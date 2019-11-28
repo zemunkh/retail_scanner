@@ -16,6 +16,8 @@ class _StockInState extends State<StockIn> {
   final FocusNode _masterNode = FocusNode();
   final FocusNode _productNode = FocusNode();
 
+  bool matched = false;
+  bool oneToMany = false;
   var counter = 0;
 
   void _compareData() {
@@ -26,20 +28,32 @@ class _StockInState extends State<StockIn> {
 
     if(masterCode == productCode) {
       setState(() {
+        matched = true;
         counter++;
         _masterController.clear();
         _productController.clear();
+      });
+    } else {
+      setState(() {
+        matched = false;
       });
     }
   }
 
 
+  void _enableOneToMany(bool isOn) {
+    setState(() {
+      oneToMany = isOn;
+      isOn = !isOn; 
+    });
+    print('Switch button value $oneToMany');
+  }
 
 
   @override
   Widget build(BuildContext context) {
     // To hide keyboards on the restart.
-    // SystemChannels.textInput.invokeMethod('TextInput.hide');
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
     return ListView(
       padding: const EdgeInsets.all(8),
       children: <Widget>[
@@ -89,10 +103,14 @@ class _StockInState extends State<StockIn> {
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Icon(
+                  child: matched? new Icon(
                     EvaIcons.checkmarkCircleOutline,
-                    size: 80,
+                    size: 100,
                     color: Colors.green,
+                  ) : new Icon(
+                    EvaIcons.closeCircleOutline,
+                    size: 100,
+                    color: Colors.red,
                   ),
                 ),
               ),
@@ -121,7 +139,7 @@ class _StockInState extends State<StockIn> {
             ],
           ),
           SizedBox(
-            height: 20,
+            height: 10,
           ),
           Center(
             child: Text(
@@ -164,9 +182,11 @@ class _StockInState extends State<StockIn> {
             child: Transform.scale(
               scale: 2.0,
               child: Switch(
+                value: oneToMany,
                 activeColor: Colors.blueAccent,
-                onChanged: (_) {},
-                value: true,
+                onChanged: (isOn) {
+                  _enableOneToMany(isOn);
+                },
               ),
             ),
           ),
