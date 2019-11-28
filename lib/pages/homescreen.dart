@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../block/bottom_block.dart';
+import '../widgets/stockIn.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import '../styles/theme.dart' as Style;
 
@@ -13,6 +14,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   BottomNavBarBlock _bottomNavBarBlock;
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  final _masterController = TextEditingController();
+  final _productController = TextEditingController();
 
   @override
   void initState() {
@@ -64,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (BuildContext context, AsyncSnapshot<NavBarItem> snapshot) {
           switch (snapshot.data) {
             case NavBarItem.STOCKIN:
-              return Center(child: Text('Hoho here'),);
+              return StockIn();
               break;
             case NavBarItem.DISPATCHNOTE:
               return _dispatchNote();
