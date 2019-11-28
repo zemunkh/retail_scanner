@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 
+import 'package:flutter/services.dart';
+
 
 class StockIn extends StatefulWidget {
   @override
@@ -11,9 +13,33 @@ class _StockInState extends State<StockIn> {
   final _masterController = TextEditingController();
   final _productController = TextEditingController();
 
+  final FocusNode _masterNode = FocusNode();
+  final FocusNode _productNode = FocusNode();
+
+  var counter = 0;
+
+  void _compareData() {
+    final masterCode = _masterController.text;
+    final productCode = _productController.text;
+
+    print('Comparison: $masterCode : $productCode');
+
+    if(masterCode == productCode) {
+      setState(() {
+        counter++;
+        _masterController.clear();
+        _productController.clear();
+      });
+    }
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
+    // To hide keyboards on the restart.
+    // SystemChannels.textInput.invokeMethod('TextInput.hide');
     return ListView(
       padding: const EdgeInsets.all(8),
       children: <Widget>[
@@ -32,7 +58,7 @@ class _StockInState extends State<StockIn> {
           SizedBox(
             height: 10,
           ),
-          TextField(
+          TextFormField(
             style: TextStyle(
               fontSize: 22, 
               color: Colors.white,
@@ -47,8 +73,14 @@ class _StockInState extends State<StockIn> {
                 fontWeight: FontWeight.w200,
               ),
             ),
+            autofocus: true,
             controller: _masterController,
-            // onSubmitted: (_) => submitData,
+            textInputAction: TextInputAction.next,
+            focusNode: _masterNode,
+            onFieldSubmitted: (term) {
+              _masterNode.unfocus();
+              FocusScope.of(context).requestFocus(_productNode);
+            },
           ),
           SizedBox(height: 10),
           Row(
@@ -78,7 +110,7 @@ class _StockInState extends State<StockIn> {
                 ),
                 child: Center(
                   child: Text(
-                    '0',
+                    counter.toString(),
                     style: TextStyle(
                       fontSize: 80,
                     ),
@@ -88,8 +120,22 @@ class _StockInState extends State<StockIn> {
               SizedBox(width: 10),
             ],
           ),
-          SizedBox(height: 10),
-          TextField(
+          SizedBox(
+            height: 20,
+          ),
+          Center(
+            child: Text(
+              'Product',
+              style: TextStyle(
+                color: Colors.grey[700], 
+                fontSize: 32,
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          TextFormField(
             style: TextStyle(
               fontSize: 22, 
               color: Colors.white,
@@ -105,15 +151,27 @@ class _StockInState extends State<StockIn> {
               ),
             ),
             controller: _productController,
-            // onSubmitted: (_) => submitData,
+            textInputAction: TextInputAction.done,
+            focusNode: _productNode,
+            onFieldSubmitted: (term) {
+              _productNode.unfocus();
+              _compareData();
+            },            
+
           ),
           SizedBox(height: 30,),
           Center(
-            child: Switch(
-              activeColor: Colors.blueAccent,
-              onChanged: (_) {},
-              value: true,
+            child: Transform.scale(
+              scale: 2.0,
+              child: Switch(
+                activeColor: Colors.blueAccent,
+                onChanged: (_) {},
+                value: true,
+              ),
             ),
+          ),
+          Center(
+            child: Text('One to Many'),
           ),
         ],
     );
