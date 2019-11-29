@@ -30,8 +30,12 @@ class _StockInState extends State<StockIn> {
       setState(() {
         matched = true;
         counter++;
-        _masterController.clear();
-        _productController.clear();
+        if(oneToMany) {
+          _productController.clear();
+        } else {
+          _masterController.clear();
+          _productController.clear();
+        }
       });
     } else {
       setState(() {
@@ -44,7 +48,10 @@ class _StockInState extends State<StockIn> {
   void _enableOneToMany(bool isOn) {
     setState(() {
       oneToMany = isOn;
-      isOn = !isOn; 
+      isOn = !isOn;
+      _masterController.clear();
+      _productController.clear();
+      counter = 0; 
     });
     print('Switch button value $oneToMany');
   }
@@ -72,30 +79,42 @@ class _StockInState extends State<StockIn> {
           SizedBox(
             height: 10,
           ),
-          TextFormField(
-            style: TextStyle(
-              fontSize: 22, 
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Color(0xFF004B83),
-              hintText: 'Master key',
-              hintStyle: TextStyle(
-                color: Colors.white, 
-                fontWeight: FontWeight.w200,
+          Stack(
+            alignment: const Alignment(1.0, 1.0),
+            children: <Widget>[
+              TextFormField(
+                style: TextStyle(
+                  fontSize: 22, 
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Color(0xFF004B83),
+                  hintText: 'Master key',
+                  hintStyle: TextStyle(
+                    color: Colors.white, 
+                    fontWeight: FontWeight.w200,
+                  ),
+                ),
+                autofocus: true,
+                controller: _masterController,
+                textInputAction: TextInputAction.next,
+                focusNode: _masterNode,
+                onFieldSubmitted: (term) {
+                  _masterNode.unfocus();
+                  FocusScope.of(context).requestFocus(_productNode);
+                },
               ),
-            ),
-            autofocus: true,
-            controller: _masterController,
-            textInputAction: TextInputAction.next,
-            focusNode: _masterNode,
-            onFieldSubmitted: (term) {
-              _masterNode.unfocus();
-              FocusScope.of(context).requestFocus(_productNode);
-            },
+              FlatButton(
+                onPressed: () {
+                  _masterController.clear();
+                },
+                child: Icon(EvaIcons.refresh, color: Colors.white, size: 30,),
+              ),
+            ],
           ),
+
           SizedBox(height: 10),
           Row(
             children: <Widget>[
@@ -153,30 +172,45 @@ class _StockInState extends State<StockIn> {
           SizedBox(
             height: 10,
           ),
-          TextFormField(
-            style: TextStyle(
-              fontSize: 22, 
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Color(0xFF004B83),
-              hintText: 'Product key',
-              hintStyle: TextStyle(
-                color: Colors.white, 
-                fontWeight: FontWeight.w200,
+          Stack(
+            alignment: const Alignment(1.0, 1.0),
+            children: <Widget>[
+              TextFormField(
+                style: TextStyle(
+                  fontSize: 22, 
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Color(0xFF004B83),
+                  hintText: 'Product key',
+                  hintStyle: TextStyle(
+                    color: Colors.white, 
+                    fontWeight: FontWeight.w200,
+                  ),
+                ),
+                autofocus: true,
+                controller: _productController,
+                textInputAction: TextInputAction.next,
+                focusNode: _productNode,
+                onFieldSubmitted: (term) {
+                  if(oneToMany) {
+                    FocusScope.of(context).requestFocus(_productNode);
+                  } else {
+                    _productNode.unfocus();
+                  }
+                  _compareData();
+                },
               ),
-            ),
-            controller: _productController,
-            textInputAction: TextInputAction.done,
-            focusNode: _productNode,
-            onFieldSubmitted: (term) {
-              _productNode.unfocus();
-              _compareData();
-            },            
-
-          ),
+              FlatButton(
+                onPressed: () {
+                  _productController.clear();
+                },
+                child: Icon(EvaIcons.refresh, color: Colors.white, size: 30,),
+              ),
+            ],
+          ),          
           SizedBox(height: 30,),
           Center(
             child: Transform.scale(
