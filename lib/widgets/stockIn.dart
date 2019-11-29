@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 
 import 'package:flutter/services.dart';
+import './rawkeyboard.dart';
 
 
 class StockIn extends StatefulWidget {
@@ -56,11 +57,10 @@ class _StockInState extends State<StockIn> {
     print('Switch button value $oneToMany');
   }
 
-
   @override
   Widget build(BuildContext context) {
     // To hide keyboards on the restart.
-    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    // SystemChannels.textInput.invokeMethod('TextInput.hide');
     return ListView(
       padding: const EdgeInsets.all(8),
       children: <Widget>[
@@ -82,29 +82,30 @@ class _StockInState extends State<StockIn> {
           Stack(
             alignment: const Alignment(1.0, 1.0),
             children: <Widget>[
-              TextFormField(
-                style: TextStyle(
-                  fontSize: 22, 
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Color(0xFF004B83),
-                  hintText: 'Master key',
-                  hintStyle: TextStyle(
-                    color: Colors.white, 
-                    fontWeight: FontWeight.w200,
+              Container(
+                child: TextFormField(
+                  style: TextStyle(
+                    fontSize: 22, 
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Color(0xFF004B83),
+                    hintText: 'Master key',
+                    hintStyle: TextStyle(
+                      color: Colors.white, 
+                      fontWeight: FontWeight.w200,
+                    ),
+                  ),
+                  autofocus: false,
+                  controller: _masterController,
+                  focusNode: _masterNode,
+                  onFieldSubmitted: (term) {
+                    _masterNode.unfocus();
+                    FocusScope.of(context).requestFocus(_productNode);
+                  },
                 ),
-                autofocus: true,
-                controller: _masterController,
-                textInputAction: TextInputAction.next,
-                focusNode: _masterNode,
-                onFieldSubmitted: (term) {
-                  _masterNode.unfocus();
-                  FocusScope.of(context).requestFocus(_productNode);
-                },
               ),
               FlatButton(
                 onPressed: () {
@@ -115,7 +116,7 @@ class _StockInState extends State<StockIn> {
             ],
           ),
 
-          SizedBox(height: 10),
+          SizedBox(height: 30, child: ScanKeyboard(),),
           Row(
             children: <Widget>[
               SizedBox(width: 10),
@@ -175,7 +176,7 @@ class _StockInState extends State<StockIn> {
           Stack(
             alignment: const Alignment(1.0, 1.0),
             children: <Widget>[
-              TextFormField(
+               TextFormField(
                 style: TextStyle(
                   fontSize: 22, 
                   color: Colors.white,
