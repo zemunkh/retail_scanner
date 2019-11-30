@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import './stockIn.dart';
 
 class ScanKeyboard extends StatefulWidget {
   @override
@@ -10,11 +11,12 @@ class _ScanKeyboardState extends State<ScanKeyboard> {
   final TextEditingController _scanController = TextEditingController();
   final FocusNode _scanNode = FocusNode();
 
+
   String _message = "";
   String buffer = "";
   String result = "";
-  @override
 
+  // @override
   // void initState() {
   //   super.initState();
   // }
@@ -34,7 +36,6 @@ class _ScanKeyboardState extends State<ScanKeyboard> {
           if(buffer.isNotEmpty) {
             result = buffer;
             print('I am Enter: Value: $buffer');
-
           }
           buffer = '';
 
@@ -109,6 +110,7 @@ class _ScanKeyboardState extends State<ScanKeyboard> {
             return Container(
               child: Text(_message ?? ' ',
               style: TextStyle(color: Colors.black),),
+              
             ); ///new Text(_message ?? 'press key');
           },
         ),
