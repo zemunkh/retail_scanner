@@ -2,6 +2,7 @@ import 'dart:async';
 
 enum NavBarItem { STOCKIN, DISPATCHNOTE, OTHERS }
 
+
 class BottomNavBarBlock {
   final StreamController<NavBarItem> _navBarController = StreamController<NavBarItem>.broadcast();
 

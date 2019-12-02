@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import './pages/homescreen.dart';
+import './screens/draft_screen.dart';
+import './screens/saved_screen.dart';
+import './screens/home_screen.dart';
 
 void main() => runApp(MyApp());
 
@@ -32,7 +34,20 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: HomeScreen(),
+      // home: HomeScreen(),
+      routes: {
+        '/': (ctx) => HomeScreen(),
+        DraftScreen.routeName: (ctx) => DraftScreen(),
+        SavedScreen.routeName: (ctx) => SavedScreen(),
+      },
+      onGenerateRoute: (settings) {
+        print(settings.arguments);
+      },
+      onUnknownRoute: (settings) {
+        return MaterialPageRoute(
+          builder: (ctx) => HomeScreen(),
+        );
+      },
     );
   }
 }

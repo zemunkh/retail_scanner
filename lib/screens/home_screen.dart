@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:eva_icons_flutter/eva_icons_flutter.dart';
+import 'package:retail_scanner/screens/dispatch_screen.dart';
+import 'package:retail_scanner/screens/others_screen.dart';
 
+import '../widgets/main_drawer.dart';
 import '../block/bottom_block.dart';
 import '../widgets/stockIn.dart';
-import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import '../styles/theme.dart' as Style;
 
 
@@ -14,9 +17,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   BottomNavBarBlock _bottomNavBarBlock;
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
-  final _masterController = TextEditingController();
-  final _productController = TextEditingController();
 
   @override
   void initState() {
@@ -35,7 +35,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Style.Colors.background,
       key: _scaffoldKey,
-      drawer: Drawer(),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(50.0),
         child: AppBar(
@@ -45,23 +44,26 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(
               EvaIcons.menu2Outline,
             ),
-            color: Colors.black,
-            onPressed: () {},
+            color: Colors.white,
+            onPressed: () {
+              _scaffoldKey.currentState.openDrawer();
+            },
           ),
           title: new Text(
-            "Stock Scan"
+            'Stock Scanner',
           ),
           actions: <Widget>[
             IconButton(
               icon: Icon(
                 EvaIcons.infoOutline,
               ),
-              color: Colors.black,
+              color: Colors.white,
               onPressed: () {},
             )
           ],
         ),
       ),
+      drawer: MainDrawer(),
       body: StreamBuilder<NavBarItem>(
         stream: _bottomNavBarBlock.itemStream,
         initialData: _bottomNavBarBlock.defaultItem,
@@ -71,10 +73,10 @@ class _HomeScreenState extends State<HomeScreen> {
               return StockIn();
               break;
             case NavBarItem.DISPATCHNOTE:
-              return _dispatchNote();
+              return DispatchScreen();
               break;
             case NavBarItem.OTHERS:
-              return _others();
+              return OthersScreen();
               break;
             default:
               return null;
@@ -127,31 +129,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           );
         },
-      ),
-    );
-  }
-
-  Widget _dispatchNote() {
-    return Center(
-      child: Text(
-        'Dispatch Note',
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          color: Colors.blue,
-          fontSize: 25.0,
-        ),
-      ),
-    );
-  }
-  Widget _others() {
-    return Center(
-      child: Text(
-        'Others Screen',
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          color: Colors.redAccent,
-          fontSize: 25.0,
-        ),
       ),
     );
   }
