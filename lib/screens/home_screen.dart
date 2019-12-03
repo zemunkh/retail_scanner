@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
           title: new Text(
-            'Stock Scanner',
+            'Mugs Stock Control',
           ),
           actions: <Widget>[
             IconButton(

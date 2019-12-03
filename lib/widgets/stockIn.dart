@@ -66,14 +66,7 @@ class StockInState extends State<StockIn> {
   masterListener() {
     print('Current text: ${_masterController.text}');
     buffer = _masterController.text;
-    if(buffer.endsWith('\\n')){
-      // _masterController.text = buffer.trim();
-      buffer = buffer.substring(0, buffer.length - 2);
-      print('Master text: $buffer');
-      setState(() {
-        _masterController.text = buffer;
-      });
-
+    if(buffer.isNotEmpty){
       _masterNode.unfocus();
       FocusScope.of(context).requestFocus(_productNode);
     }
@@ -81,13 +74,7 @@ class StockInState extends State<StockIn> {
 
   productListener() async {
     buffer = _productController.text;
-    if(buffer.endsWith('\\n')) {
-      buffer = buffer.substring(0, buffer.length - 2);
-      print('Master text: $buffer');
-      setState(() {
-        _productController.text = buffer;
-      });
-
+    if(buffer.isNotEmpty) {
       _compareData();
       if(oneToMany) {
         FocusScope.of(context).requestFocus(_productNode);
@@ -95,7 +82,6 @@ class StockInState extends State<StockIn> {
         _productNode.unfocus();
         FocusScope.of(context).requestFocus(new FocusNode());
       }
-
     }
   }
     
@@ -124,17 +110,52 @@ class StockInState extends State<StockIn> {
       child: ListView(
         padding: const EdgeInsets.all(8),
         children: <Widget>[
-            SizedBox(
-              height: 30,
-            ),
-            Center(
-              child: Text(
-                'Master',
-                style: TextStyle(
-                  color: Colors.grey[700], 
-                  fontSize: 32,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: matched? new Icon(
+                    EvaIcons.checkmarkCircleOutline,
+                    size: 80,
+                    color: Colors.green,
+                  ) : new Icon(
+                    EvaIcons.closeCircleOutline,
+                    size: 80,
+                    color: Colors.red,
+                  ),
                 ),
+                Container(
+                  margin: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
+                  decoration: ShapeDecoration(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                      ),
+                      side: BorderSide(width: 1, color: Colors.black), 
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      counter.toString(),
+                      style: TextStyle(
+                        fontSize: 50,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            Text(
+              'Barcode #1',
+              style: TextStyle(
+                color: Colors.grey[700], 
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
+              textAlign: TextAlign.start,
             ),
             SizedBox(
               height: 10,
@@ -167,68 +188,21 @@ class StockInState extends State<StockIn> {
                 FlatButton(
                   onPressed: () {
                     _masterController.clear();
+                    FocusScope.of(context).requestFocus(_masterNode);
                   },
                   child: Icon(EvaIcons.refresh, color: Colors.white, size: 30,),
                 ),
               ],
             ),
 
-            SizedBox(height: 30, 
-              // child: ScanKeyboard(),
-            ),
-
-            Row(
-              children: <Widget>[
-                SizedBox(width: 10),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    child: matched? new Icon(
-                      EvaIcons.checkmarkCircleOutline,
-                      size: 100,
-                      color: Colors.green,
-                    ) : new Icon(
-                      EvaIcons.closeCircleOutline,
-                      size: 100,
-                      color: Colors.red,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 80),
-                Container(
-                  margin: const EdgeInsets.all(10),
-                  padding: const EdgeInsets.all(10),
-                  decoration: ShapeDecoration(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(
-                          Radius.circular(10),
-                      ),
-                      side: BorderSide(width: 1, color: Colors.black), 
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      counter.toString(),
-                      style: TextStyle(
-                        fontSize: 80,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10),
-              ],
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Center(
-              child: Text(
-                'Product',
-                style: TextStyle(
-                  color: Colors.grey[700], 
-                  fontSize: 32,
-                ),
+            Text(
+              'Barcode #2',
+              style: TextStyle(
+                color: Colors.grey[700], 
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
+              textAlign: TextAlign.start,
             ),
             SizedBox(
               height: 10,
@@ -259,12 +233,18 @@ class StockInState extends State<StockIn> {
                 FlatButton(
                   onPressed: () {
                     _productController.clear();
+                    FocusScope.of(context).requestFocus(_productNode);
                   },
                   child: Icon(EvaIcons.refresh, color: Colors.white, size: 30,),
                 ),
               ],
             ),          
-            SizedBox(height: 30,),
+
+            SizedBox(
+              height: 10,
+            ),
+
+            SizedBox(height: 10,),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
@@ -286,24 +266,6 @@ class StockInState extends State<StockIn> {
                     ),
                   ],
                 ),
-                MaterialButton(
-                  onPressed: () {},
-                  child: Text(
-                    'Save',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'QuickSand',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
-                  shape: StadiumBorder(),
-                  color: Colors.redAccent,
-                  splashColor: Colors.teal,
-                  height: 55,
-                  minWidth: 100,
-                  elevation: 2,
-                )
               ], 
             ),
           ],
