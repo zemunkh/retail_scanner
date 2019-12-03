@@ -19,8 +19,6 @@ class StockInState extends State<StockIn> {
   final _masterController = TextEditingController();
   final _productController = TextEditingController();
 
-  final _textController = TextEditingController();
-
   final FocusNode _masterNode = FocusNode();
   final FocusNode _productNode = FocusNode();
 
@@ -37,13 +35,12 @@ class StockInState extends State<StockIn> {
     if(masterCode == productCode) {
       setState(() {
         matched = true;
-        _textController.text = 'I am value';
         counter++;
         if(oneToMany) {
           _productController.clear();
         } else {
-          _masterController.clear();
-          _productController.clear();
+          // _masterController.clear();
+          // _productController.clear();
         }
       });
     } else {
@@ -58,7 +55,7 @@ class StockInState extends State<StockIn> {
     setState(() {
       oneToMany = isOn;
       isOn = !isOn;
-      // _masterController.clear();
+      _masterController.clear();
       _productController.clear();
       counter = 0; 
     });
@@ -66,32 +63,56 @@ class StockInState extends State<StockIn> {
   }
   String buffer = '';
 
-  textListener() {
+  masterListener() {
     print('Current text: ${_masterController.text}');
     buffer = _masterController.text;
-    if(buffer.contains('\\n')){
+    if(buffer.endsWith('\\n')){
       // _masterController.text = buffer.trim();
       buffer = buffer.substring(0, buffer.length - 2);
-      print('Trimmed text: $buffer');
-      _masterController.text = buffer;
+      print('Master text: $buffer');
+      setState(() {
+        _masterController.text = buffer;
+      });
 
       _masterNode.unfocus();
       FocusScope.of(context).requestFocus(_productNode);
     }
   }
 
+  productListener() async {
+    buffer = _productController.text;
+    if(buffer.endsWith('\\n')) {
+      buffer = buffer.substring(0, buffer.length - 2);
+      print('Master text: $buffer');
+      setState(() {
+        _productController.text = buffer;
+      });
+
+      _compareData();
+      if(oneToMany) {
+        FocusScope.of(context).requestFocus(_productNode);
+      } else {
+        _productNode.unfocus();
+        FocusScope.of(context).requestFocus(new FocusNode());
+      }
+
+    }
+  }
+    
   @override
   void dispose() {
     super.dispose();
     _masterController.dispose();
+    _productController.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    _masterController.addListener(textListener);
+    _masterController.addListener(masterListener);
+    _productController.addListener(productListener);
   }
-
+  
   @override
   Widget build(BuildContext context) {
     // To hide keyboards on the restart.
@@ -140,21 +161,7 @@ class StockInState extends State<StockIn> {
                     autofocus: true,
                     controller: _masterController,
                     focusNode: _masterNode,
-                    // focusNode: AlwaysDisabledFocusNode(),
-                    // enableInteractiveSelection: false,
-                    // onTap: () { FocusScope.of(context).requestFocus(_masterNode); },
-                    // onChanged: (text) {
-                    //   print('Current text: $text');
-                    //   if(text.contains('\\n')){
-                    //     _masterNode.unfocus();
-                    //     FocusScope.of(context).requestFocus(_productNode);
-                    //   }
-                    // },
-                    // onFieldSubmitted: (term) {
-                    //   print('Data $term');
-                    //   _masterNode.unfocus();
-                    //   FocusScope.of(context).requestFocus(_productNode);
-                    // },
+                    onTap: () { FocusScope.of(context).requestFocus(_masterNode); },
                   ),
                 ),
                 FlatButton(
@@ -169,10 +176,6 @@ class StockInState extends State<StockIn> {
             SizedBox(height: 30, 
               // child: ScanKeyboard(),
             ),
-
-
-
-
 
             Row(
               children: <Widget>[
@@ -198,9 +201,9 @@ class StockInState extends State<StockIn> {
                   decoration: ShapeDecoration(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(
-                         Radius.circular(10),
+                          Radius.circular(10),
                       ),
-                      side: BorderSide(width: 1), 
+                      side: BorderSide(width: 1, color: Colors.black), 
                     ),
                   ),
                   child: Center(
@@ -233,7 +236,7 @@ class StockInState extends State<StockIn> {
             Stack(
               alignment: const Alignment(1.0, 1.0),
               children: <Widget>[
-                 TextFormField(
+                  TextFormField(
                   style: TextStyle(
                     fontSize: 22, 
                     color: Colors.white,
@@ -248,27 +251,10 @@ class StockInState extends State<StockIn> {
                       fontWeight: FontWeight.w200,
                     ),
                   ),
-                  autofocus: true,
+                  // autofocus: true,
                   controller: _productController,
-                  // textInputAction: TextInputAction.next,
-                  // focusNode: AlwaysDisabledFocusNode(),
                   focusNode: _productNode,
-                  onChanged: (text) {
-                    if(text.contains('\\n')){
-                      _productNode.unfocus();
-                      FocusScope.of(context).requestFocus(FocusNode());
-                       _compareData();
-                    }
-                  },
                   onTap: () { FocusScope.of(context).requestFocus(_productNode); },
-                  // onFieldSubmitted: (term) {
-                  //   if(oneToMany) {
-                  //     FocusScope.of(context).requestFocus(_productNode);
-                  //   } else {
-                  //     _productNode.unfocus();
-                  //   }
-                  //   _compareData();
-                  // },
                 ),
                 FlatButton(
                   onPressed: () {
@@ -279,23 +265,50 @@ class StockInState extends State<StockIn> {
               ],
             ),          
             SizedBox(height: 30,),
-            Center(
-              child: Transform.scale(
-                scale: 2.0,
-                child: Switch(
-                  value: oneToMany,
-                  activeColor: Colors.blueAccent,
-                  onChanged: (isOn) {
-                    _enableOneToMany(isOn);
-                  },
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Transform.scale(
+                      scale: 2.0,
+                      child: Switch(
+                        value: oneToMany,
+                        activeColor: Colors.blueAccent,
+                        onChanged: (isOn) {
+                          _enableOneToMany(isOn);
+                        },
+                      ),
+                    ),
+                    Center(
+                      child: Text('One to Many'),
+                    ),
+                  ],
                 ),
-              ),
-            ),
-            Center(
-              child: Text('One to Many'),
+                MaterialButton(
+                  onPressed: () {},
+                  child: Text(
+                    'Save',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'QuickSand',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                  shape: StadiumBorder(),
+                  color: Colors.redAccent,
+                  splashColor: Colors.teal,
+                  height: 55,
+                  minWidth: 100,
+                  elevation: 2,
+                )
+              ], 
             ),
           ],
       ),
     );
   } 
 }
+    
