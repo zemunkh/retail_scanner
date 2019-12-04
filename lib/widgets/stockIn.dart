@@ -1,6 +1,8 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
-import './noediting.dart';
+
 import 'package:flutter/services.dart';
 // import './rawkeyboard.dart';
 
@@ -26,7 +28,7 @@ class StockInState extends State<StockIn> {
   bool oneToMany = false;
   var counter = 0;
 
-  void _compareData() {
+Future<Null> _compareData() async {
     final masterCode = _masterController.text;
     final productCode = _productController.text;
 
@@ -50,8 +52,12 @@ class StockInState extends State<StockIn> {
     }
   }
 
+  // Future<Null> _shiftToNext() async {
+  //   _masterNode.unfocus();
+  //   FocusScope.of(context).requestFocus(_productNode);
+  // }
 
-  void _enableOneToMany(bool isOn) {
+  Future<Null> _enableOneToMany(bool isOn) async {
     setState(() {
       oneToMany = isOn;
       isOn = !isOn;
@@ -63,19 +69,36 @@ class StockInState extends State<StockIn> {
   }
   String buffer = '';
 
-  masterListener() {
+  Future<Null> masterListener() async {
     print('Current text: ${_masterController.text}');
     buffer = _masterController.text;
-    if(buffer.isNotEmpty){
+    if(buffer.endsWith(r'$')){
+      buffer = buffer.substring(0, buffer.length - 1);
       _masterNode.unfocus();
+
+      setState(() {
+        _masterController.text = buffer;
+      });
+      
       FocusScope.of(context).requestFocus(_productNode);
+
+      // await _shiftToNext();
     }
   }
 
-  productListener() async {
+  Future<Null> productListener() async {
     buffer = _productController.text;
-    if(buffer.isNotEmpty) {
-      _compareData();
+    if(buffer.endsWith(r'$')) {
+      try {
+        buffer = buffer.substring(0, buffer.length - 1);
+        setState(() {
+          _productController.text = buffer;
+        });
+        await _compareData();
+      } on Exception catch(e) {
+        print('Error: $e');
+      }
+
       if(oneToMany) {
         FocusScope.of(context).requestFocus(_productNode);
       } else {
@@ -83,6 +106,21 @@ class StockInState extends State<StockIn> {
         FocusScope.of(context).requestFocus(new FocusNode());
       }
     }
+  }
+
+  Future<Null> _focusNode(BuildContext context, FocusNode node) async {
+    FocusScope.of(context).requestFocus(node);
+  }
+
+  Future<Null> _clearTextController(BuildContext context, TextEditingController _controller, FocusNode node) async {
+    setState(() {
+      _controller.clear();
+      if(oneToMany) {
+        counter = 0;
+      }
+    });
+
+    FocusScope.of(context).requestFocus(node);
   }
     
   @override
@@ -102,7 +140,120 @@ class StockInState extends State<StockIn> {
   @override
   Widget build(BuildContext context) {
     // To hide keyboards on the restart.
-    // SystemChannels.textInput.invokeMethod('TextInput.hide');
+
+    Widget _titleWidget(String title) {
+      return Text(
+        title,
+        style: TextStyle(
+          color: Colors.black, 
+          fontSize: 18,
+          fontFamily: 'QuickSand',
+          fontWeight: FontWeight.bold,
+        ),
+        textAlign: TextAlign.start,       
+      );
+    }
+
+    Widget _scannerInput(String hintext, TextEditingController _controller, FocusNode currentNode) {
+      return Stack(
+        alignment: const Alignment(1.0, 1.0),
+        children: <Widget>[
+          Container(
+            child: TextFormField(
+              style: TextStyle(
+                fontSize: 22, 
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Color(0xFF004B83),
+                hintText: hintext,
+                hintStyle: TextStyle(
+                  color: Colors.white, 
+                  fontWeight: FontWeight.w200,
+                ),
+              ),
+              autofocus: true,
+              controller: _controller,
+              focusNode: currentNode,
+              onTap: () {
+                _focusNode(context, currentNode);
+              },
+            ),
+          ),
+          FlatButton(
+            onPressed: () {
+              _clearTextController(context, _controller, currentNode);
+            },
+            child: Icon(EvaIcons.refresh, color: Colors.white, size: 30,),
+          ),
+        ],
+      );
+    }
+
+    final statusBar = Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10),
+          child: matched? new Icon(
+            EvaIcons.checkmarkCircleOutline,
+            size: 80,
+            color: Colors.green,
+          ) : new Icon(
+            EvaIcons.closeCircleOutline,
+            size: 80,
+            color: Colors.red,
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
+          decoration: ShapeDecoration(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                  Radius.circular(10),
+              ),
+              side: BorderSide(width: 1, color: Colors.black), 
+            ),
+          ),
+          child: Center(
+            child: Text(
+              counter.toString(),
+              style: TextStyle(
+                fontSize: 50,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    final switchButton = Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Transform.scale(
+              scale: 2.0,
+              child: Switch(
+                value: oneToMany,
+                activeColor: Colors.blueAccent,
+                onChanged: (isOn) {
+                  _enableOneToMany(isOn);
+                },
+              ),
+            ),
+            Center(
+              child: Text('One to Many'),
+            ),
+          ],
+        ),
+      ], 
+    );
+
     return new GestureDetector(
       onTap: () {
         FocusScope.of(context).requestFocus(new FocusNode());
@@ -110,164 +261,26 @@ class StockInState extends State<StockIn> {
       child: ListView(
         padding: const EdgeInsets.all(8),
         children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: matched? new Icon(
-                    EvaIcons.checkmarkCircleOutline,
-                    size: 80,
-                    color: Colors.green,
-                  ) : new Icon(
-                    EvaIcons.closeCircleOutline,
-                    size: 80,
-                    color: Colors.red,
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10),
-                  padding: const EdgeInsets.all(10),
-                  decoration: ShapeDecoration(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(
-                          Radius.circular(10),
-                      ),
-                      side: BorderSide(width: 1, color: Colors.black), 
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      counter.toString(),
-                      style: TextStyle(
-                        fontSize: 50,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            statusBar,
 
-            Text(
-              'Barcode #1',
-              style: TextStyle(
-                color: Colors.grey[700], 
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.start,
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Stack(
-              alignment: const Alignment(1.0, 1.0),
-              children: <Widget>[
-                Container(
-                  child: TextFormField(
-                    style: TextStyle(
-                      fontSize: 22, 
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Color(0xFF004B83),
-                      hintText: 'Master key',
-                      hintStyle: TextStyle(
-                        color: Colors.white, 
-                        fontWeight: FontWeight.w200,
-                      ),
-                    ),
-                    autofocus: true,
-                    controller: _masterController,
-                    focusNode: _masterNode,
-                    onTap: () { FocusScope.of(context).requestFocus(_masterNode); },
-                  ),
-                ),
-                FlatButton(
-                  onPressed: () {
-                    _masterController.clear();
-                    FocusScope.of(context).requestFocus(_masterNode);
-                  },
-                  child: Icon(EvaIcons.refresh, color: Colors.white, size: 30,),
-                ),
-              ],
-            ),
-
-            Text(
-              'Barcode #2',
-              style: TextStyle(
-                color: Colors.grey[700], 
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.start,
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Stack(
-              alignment: const Alignment(1.0, 1.0),
-              children: <Widget>[
-                  TextFormField(
-                  style: TextStyle(
-                    fontSize: 22, 
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Color(0xFF004B83),
-                    hintText: 'Product key',
-                    hintStyle: TextStyle(
-                      color: Colors.white, 
-                      fontWeight: FontWeight.w200,
-                    ),
-                  ),
-                  // autofocus: true,
-                  controller: _productController,
-                  focusNode: _productNode,
-                  onTap: () { FocusScope.of(context).requestFocus(_productNode); },
-                ),
-                FlatButton(
-                  onPressed: () {
-                    _productController.clear();
-                    FocusScope.of(context).requestFocus(_productNode);
-                  },
-                  child: Icon(EvaIcons.refresh, color: Colors.white, size: 30,),
-                ),
-              ],
-            ),          
-
-            SizedBox(
-              height: 10,
-            ),
-
+            _titleWidget('Barcode #1'),
             SizedBox(height: 10,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Transform.scale(
-                      scale: 2.0,
-                      child: Switch(
-                        value: oneToMany,
-                        activeColor: Colors.blueAccent,
-                        onChanged: (isOn) {
-                          _enableOneToMany(isOn);
-                        },
-                      ),
-                    ),
-                    Center(
-                      child: Text('One to Many'),
-                    ),
-                  ],
-                ),
-              ], 
+            _scannerInput(
+              'Master key',
+              _masterController,
+              _masterNode,
             ),
+
+            _titleWidget('Barcode #2'),
+            SizedBox(height: 10,),
+            _scannerInput(
+              'Product key',
+              _productController,
+              _productNode,
+            ),        
+
+            SizedBox(height: 20,),
+            switchButton,
           ],
       ),
     );
