@@ -89,23 +89,22 @@ Future<Null> _compareData() async {
     buffer = _productController.text;
     if(buffer.endsWith(r'$')) {
       buffer = buffer.substring(0, buffer.length - 1);
-      trueVal = buffer; 
-      
-      await Future.delayed(const Duration(milliseconds: 200), (){
-        setState(() {
-          _productController.text = trueVal;
-        });
+      trueVal = buffer;
 
+
+      await Future.delayed(const Duration(milliseconds: 800), (){
+        _productController.text = trueVal;
+      }).then((value){
+        _compareData();
+        if(oneToMany) {
+          _productController.clear();
+          FocusScope.of(context).requestFocus(_productNode);
+        } else {
+          _productNode.unfocus();
+          FocusScope.of(context).requestFocus(new FocusNode());
+        }
+        
       });
-      await _compareData();
-
-
-      if(oneToMany) {
-        FocusScope.of(context).requestFocus(_productNode);
-      } else {
-        _productNode.unfocus();
-        FocusScope.of(context).requestFocus(new FocusNode());
-      }
     }
   }
 
@@ -186,6 +185,9 @@ Future<Null> _compareData() async {
           FlatButton(
             onPressed: () {
               _clearTextController(context, _controller, currentNode);
+              if(_controller == _masterController) {
+                _productController.clear();
+              }
             },
             child: Icon(EvaIcons.refresh, color: Colors.white, size: 30,),
           ),
