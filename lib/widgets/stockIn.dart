@@ -1,10 +1,7 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 
 import 'package:flutter/services.dart';
-// import './rawkeyboard.dart';
 
 
 class AlwaysDisabledFocusNode extends FocusNode {
@@ -68,36 +65,40 @@ Future<Null> _compareData() async {
     print('Switch button value $oneToMany');
   }
   String buffer = '';
+  String trueVal = '';
 
   Future<Null> masterListener() async {
     print('Current text: ${_masterController.text}');
     buffer = _masterController.text;
     if(buffer.endsWith(r'$')){
       buffer = buffer.substring(0, buffer.length - 1);
+      trueVal = buffer;
       _masterNode.unfocus();
-
-      setState(() {
-        _masterController.text = buffer;
+      await Future.delayed(const Duration(milliseconds: 200), (){
+        setState(() {
+          _masterController.text = trueVal;
+        });
+        FocusScope.of(context).requestFocus(_productNode);
       });
-      
-      FocusScope.of(context).requestFocus(_productNode);
 
-      // await _shiftToNext();
+     
     }
   }
 
   Future<Null> productListener() async {
     buffer = _productController.text;
     if(buffer.endsWith(r'$')) {
-      try {
-        buffer = buffer.substring(0, buffer.length - 1);
+      buffer = buffer.substring(0, buffer.length - 1);
+      trueVal = buffer; 
+      
+      await Future.delayed(const Duration(milliseconds: 200), (){
         setState(() {
-          _productController.text = buffer;
+          _productController.text = trueVal;
         });
-        await _compareData();
-      } on Exception catch(e) {
-        print('Error: $e');
-      }
+
+      });
+      await _compareData();
+
 
       if(oneToMany) {
         FocusScope.of(context).requestFocus(_productNode);
@@ -286,4 +287,3 @@ Future<Null> _compareData() async {
     );
   } 
 }
-    
