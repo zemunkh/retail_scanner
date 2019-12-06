@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 
-import 'package:flutter/services.dart';
+import '../helper/file_manager.dart';
 
 
 class AlwaysDisabledFocusNode extends FocusNode {
@@ -47,11 +47,20 @@ Future<Null> _compareData() async {
         matched = false;
       });
     }
+
+    FileManager.saveScanData(productCode, matched, DateTime.now());
+
+    // get product code and get matched status and get current DateTime
+    // 
   }
 
-  // Future<Null> _shiftToNext() async {
-  //   _masterNode.unfocus();
-  //   FocusScope.of(context).requestFocus(_productNode);
+  // void _saveScanData(String productCode, bool matched, DateTime currentDate) {
+    // check file exits
+    // if file exists, add productCode, matched status to the file
+
+    // if file non-exists, get filelist.json, add create file, callback it again
+    // then add to filelist.json
+    //
   // }
 
   Future<Null> _enableOneToMany(bool isOn) async {
