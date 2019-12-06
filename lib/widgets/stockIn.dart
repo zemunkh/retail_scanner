@@ -124,7 +124,7 @@ Future<Null> _compareData() async {
   Future<Null> _clearTextController(BuildContext context, TextEditingController _controller, FocusNode node) async {
     setState(() {
       _controller.clear();
-      if(oneToMany) {
+      if(oneToMany || (_controller == _masterController)) {
         counter = 0;
       }
     });
