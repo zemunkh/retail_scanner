@@ -10,6 +10,7 @@ import '../styles/theme.dart' as Style;
 
 
 class HomeScreen extends StatefulWidget {
+  static const routeName = '/home';
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:retail_scanner/screens/activation_screen.dart';
 import './screens/draft_screen.dart';
 import './screens/saved_screen.dart';
 import './screens/home_screen.dart';
@@ -36,7 +37,8 @@ class MyApp extends StatelessWidget {
       ),
       // home: HomeScreen(),
       routes: {
-        '/': (ctx) => HomeScreen(),
+        '/': (ctx) => ActivationScreen(),
+        HomeScreen.routeName: (ctx) => HomeScreen(),
         DraftScreen.routeName: (ctx) => DraftScreen(),
         SavedScreen.routeName: (ctx) => SavedScreen(),
       },
