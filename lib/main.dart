@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:retail_scanner/screens/activation_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import './screens/draft_screen.dart';
 import './screens/saved_screen.dart';
 import './screens/home_screen.dart';
+import './helper/file_manager.dart';
 
-void main() => runApp(MyApp());
+bool activated = false;
+
+Future<void> main() async {
+  try {
+    await _read();
+    runApp(MyApp());
+  } catch(error) {
+    print('Checking Activation Status');
+  }
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -37,8 +48,7 @@ class MyApp extends StatelessWidget {
       ),
       // home: HomeScreen(),
       routes: {
-        '/': (ctx) => ActivationScreen(),
-        HomeScreen.routeName: (ctx) => HomeScreen(),
+        '/': (ctx) => activated ? HomeScreen() : ActivationScreen(),
         DraftScreen.routeName: (ctx) => DraftScreen(),
         SavedScreen.routeName: (ctx) => SavedScreen(),
       },
@@ -52,4 +62,13 @@ class MyApp extends StatelessWidget {
       },
     );
   }
+
+}
+
+_read() async {
+  final prefs = await SharedPreferences.getInstance();
+  final key = 'my_activation_status';
+  final status = prefs.getBool(key) ?? false;
+  print('Activation Status: $status');
+  activated = status;
 }

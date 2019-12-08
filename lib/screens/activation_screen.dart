@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../styles/theme.dart' as Style;
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
+import '../styles/theme.dart' as Style;
 
 
 
@@ -12,6 +14,20 @@ class ActivationScreen extends StatelessWidget {
 
   Future<Null> _focusNode(BuildContext context, FocusNode node) async {
     FocusScope.of(context).requestFocus(node);
+  }
+
+  Future<Null> _activationHandler(TextEditingController _controller) {
+    String inputText = _controller.text;
+    const int adder = 53124729;
+    String currentDate = '${DateFormat("MMddyyyy").format(DateTime.now())}';
+    int activationCode = adder + int.parse(currentDate);
+    print('Code: ${activationCode.toString()}');
+    if(activationCode.toString() == inputText) {
+      print('$inputText');
+      _save();
+    } else {
+      print('Unsuccessful!');
+    }
   }
 
   @override
@@ -87,8 +103,7 @@ class ActivationScreen extends StatelessWidget {
       padding: EdgeInsets.all(10),
       child: MaterialButton(
         onPressed: () {
-          String inputText = _activationController.text;
-          print('$inputText');
+          _activationHandler(_activationController);
         },
         child: Text(
           'Activate',
@@ -129,5 +144,13 @@ class ActivationScreen extends StatelessWidget {
         child: mainView,
       ),
     );
+  }
+
+  _save() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'my_activation_status';
+    final status = true;
+    prefs.setBool(key, status);
+    print('Activation Status: $status');
   }
 }
