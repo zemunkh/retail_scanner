@@ -49,6 +49,7 @@ class MyApp extends StatelessWidget {
       // home: HomeScreen(),
       routes: {
         '/': (ctx) => activated ? HomeScreen() : ActivationScreen(),
+        '/main': (ctx) => HomeScreen(),
         DraftScreen.routeName: (ctx) => DraftScreen(),
         SavedScreen.routeName: (ctx) => SavedScreen(),
       },

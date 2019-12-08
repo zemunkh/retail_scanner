@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import '../styles/theme.dart' as Style;
@@ -7,8 +6,6 @@ import '../styles/theme.dart' as Style;
 
 
 class ActivationScreen extends StatelessWidget {
-  static const routeName = '/activation';
-
   final _activationController = TextEditingController();
   final FocusNode _activationNode = FocusNode();
 
@@ -16,15 +13,17 @@ class ActivationScreen extends StatelessWidget {
     FocusScope.of(context).requestFocus(node);
   }
 
-  Future<Null> _activationHandler(TextEditingController _controller) {
+  Future<Null> _activationHandler(BuildContext context, TextEditingController _controller) {
     String inputText = _controller.text;
     const int adder = 53124729;
-    String currentDate = '${DateFormat("MMddyyyy").format(DateTime.now())}';
+    String currentDate = '${DateFormat("ddMMyyyy").format(DateTime.now())}';
+    print('Date: $currentDate');
     int activationCode = adder + int.parse(currentDate);
     print('Code: ${activationCode.toString()}');
     if(activationCode.toString() == inputText) {
-      print('$inputText');
-      _save();
+      _activate().then((_) {
+        Navigator.of(context).pushReplacementNamed('/home');
+      });
     } else {
       print('Unsuccessful!');
     }
@@ -103,7 +102,7 @@ class ActivationScreen extends StatelessWidget {
       padding: EdgeInsets.all(10),
       child: MaterialButton(
         onPressed: () {
-          _activationHandler(_activationController);
+          _activationHandler(context, _activationController);
         },
         child: Text(
           'Activate',
@@ -146,7 +145,7 @@ class ActivationScreen extends StatelessWidget {
     );
   }
 
-  _save() async {
+  _activate() async {
     final prefs = await SharedPreferences.getInstance();
     final key = 'my_activation_status';
     final status = true;

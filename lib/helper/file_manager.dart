@@ -1,12 +1,18 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:provider/provider.dart';
+
+import '../providers/file_info.dart';
+import '../providers/files.dart';
 
 
 
 class FileManager {
+  static get context => null;
+
   static void saveScanData(String productCode, bool matched, DateTime currentDate) {
     String filename = '${DateFormat("yyyyMMdd").format(currentDate)}';
     String time = DateFormat("yyyy/MM/dd HH:mm:ss").format(currentDate);
@@ -14,9 +20,8 @@ class FileManager {
 
     String matching = matched ? 'matched' : 'unmatched';
 
-    writeJson(productCode, filename).then((_){
-      writeToCsv(filename, time, productCode, matching);
-    });
+    writeToCsv(filename, time, productCode, matching);
+    // writeJson(productCode, filename);
 
     // create csv and add logging data:
   }
@@ -45,10 +50,21 @@ class FileManager {
 
   static Future<File> getCsvFile(String filename) async {
     final path = await _getLocalPath;
+    print("$path/$filename.csv");
+
+    var _newFile = FileInfo(
+      id: '${DateFormat("yyyyMMdd").format(DateTime.now())}',
+      filename: filename,
+      dir: "$path/$filename.csv",
+    );
+
     File file = File("$path/$filename.csv");
     if(!await file.exists()) {
       print('Creating CSV file');
       file.createSync(recursive: true);
+
+      Provider.of<Files>(context, listen: false).addProduct(_newFile);
+
       return file;
     } else {
       print('Opening Existing CSV file');
@@ -58,7 +74,7 @@ class FileManager {
 
   static Future<Null> writeJson(String key, String filename) async {
     final file = await getJsonFile(filename);
-    Map<String, dynamic> content = {key: 0, 'filename': filename};
+    Map<String, dynamic> content = {key: key, 'filename': filename};
 
     
     Map<String, dynamic> jsonFileContent = json.decode(file.readAsStringSync());
