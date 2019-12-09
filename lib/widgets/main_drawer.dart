@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
+import 'package:retail_scanner/screens/printer_screen.dart';
+import 'package:retail_scanner/screens/record_saved_screen.dart';
 
 import '../screens/draft_screen.dart';
 import '../screens/saved_screen.dart';
@@ -60,11 +62,26 @@ class MainDrawer extends StatelessWidget {
               Navigator.of(context).pushReplacementNamed(SavedScreen.routeName);
             }
           ),
+          SizedBox(width: 50,),
+          buildListTile(
+            'Record Saved', 
+            EvaIcons.recording,
+            () {
+              Navigator.of(context).pushReplacementNamed(RecordSavedScreen.routeName);
+            }
+          ),          
           buildListTile(
             'Draft', 
             EvaIcons.clock,
             () {
               Navigator.of(context).pushReplacementNamed(DraftScreen.routeName);
+            }
+          ),
+          buildListTile(
+            'Printer', 
+            EvaIcons.printer,
+            () {
+              Navigator.of(context).pushReplacementNamed(PrinterScreen.routeName);
             }
           ),
         ],

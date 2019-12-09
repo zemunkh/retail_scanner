@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import '../widgets/main_drawer.dart';
 
 
-class OthersScreen extends StatelessWidget {
-  static const routeName = '/others';
+class PrinterScreen extends StatelessWidget {
+  static const routeName = '/printer';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text('Others Page'),
-      // ),
+      appBar: AppBar(
+        title: Text('Printer Page'),
+      ),
       drawer: MainDrawer(),
       body: Center(
         child: Text(

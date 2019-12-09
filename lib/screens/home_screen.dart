@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:retail_scanner/screens/dispatch_screen.dart';
-import 'package:retail_scanner/screens/others_screen.dart';
 
 import '../widgets/main_drawer.dart';
 import '../block/bottom_block.dart';
@@ -76,9 +75,6 @@ class _HomeScreenState extends State<HomeScreen> {
             case NavBarItem.DISPATCHNOTE:
               return DispatchScreen();
               break;
-            case NavBarItem.OTHERS:
-              return OthersScreen();
-              break;
             default:
               return null;
           }
@@ -116,17 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 icon: Icon(EvaIcons.carOutline),
                 activeIcon: Icon(EvaIcons.car),
-              ),
-              BottomNavigationBarItem(
-                title: Text(
-                  'Others',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold
-                  ),
-                ),
-                icon: Icon(EvaIcons.layersOutline),
-                activeIcon: Icon(EvaIcons.layers),
-              ),                           
+              ),                          
             ],
           );
         },

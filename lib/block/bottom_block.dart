@@ -1,6 +1,6 @@
 import 'dart:async';
 
-enum NavBarItem { STOCKIN, DISPATCHNOTE, OTHERS }
+enum NavBarItem { STOCKIN, DISPATCHNOTE }
 
 
 class BottomNavBarBlock {
@@ -17,9 +17,6 @@ class BottomNavBarBlock {
         break;
       case 1:
         _navBarController.sink.add(NavBarItem.DISPATCHNOTE);
-        break;
-      case 2:
-        _navBarController.sink.add(NavBarItem.OTHERS);
         break;
     }
   }

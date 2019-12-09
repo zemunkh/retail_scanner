@@ -6,21 +6,21 @@ import '../widgets/saved_file_item.dart';
 
   _getFilesList() async {
     final prefs = await SharedPreferences.getInstance();
-    final key = 'files_list';
+    final key = 'record_files_list';
     List<String> files = prefs.getStringList(key);
     print('Files List: $files');
     return files;
   }
 
-class SavedScreen extends StatelessWidget {
-  static const routeName = '/saved';
+class RecordSavedScreen extends StatelessWidget {
+  static const routeName = '/record_saved';
 
   @override
   Widget build(BuildContext context) {
     // final fileData = Provider.of<Files>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Saved Page'),
+        title: Text('Record Saved Page'),
       ),
       drawer: MainDrawer(),
       body: Container(
@@ -48,3 +48,4 @@ class SavedScreen extends StatelessWidget {
     );
   }
 }
+
