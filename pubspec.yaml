@@ -29,7 +29,6 @@ dependencies:
   eva_icons_flutter: ^2.0.0
   font_awesome_flutter: ^8.5.0
   path_provider:
-  provider: ^3.0.0
   share_extend: ^1.1.0
 
 dev_dependencies:

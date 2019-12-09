@@ -31,37 +31,19 @@ Future<Null> _compareData() async {
 
     print('Comparison: $masterCode : $productCode');
 
-    if(masterCode == productCode) {
-      setState(() {
+    setState(() {
+      if(masterCode == productCode) {
         matched = true;
         counter++;
         if(oneToMany) {
           _productController.clear();
-        } else {
-          // _masterController.clear();
-          // _productController.clear();
-        }
-      });
-    } else {
-      setState(() {
+        } 
+      } else {
         matched = false;
-      });
-    }
-
-    FileManager.saveScanData(productCode, matched, DateTime.now());
-
-    // get product code and get matched status and get current DateTime
-    // 
+      }
+      FileManager.saveScanData(productCode, counter, matched, DateTime.now());
+    });
   }
-
-  // void _saveScanData(String productCode, bool matched, DateTime currentDate) {
-    // check file exits
-    // if file exists, add productCode, matched status to the file
-
-    // if file non-exists, get filelist.json, add create file, callback it again
-    // then add to filelist.json
-    //
-  // }
 
   Future<Null> _enableOneToMany(bool isOn) async {
     setState(() {

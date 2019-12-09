@@ -1,13 +1,28 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../providers/files.dart';
 import '../widgets/main_drawer.dart';
 import '../widgets/saved_file_item.dart';
 
+  _getFilesList() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'files_list';
+    List<String> files = prefs.getStringList(key);
+    print('Files List: $files');
+    return files;
+  }
+
 class SavedScreen extends StatelessWidget {
   static const routeName = '/saved';
+
+  // void _deleteTransaction(String id) {
+  //   setState(() {
+  //     _userTransactions.removeWhere((tx) =>  tx.id == id);
+  //   });
+  // }
+
+
   @override
   Widget build(BuildContext context) {
     // final fileData = Provider.of<Files>(context);
@@ -19,21 +34,20 @@ class SavedScreen extends StatelessWidget {
       body: Container(
         child: Center(
           child: new FutureBuilder(
-            future: DefaultAssetBundle.of(context).loadString('assets/data/files.json'),
+            future: _getFilesList(),
             builder: (context, snapshot){
-              var myData = json.decode(snapshot.data.toString());
+              var myData = snapshot.data;
               return ListView.builder(
                 itemCount: myData == null ? 0: myData.length,
                 itemBuilder: (_, i) => Column(
-                      children: [
-                        SavedFileItem(
-                          myData[i]['id'],
-                          myData[i]['filename'],
-                          myData[i]['dir'],
-                        ),
-                        Divider(),
-                      ],
+                  children: [
+                    SavedFileItem(
+                      myData[i],
+                      i,
                     ),
+                    Divider(),
+                  ],
+                ),
               );
             },
           ),
