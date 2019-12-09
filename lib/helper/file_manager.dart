@@ -8,7 +8,7 @@ _saveFilename(String fname) async {
   final key = 'files_list';
   final filename = fname;
   List<String> files = prefs.getStringList(key);
-  if(files.isEmpty) {
+  if(files == null || files.isEmpty) {
     files = [filename];
     prefs.setStringList(key, files);
   } else {
@@ -46,18 +46,10 @@ class FileManager {
     final path = await _getLocalPath;
     print("$path/$filename.csv");
 
-    // var _newFile = FileInfo(
-    //   id: '${DateFormat("yyyyMMdd").format(DateTime.now())}',
-    //   filename: filename,
-    //   dir: "$path/$filename.csv",
-    // );
-
     File file = File("$path/$filename.csv");
     if(!await file.exists()) {
       print('Creating CSV file');
       file.createSync(recursive: true);
-
-      // Provider.of<Files>(context, listen: false).addProduct(_newFile);
 
       return file;
     } else {

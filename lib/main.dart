@@ -12,7 +12,7 @@ bool activated = false;
 
 Future<void> main() async {
   try {
-    await _read();
+    activated = await _read();
     runApp(MyApp());
   } catch(error) {
     print('Checking Activation Status');
@@ -75,5 +75,6 @@ _read() async {
   final key = 'my_activation_status';
   final status = prefs.getBool(key) ?? false;
   print('Activation Status: $status');
-  activated = status;
+  // activated = status;
+  return status;
 }

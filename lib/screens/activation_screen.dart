@@ -15,7 +15,7 @@ class ActivationScreen extends StatelessWidget {
 
   Future<Null> _activationHandler(BuildContext context, TextEditingController _controller) {
     String inputText = _controller.text;
-    const int adder = 53124729;
+    const int adder = 53127429; // has to change
     String currentDate = '${DateFormat("ddMMyyyy").format(DateTime.now())}';
     print('Date: $currentDate');
     int activationCode = adder + int.parse(currentDate);
