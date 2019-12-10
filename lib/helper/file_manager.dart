@@ -25,14 +25,14 @@ _saveFilename(String fname) async {
 class FileManager {
   static get context => null;
 
-  static void saveScanData(String productCode, int counter, bool matched, DateTime currentDate) {
+  static void saveScanData(String masterCode, String productCode, int counter, bool matched, DateTime currentDate) {
     String filename = '${DateFormat("yyyyMMdd").format(currentDate)}';
     String time = DateFormat("yyyy/MM/dd HH:mm:ss").format(currentDate);
     print('Time: $time');
 
     String matching = matched ? 'matched' : 'unmatched';
 
-    writeToCsv(filename, time, productCode, counter, matching).then((_){
+    writeToCsv(filename, time, masterCode, productCode, counter, matching).then((_){
       _saveFilename('$filename.csv');
     });
   }
@@ -58,11 +58,11 @@ class FileManager {
     }
   }
 
-  static Future<Null> writeToCsv(String filename, String time, String key, int counter, String matching) async {
+  static Future<Null> writeToCsv(String filename, String time, String key1, String key2, int counter, String matching) async {
     final file = await getCsvFile(filename);
     
     // String countedValue = await getCounter(filename, key);
-    String newData = '$time, $key, $counter, $matching \r\n';
+    String newData = '$time, $key1, $key2, ${counter.toString()}, $matching \r\n';
 
     String content = file.readAsStringSync();
     file.writeAsStringSync(content + newData);

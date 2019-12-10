@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
-import 'package:retail_scanner/screens/dispatch_screen.dart';
+
 
 import '../widgets/main_drawer.dart';
 import '../block/bottom_block.dart';
-import '../widgets/stockIn.dart';
+import '../widgets/stock_check.dart';
+import '../widgets/dispatch_note.dart';
 import '../styles/theme.dart' as Style;
 
 
@@ -51,6 +52,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           title: new Text(
             'Mugs Stock Control',
+            style: TextStyle(
+              fontSize: 16,
+            ),
           ),
           actions: <Widget>[
             IconButton(
@@ -73,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
               return StockIn();
               break;
             case NavBarItem.DISPATCHNOTE:
-              return DispatchScreen();
+              return DispatchNote();
               break;
             default:
               return null;
@@ -95,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
             items: [
               BottomNavigationBarItem(
                 title: Text(
-                  'Stock In',
+                  'Stock Check',
                   style: TextStyle(
                     fontWeight: FontWeight.bold
                   ),

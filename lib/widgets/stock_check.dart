@@ -4,11 +4,6 @@ import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import '../helper/file_manager.dart';
 
 
-class AlwaysDisabledFocusNode extends FocusNode {
-  @override
-  bool get hasFocus => false;
-}
-
 class StockIn extends StatefulWidget {
   @override
   StockInState createState() => StockInState();
@@ -22,7 +17,7 @@ class StockInState extends State<StockIn> {
   final FocusNode _productNode = FocusNode();
 
   bool matched = false;
-  bool oneToMany = false;
+  bool oneToMany = true;
   var counter = 0;
 
 Future<Null> _compareData() async {
@@ -41,7 +36,7 @@ Future<Null> _compareData() async {
       } else {
         matched = false;
       }
-      FileManager.saveScanData(productCode, counter, matched, DateTime.now());
+      FileManager.saveScanData(masterCode, productCode, counter, matched, DateTime.now());
     });
   }
 
@@ -83,13 +78,16 @@ Future<Null> _compareData() async {
       trueVal = buffer;
 
 
-      await Future.delayed(const Duration(milliseconds: 800), (){
+      await Future.delayed(const Duration(milliseconds: 1000), (){
         _productController.text = trueVal;
       }).then((value){
         _compareData();
         if(oneToMany) {
-          _productController.clear();
-          FocusScope.of(context).requestFocus(_productNode);
+          
+          Future.delayed(const Duration(milliseconds: 500), (){
+            _productController.clear();
+          });
+
         } else {
           _productNode.unfocus();
           FocusScope.of(context).requestFocus(new FocusNode());

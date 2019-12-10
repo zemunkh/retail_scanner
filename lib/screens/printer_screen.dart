@@ -13,7 +13,7 @@ class PrinterScreen extends StatelessWidget {
       drawer: MainDrawer(),
       body: Center(
         child: Text(
-          'Others',
+          'Printer',
           style: TextStyle(
             fontWeight: FontWeight.w700,
             color: Colors.blue,

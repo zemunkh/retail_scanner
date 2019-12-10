@@ -33,35 +33,40 @@ class ActivationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
 
     Widget _activationInput(String labeltext, TextEditingController _controller, FocusNode currentNode) {
-      return Stack(
-        alignment: const Alignment(1.0, 1.0),
-        children: <Widget>[
-          Container(
-            child: TextFormField(
-              style: TextStyle(
-                fontSize: 22, 
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-              ),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                labelStyle: Theme.of(context).textTheme.display1,
-                labelText: labeltext,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(5.0),
+      return new GestureDetector(
+        onTap: () {
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },
+        child: Stack(
+          alignment: const Alignment(1.0, 1.0),
+          children: <Widget>[
+            Container(
+              child: TextFormField(
+                style: TextStyle(
+                  fontSize: 22, 
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
                 ),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  labelStyle: Theme.of(context).textTheme.display1,
+                  labelText: labeltext,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                ),
+                autofocus: false,
+                keyboardType: TextInputType.number,
+                controller: _controller,
+                focusNode: currentNode,
+                onTap: () {
+                  _focusNode(context, currentNode);
+                },
               ),
-              autofocus: false,
-              keyboardType: TextInputType.number,
-              controller: _controller,
-              focusNode: currentNode,
-              onTap: () {
-                _focusNode(context, currentNode);
-              },
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 

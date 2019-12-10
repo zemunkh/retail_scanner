@@ -6,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import './screens/draft_screen.dart';
 import './screens/saved_screen.dart';
 import './screens/home_screen.dart';
-import './helper/file_manager.dart';
 
 bool activated = false;
 
