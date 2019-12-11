@@ -28,7 +28,15 @@ class DispatchNoteState extends State<DispatchNote> {
                     flex: 3,
                     child: new TextField(
                     textAlign: TextAlign.center,
-                    decoration: new InputDecoration.collapsed(hintText: 'Zee'),
+                    decoration: new InputDecoration(
+                      filled: true,
+                      fillColor: Color(0xFF004B83),
+                      hintText: 'Barcode',
+                      hintStyle: TextStyle(
+                        color: Colors.white, 
+                        fontWeight: FontWeight.w200,
+                      ),
+                    ),
                   ),
                 ),
                 new Expanded(
