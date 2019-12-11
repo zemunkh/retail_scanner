@@ -24,27 +24,32 @@ class SavedScreen extends StatelessWidget {
       ),
       drawer: MainDrawer(),
       body: Container(
-        child: Center(
-          child: new FutureBuilder(
-            future: _getFilesList(),
-            builder: (context, snapshot){
+        child: new FutureBuilder(
+          future: _getFilesList(),
+          builder: (context, snapshot){
+            if(snapshot.connectionState == ConnectionState.done) {
               var myData = snapshot.data;
-              return ListView.builder(
-                itemCount: myData == null ? 0: myData.length,
-                itemBuilder: (_, i) => Column(
-                  children: [
-                    SavedFileItem(
-                      myData[i],
-                      i,
-                    ),
-                    Divider(),
-                  ],
+              return Container(
+                child: ListView.builder(
+                  itemCount: myData == null ? 0: myData.length,
+                  itemBuilder: (_, i) => Column(
+                    children: [
+                      SavedFileItem(
+                        myData[i],
+                        i,
+                      ),
+                      Divider(),
+                    ],
+                  ),
                 ),
               );
-            },
-          ),
+            }
+            else {
+              return new CircularProgressIndicator();
+            }
+          },
         ),
-      )
+      ),
     );
   }
 }
