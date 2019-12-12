@@ -74,10 +74,10 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (BuildContext context, AsyncSnapshot<NavBarItem> snapshot) {
           switch (snapshot.data) {
             case NavBarItem.STOCKIN:
-              return DispatchNote(); //StockIn(); 
+              return StockIn(); 
               break;
             case NavBarItem.DISPATCHNOTE:
-              return StockIn(); //DispatchNote();
+              return DispatchNote();
               break;
             default:
               return null;

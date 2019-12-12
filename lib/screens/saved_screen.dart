@@ -45,7 +45,7 @@ class SavedScreen extends StatelessWidget {
               );
             }
             else {
-              return new CircularProgressIndicator();
+              return new Center(child:CircularProgressIndicator(),);
             }
           },
         ),

@@ -55,28 +55,32 @@ class MainDrawer extends StatelessWidget {
               Navigator.of(context).pushReplacementNamed('/');
             }
           ),
+          SizedBox(height: 20,),
           buildListTile(
-            'Saved', 
-            EvaIcons.checkmark,
+            'Stock Saved', 
+            EvaIcons.checkmarkCircle,
             () {
               Navigator.of(context).pushReplacementNamed(SavedScreen.routeName);
             }
           ),
-          SizedBox(width: 50,),
+          SizedBox(height: 20,),
           buildListTile(
-            'Record Saved', 
-            EvaIcons.recording,
+            'Dispatch Saved', 
+            EvaIcons.carOutline,
             () {
               Navigator.of(context).pushReplacementNamed(RecordSavedScreen.routeName);
             }
           ),          
           buildListTile(
-            'Draft', 
+            'Dispatch Draft', 
             EvaIcons.clock,
             () {
               Navigator.of(context).pushReplacementNamed(DraftScreen.routeName);
             }
           ),
+
+          SizedBox(height: 20,),
+
           buildListTile(
             'Printer', 
             EvaIcons.printer,

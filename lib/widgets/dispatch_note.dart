@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:retail_scanner/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
@@ -23,7 +24,9 @@ class DispatchNoteState extends State<DispatchNote> {
   final _dispatchNode = FocusNode();
   final _numberNode = FocusNode();
 
+  var refreshKey = GlobalKey<RefreshIndicatorState>();
 
+  Widget _form;
   bool matched = false;
   int counter = 0;
 
@@ -48,7 +51,7 @@ class DispatchNoteState extends State<DispatchNote> {
   String trueVal = '';
 
 
-  Future<Null> dipatchNoListener() async {
+  Future<Null> _dipatchNoListener() async {
     print('Current text: ${_dispatchNoController.text}');
     buffer = _dispatchNoController.text;
     if(buffer.endsWith(r'$')){
@@ -74,14 +77,63 @@ class DispatchNoteState extends State<DispatchNote> {
       await Future.delayed(const Duration(milliseconds: 1000), (){
         _numberOfScanController.text = trueVal;
       }).then((value){
-        _compareData();
-          
+        
+        // set the number of inputs will be built in the screen 
+        if(int.parse(trueVal) < 9) {
+          _setNumberItems(int.parse(trueVal));
+          for(int i = 0; i < int.parse(trueVal); i++) {
+            _masterControllers.add(new TextEditingController());
+            _productControllers.add(new TextEditingController());
+
+            _masterFocusNodes.add(new FocusNode());
+            _productFocusNodes.add(new FocusNode());
+          }
+        } else {
+          _setNumberItems(8);
+          print('Too many :(');
+        } 
         _numberNode.unfocus();
         FocusScope.of(context).requestFocus(new FocusNode());
       });
     }
   }
 
+  // Future<List> _getList() async {
+  //   int number = await _getNumItems();
+  //   print('Saved Item N: $number');
+
+  //   for(int i = 0; i < number; i++) {
+  //     _masterControllers.add(new TextEditingController());
+  //     _productControllers.add(new TextEditingController());
+
+  //     _masterFocusNodes.add(new FocusNode());
+  //     _productFocusNodes.add(new FocusNode());
+  //   }
+  //   return _masterControllers;
+  // }
+
+  Future<Null> _refreshList() async {
+    refreshKey.currentState?.show(atTop: false);
+    await Future.delayed(Duration(seconds: 2));
+
+    int number = await _getNumItems();
+    print('Saved Item N: $number');
+
+    if(_masterControllers.length < number) {
+      for(int i = 0; i < number; i++) {
+        setState(() {
+          _masterControllers.add(new TextEditingController());
+          _productControllers.add(new TextEditingController());
+
+          _masterFocusNodes.add(new FocusNode());
+          _productFocusNodes.add(new FocusNode());
+        });
+      }
+    }
+
+    print('Lenght: ${_masterControllers.length}');
+    return null;
+  }
 
   Future<Null> _focusNode(BuildContext context, FocusNode node) async {
     FocusScope.of(context).requestFocus(node);
@@ -94,10 +146,19 @@ class DispatchNoteState extends State<DispatchNote> {
     FocusScope.of(context).requestFocus(node);
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    _dispatchNoController.dispose();
+    _numberOfScanController.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
+    _dispatchNoController.addListener(_dipatchNoListener);
+    _numberOfScanController.addListener(_numberScanListener);
+    _refreshList();
   }
 
   @override 
@@ -134,7 +195,6 @@ class DispatchNoteState extends State<DispatchNote> {
                         fontWeight: FontWeight.bold,
                       ),
                       decoration: InputDecoration(
-                        // contentPadding: EdgeInsets.symmetric(vertical: 0.0),
                         filled: true,
                         fillColor: Colors.white,
                         hintText: header,
@@ -144,6 +204,15 @@ class DispatchNoteState extends State<DispatchNote> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.0),
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(EvaIcons.close, 
+                            color: Colors.blueAccent, 
+                            size: 32,
+                          ),
+                          onPressed: () {
+                            _clearTextController(context, _mainController, _mainNode);
+                          },
                         ),
                       ),
                       autofocus: true,
@@ -175,7 +244,7 @@ class DispatchNoteState extends State<DispatchNote> {
                     color: Color(0xFF004B83),
                     fontWeight: FontWeight.bold,
                   ),
-                  decoration: InputDecoration(
+                  decoration: InputDecoration.collapsed(
                     filled: true,
                     fillColor: Colors.white,
                     hintText: hintext,
@@ -184,25 +253,18 @@ class DispatchNoteState extends State<DispatchNote> {
                       fontSize: 20, 
                       fontWeight: FontWeight.w300,
                     ),
-                    // labelStyle: TextStyle(
-                    //   color: Color(0xFF004B83),
-                    //   fontSize: 16, 
-                    //   fontWeight: FontWeight.w600,
-                    // ),
-                    // labelText: 'item: $hintext',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5.0),
                     ),
-                    suffixIcon: IconButton(
-                      icon: Icon(EvaIcons.close, 
-                        color: Colors.blueAccent, 
-                        size: 32,
-                      ),
-                      onPressed: () {
-                        _clearTextController(context, _controller, currentNode);
-                      },
-                    ),
-                    
+                    // suffixIcon: IconButton(
+                    //   icon: Icon(EvaIcons.close, 
+                    //     color: Colors.blueAccent, 
+                    //     size: 32,
+                    //   ),
+                    //   onPressed: () {
+                    //     _clearTextController(context, _controller, currentNode);
+                    //   },
+                    // ),
                   ),
                   autofocus: true,
                   controller: _controller,
@@ -216,15 +278,6 @@ class DispatchNoteState extends State<DispatchNote> {
                 ),
               ),
             ),
-            // Padding(
-            //   padding: const EdgeInsets.all(2),
-            //   child: FlatButton(
-            //     onPressed: () {
-            //       _clearTextController(context, _controller, currentNode);
-            //     },
-            //     child: Icon(EvaIcons.close, color: Colors.blueAccent, size: 32,),
-            //   ),
-            // ),
           ],
         );
     }
@@ -237,11 +290,11 @@ class DispatchNoteState extends State<DispatchNote> {
               padding: EdgeInsets.symmetric(horizontal: 2),
               child: matched ? new Icon(
                 EvaIcons.checkmarkCircleOutline,
-                size: 50,
+                size: 30,
                 color: Colors.green,
               ) : new Icon(
                 EvaIcons.closeCircleOutline,
-                size: 50,
+                size: 30,
                 color: Colors.red,
               ),
             ),
@@ -261,9 +314,9 @@ class DispatchNoteState extends State<DispatchNote> {
               ),
               child: Center(
                 child: Text(
-                  '80',// counter.toString(),
+                  '60',// counter.toString(),
                   style: TextStyle(
-                    fontSize: 50,
+                    fontSize: 24,
                   ),
                 ),
               ),
@@ -340,88 +393,98 @@ class DispatchNoteState extends State<DispatchNote> {
 
     // _getTextFieldList()
 
-    if(_masterControllers.length == 0) {
-      _masterControllers.add(new TextEditingController());
-      _productControllers.add(new TextEditingController());
+    // if(_masterControllers.length == 0) {
+    //   _masterControllers.add(new TextEditingController());
+    //   _productControllers.add(new TextEditingController());
 
-      _productControllers.add(new TextEditingController());
-      _masterControllers.add(new TextEditingController());
-
-      _masterFocusNodes.add(new FocusNode());
-      _productFocusNodes.add(new FocusNode());
-
-      _masterFocusNodes.add(new FocusNode());
-      _productFocusNodes.add(new FocusNode());
-    }
+    //   _masterFocusNodes.add(new FocusNode());
+    //   _productFocusNodes.add(new FocusNode());
+    // }
 
     
     String time = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
+    
+    Widget createWidget(BuildContext context) {
+      return GestureDetector(
+        onTap: () {
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },
+        child: Container(
+          child: Column(
+            children: <Widget>[
+              dateTime(time),
 
-    return new GestureDetector(
-      onTap: () {
-        FocusScope.of(context).requestFocus(new FocusNode());
-      },
-      child: Container(
-        child: Column(
-          children: <Widget>[
-            dateTime(time),
-
-            _mainInput('Dispatch Number',_dispatchNoController, _dispatchNode),
-            _mainInput('Number of item',_numberOfScanController, _numberNode),
-
-            new Expanded(
-              child: new ListView.builder(
-                itemCount: _masterControllers.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Container(
-                    padding: const EdgeInsets.all(8),
-                    child: Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+              _mainInput('Dispatch Number',_dispatchNoController, _dispatchNode),
+              _mainInput('Number of item',_numberOfScanController, _numberNode),
+              SizedBox(height: 15,),
+              new Expanded(
+                child: RefreshIndicator(
+                  key: refreshKey,
+                  child: new ListView.builder(
+                    itemCount: _masterControllers?.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Container(
+                        padding: const EdgeInsets.all(4),
+                        child: Row(
                           children: <Widget>[
-                              Text('Item: $index'),
-                              _scannerInput(index.toString(), _masterControllers[index], _masterFocusNodes[index], index),
-                              _scannerInput(index.toString(), _productControllers[index], _productFocusNodes[index], index),
-                            ],
-                          ),
+                            Expanded(
+                              child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                  Text('Item: $index'),
+                                  _scannerInput(index.toString(), _masterControllers[index], _masterFocusNodes[index], index),
+                                  _scannerInput(index.toString(), _productControllers[index], _productFocusNodes[index], index),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: statusBar(true),
+                            ),
+                          ],
                         ),
-                        Expanded(
-                          child: statusBar(true),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Expanded(
-                  child: _saveDraftButton(),
+                      );
+                    },
+                    
+                  ),
+                  onRefresh: _refreshList,
                 ),
-                Expanded(
-                  child: _printAndOkButton(),
-                )
-              ],
-            ),
-          ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  Expanded(
+                    child: _saveDraftButton(),
+                  ),
+                  Expanded(
+                    child: _printAndOkButton(),
+                  )
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    }
+
+    if(_form == null) {
+      _form = createWidget(context);
+    }
+
+    return _form;
   }
 }
 
 
-_getTextFieldList() async {
-  List<TextEditingController> _controllers = new List();
-  List<FocusNode> _focusNodes = new List();
-
+_getNumItems() async {
   final prefs = await SharedPreferences.getInstance();
   final key = 'number_items';
-  int fieldLength = prefs.getInt(key);
+  int num_items = prefs.getInt(key);
+  return num_items;
+}
 
-  return fieldLength;
+_setNumberItems(int val) async {
+  final prefs = await SharedPreferences.getInstance();
+  final key = 'number_items';
+  prefs.setInt(key, val);
+  print('Items set to $val');
 }
