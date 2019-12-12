@@ -24,7 +24,64 @@ class DispatchNoteState extends State<DispatchNote> {
   final _numberNode = FocusNode();
 
 
-  List<String> litems = [];
+  bool matched = false;
+  int counter = 0;
+
+
+  Future<Null> _compareData() async {
+    final masterCode = _dispatchNoController.text;
+    final productCode = _numberOfScanController.text;
+
+    print('Comparison: $masterCode : $productCode');
+
+    setState(() {
+      if(masterCode == productCode) {
+        matched = true;
+        counter++;
+      } else {
+        matched = false;
+      }
+    });
+  }
+
+  String buffer = '';
+  String trueVal = '';
+
+
+  Future<Null> dipatchNoListener() async {
+    print('Current text: ${_dispatchNoController.text}');
+    buffer = _dispatchNoController.text;
+    if(buffer.endsWith(r'$')){
+      buffer = buffer.substring(0, buffer.length - 1);
+      trueVal = buffer;
+      _dispatchNode.unfocus();
+      await Future.delayed(const Duration(milliseconds: 200), (){
+        setState(() {
+          _dispatchNoController.text = trueVal;
+        });
+        FocusScope.of(context).requestFocus(_numberNode);
+      });
+    }
+  }
+
+
+  Future<Null> _numberScanListener() async {
+    buffer = _numberOfScanController.text;
+    if(buffer.endsWith(r'$')) {
+      buffer = buffer.substring(0, buffer.length - 1);
+      trueVal = buffer;
+
+      await Future.delayed(const Duration(milliseconds: 1000), (){
+        _numberOfScanController.text = trueVal;
+      }).then((value){
+        _compareData();
+          
+        _numberNode.unfocus();
+        FocusScope.of(context).requestFocus(new FocusNode());
+      });
+    }
+  }
+
 
   Future<Null> _focusNode(BuildContext context, FocusNode node) async {
     FocusScope.of(context).requestFocus(node);
@@ -105,32 +162,47 @@ class DispatchNoteState extends State<DispatchNote> {
       );
     }
 
-    Widget _scannerInput(String hintext, TextEditingController _controller, FocusNode currentNode) {
+    Widget _scannerInput(String hintext, TextEditingController _controller, FocusNode currentNode, int index) {
       return Stack(
-          alignment: const Alignment(2.0, 1.0),
+          alignment: const Alignment(1.4, 1.0),
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(2.0),
               child: Center(
                 child: TextFormField(
                   style: TextStyle(
-                    fontSize: 16, 
+                    fontSize: 20, 
                     color: Color(0xFF004B83),
                     fontWeight: FontWeight.bold,
                   ),
                   decoration: InputDecoration(
-                    // contentPadding: EdgeInsets.symmetric(vertical: 0.0),
                     filled: true,
                     fillColor: Colors.white,
-                    labelStyle: Theme.of(context).textTheme.display1,
-                    labelText: 'item: $hintext',
-                    // labelText: TextStyle(
-                    //   color: Color(0xFF004B83), 
-                    //   fontWeight: FontWeight.w200,
+                    hintText: hintext,
+                    hintStyle: TextStyle(
+                      color: Color(0xFF004B83),
+                      fontSize: 20, 
+                      fontWeight: FontWeight.w300,
+                    ),
+                    // labelStyle: TextStyle(
+                    //   color: Color(0xFF004B83),
+                    //   fontSize: 16, 
+                    //   fontWeight: FontWeight.w600,
                     // ),
+                    // labelText: 'item: $hintext',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5.0),
                     ),
+                    suffixIcon: IconButton(
+                      icon: Icon(EvaIcons.close, 
+                        color: Colors.blueAccent, 
+                        size: 32,
+                      ),
+                      onPressed: () {
+                        _clearTextController(context, _controller, currentNode);
+                      },
+                    ),
+                    
                   ),
                   autofocus: true,
                   controller: _controller,
@@ -138,21 +210,21 @@ class DispatchNoteState extends State<DispatchNote> {
                   onTap: () {
                     _focusNode(context, currentNode);
                   },
+                  onChanged: (value){
+                    print('Text: $value');
+                  },
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(
-                bottom: 8,
-                left: 32,
-              ),
-              child: FlatButton(
-                onPressed: () {
-                  _clearTextController(context, _controller, currentNode);
-                },
-                child: Icon(EvaIcons.close, color: Colors.blueAccent, size: 20,),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.all(2),
+            //   child: FlatButton(
+            //     onPressed: () {
+            //       _clearTextController(context, _controller, currentNode);
+            //     },
+            //     child: Icon(EvaIcons.close, color: Colors.blueAccent, size: 32,),
+            //   ),
+            // ),
           ],
         );
     }
@@ -163,13 +235,13 @@ class DispatchNoteState extends State<DispatchNote> {
             flex: 5,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 2),
-              child: true ? new Icon(
+              child: matched ? new Icon(
                 EvaIcons.checkmarkCircleOutline,
-                size: 22,
+                size: 50,
                 color: Colors.green,
               ) : new Icon(
                 EvaIcons.closeCircleOutline,
-                size: 22,
+                size: 50,
                 color: Colors.red,
               ),
             ),
@@ -189,9 +261,9 @@ class DispatchNoteState extends State<DispatchNote> {
               ),
               child: Center(
                 child: Text(
-                  '22',// counter.toString(),
+                  '80',// counter.toString(),
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 50,
                   ),
                 ),
               ),
@@ -208,10 +280,63 @@ class DispatchNoteState extends State<DispatchNote> {
         style: TextStyle(
           fontFamily: 'QuickSand',
           fontWeight: FontWeight.bold,
+          fontSize: 30,
           color: Colors.black,
         ),
       );
     }
+
+    Widget _saveDraftButton() {
+      return Padding(
+        padding: EdgeInsets.all(10),
+        child: MaterialButton(
+          onPressed: () {
+            print('I am pressed');
+          },
+          child: Text(
+            'Print & Ok',
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'QuickSand',
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          shape: StadiumBorder(),
+          color: Colors.orange[800],
+          splashColor: Colors.yellow[200],
+          height: 50,
+          minWidth: 200,
+          elevation: 2,
+        )
+      );
+    } 
+
+    Widget _printAndOkButton() {
+      return Padding(
+        padding: EdgeInsets.all(10),
+        child: MaterialButton(
+          onPressed: () {
+            print('I am pressed');
+          },
+          child: Text(
+            'Save as Draft',
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'QuickSand',
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          shape: StadiumBorder(),
+          color: Colors.teal[400],
+          splashColor: Colors.blue[100],
+          height: 50,
+          minWidth: 200,
+          elevation: 2,
+        )
+      );
+    }  
 
     // _getTextFieldList()
 
@@ -229,10 +354,6 @@ class DispatchNoteState extends State<DispatchNote> {
       _productFocusNodes.add(new FocusNode());
     }
 
-
-    // _scannerInput('hello', _controllers[index], _focusNodes[index]);
-
-
     
     String time = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
 
@@ -246,7 +367,6 @@ class DispatchNoteState extends State<DispatchNote> {
             dateTime(time),
 
             _mainInput('Dispatch Number',_dispatchNoController, _dispatchNode),
-
             _mainInput('Number of item',_numberOfScanController, _numberNode),
 
             new Expanded(
@@ -254,16 +374,16 @@ class DispatchNoteState extends State<DispatchNote> {
                 itemCount: _masterControllers.length,
                 itemBuilder: (BuildContext context, int index) {
                   return Container(
-                    padding: const EdgeInsets.all(32),
+                    padding: const EdgeInsets.all(8),
                     child: Row(
                       children: <Widget>[
-                        SizedBox(height: 15,),
                         Expanded(
                           child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                              _scannerInput(index.toString(), _masterControllers[index], _masterFocusNodes[index],),
-                              _scannerInput(index.toString(), _productControllers[index], _productFocusNodes[index],),
+                              Text('Item: $index'),
+                              _scannerInput(index.toString(), _masterControllers[index], _masterFocusNodes[index], index),
+                              _scannerInput(index.toString(), _productControllers[index], _productFocusNodes[index], index),
                             ],
                           ),
                         ),
@@ -275,6 +395,17 @@ class DispatchNoteState extends State<DispatchNote> {
                   );
                 },
               ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Expanded(
+                  child: _saveDraftButton(),
+                ),
+                Expanded(
+                  child: _printAndOkButton(),
+                )
+              ],
             ),
           ],
         ),

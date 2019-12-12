@@ -20,7 +20,7 @@ class StockInState extends State<StockIn> {
   bool oneToMany = true;
   var counter = 0;
 
-Future<Null> _compareData() async {
+  Future<Null> _compareData() async {
     final masterCode = _masterController.text;
     final productCode = _productController.text;
 
