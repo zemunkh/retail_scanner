@@ -11,9 +11,17 @@ class DispatchNote extends StatefulWidget {
 }
 
 class DispatchNoteState extends State<DispatchNote> {
-  List<TextEditingController> _controllers = new List();
-  List<FocusNode> _focusNodes = new List();
+  List<TextEditingController> _masterControllers = new List();
+  List<TextEditingController> _productControllers = new List();
 
+  List<FocusNode> _masterFocusNodes = new List();
+  List<FocusNode> _productFocusNodes = new List();
+
+  final _dispatchNoController = TextEditingController();
+  final _numberOfScanController = TextEditingController();
+  
+  final _dispatchNode = FocusNode();
+  final _numberNode = FocusNode();
 
 
   List<String> litems = [];
@@ -38,33 +46,33 @@ class DispatchNoteState extends State<DispatchNote> {
   @override 
   Widget build(BuildContext context) {
     
-
-    Widget _scannerInput(String hintext, TextEditingController _controller, FocusNode currentNode) {
+    Widget _mainInput(String header, TextEditingController _mainController, FocusNode _mainNode) {
       return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           Expanded(
-            flex: 2,
+            flex: 6,
             child: Text(
-              'item: $hintext',
+              '$header:',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 22, 
+                fontSize: 20, 
                 color: Color(0xFF004B83),
                 fontWeight: FontWeight.bold,
               ),
-            ),
+            )
           ),
           Expanded(
-            flex: 5,
+            flex: 4,
             child: Stack(
-              alignment: const Alignment(2.0, 1.0),
+              alignment: Alignment(1.0, 1.0),
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.all(2.0),
-                  child: Container(
-                    height: 50,
+                  child: Center(
                     child: TextFormField(
                       style: TextStyle(
-                        fontSize: 22, 
+                        fontSize: 16, 
                         color: Color(0xFF004B83),
                         fontWeight: FontWeight.bold,
                       ),
@@ -72,7 +80,7 @@ class DispatchNoteState extends State<DispatchNote> {
                         // contentPadding: EdgeInsets.symmetric(vertical: 0.0),
                         filled: true,
                         fillColor: Colors.white,
-                        hintText: hintext,
+                        hintText: header,
                         hintStyle: TextStyle(
                           color: Color(0xFF004B83), 
                           fontWeight: FontWeight.w200,
@@ -82,64 +90,11 @@ class DispatchNoteState extends State<DispatchNote> {
                         ),
                       ),
                       autofocus: true,
-                      controller: _controller,
-                      focusNode: currentNode,
+                      controller: _mainController,
+                      focusNode: _mainNode,
                       onTap: () {
-                        _focusNode(context, currentNode);
+                        _focusNode(context, _mainNode);
                       },
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: 8,
-                    left: 32,
-                  ),
-                  child: FlatButton(
-                    onPressed: () {
-                      _clearTextController(context, _controller, currentNode);
-                    },
-                    child: Icon(EvaIcons.close, color: Colors.blueAccent, size: 20,),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 5,
-            child: Stack(
-              alignment: Alignment(1.0, 1.0),
-              
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 2),
-                  child: true ? new Icon(
-                    EvaIcons.checkmarkCircleOutline,
-                    size: 22,
-                    color: Colors.green,
-                  ) : new Icon(
-                    EvaIcons.closeCircleOutline,
-                    size: 22,
-                    color: Colors.red,
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(2),
-                  padding: const EdgeInsets.all(2),
-                  // decoration: ShapeDecoration(
-                  //   shape: RoundedRectangleBorder(
-                  //     borderRadius: BorderRadius.all(
-                  //         Radius.circular(3),
-                  //     ),
-                  //     side: BorderSide(width: 1, color: Colors.black), 
-                  //   ),
-                  // ),
-                  child: Center(
-                    child: Text(
-                      '22',// counter.toString(),
-                      style: TextStyle(
-                        fontSize: 16,
-                      ),
                     ),
                   ),
                 ),
@@ -150,19 +105,134 @@ class DispatchNoteState extends State<DispatchNote> {
       );
     }
 
+    Widget _scannerInput(String hintext, TextEditingController _controller, FocusNode currentNode) {
+      return Stack(
+          alignment: const Alignment(2.0, 1.0),
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: Center(
+                child: TextFormField(
+                  style: TextStyle(
+                    fontSize: 16, 
+                    color: Color(0xFF004B83),
+                    fontWeight: FontWeight.bold,
+                  ),
+                  decoration: InputDecoration(
+                    // contentPadding: EdgeInsets.symmetric(vertical: 0.0),
+                    filled: true,
+                    fillColor: Colors.white,
+                    labelStyle: Theme.of(context).textTheme.display1,
+                    labelText: 'item: $hintext',
+                    // labelText: TextStyle(
+                    //   color: Color(0xFF004B83), 
+                    //   fontWeight: FontWeight.w200,
+                    // ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  ),
+                  autofocus: true,
+                  controller: _controller,
+                  focusNode: currentNode,
+                  onTap: () {
+                    _focusNode(context, currentNode);
+                  },
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                bottom: 8,
+                left: 32,
+              ),
+              child: FlatButton(
+                onPressed: () {
+                  _clearTextController(context, _controller, currentNode);
+                },
+                child: Icon(EvaIcons.close, color: Colors.blueAccent, size: 20,),
+              ),
+            ),
+          ],
+        );
+    }
+
+    Widget statusBar(bool matched) {
+      return Row(children: <Widget>[
+        Expanded(
+            flex: 5,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 2),
+              child: true ? new Icon(
+                EvaIcons.checkmarkCircleOutline,
+                size: 22,
+                color: Colors.green,
+              ) : new Icon(
+                EvaIcons.closeCircleOutline,
+                size: 22,
+                color: Colors.red,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 5,
+            child: Container(
+              margin: const EdgeInsets.all(2),
+              padding: const EdgeInsets.all(2),
+              decoration: ShapeDecoration(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(
+                      Radius.circular(3),
+                  ),
+                  side: BorderSide(width: 1, color: Colors.black), 
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  '22',// counter.toString(),
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    Widget dateTime(String time) {
+      return Text(
+        time,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontFamily: 'QuickSand',
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+        ),
+      );
+    }
 
     // _getTextFieldList()
 
+    if(_masterControllers.length == 0) {
+      _masterControllers.add(new TextEditingController());
+      _productControllers.add(new TextEditingController());
 
-    // _controllers.add(new TextEditingController());
-    // _focusNodes.add(new FocusNode());
+      _productControllers.add(new TextEditingController());
+      _masterControllers.add(new TextEditingController());
+
+      _masterFocusNodes.add(new FocusNode());
+      _productFocusNodes.add(new FocusNode());
+
+      _masterFocusNodes.add(new FocusNode());
+      _productFocusNodes.add(new FocusNode());
+    }
+
 
     // _scannerInput('hello', _controllers[index], _focusNodes[index]);
 
-    for(int i = 0; i < 8; i++) {
-      _focusNodes.add(new FocusNode());
-      _controllers.add(new TextEditingController());
-    }
+
     
     String time = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
 
@@ -173,25 +243,35 @@ class DispatchNoteState extends State<DispatchNote> {
       child: Container(
         child: Column(
           children: <Widget>[
-            Text(
-              time,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'QuickSand',
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
+            dateTime(time),
+
+            _mainInput('Dispatch Number',_dispatchNoController, _dispatchNode),
+
+            _mainInput('Number of item',_numberOfScanController, _numberNode),
 
             new Expanded(
               child: new ListView.builder(
-                itemCount: _controllers.length,
+                itemCount: _masterControllers.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return Column(
-                    children: <Widget>[
-                      SizedBox(height: 15,),
-                      _scannerInput(index.toString(), _controllers[index], _focusNodes[index]),
-                    ],
+                  return Container(
+                    padding: const EdgeInsets.all(32),
+                    child: Row(
+                      children: <Widget>[
+                        SizedBox(height: 15,),
+                        Expanded(
+                          child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                              _scannerInput(index.toString(), _masterControllers[index], _masterFocusNodes[index],),
+                              _scannerInput(index.toString(), _productControllers[index], _productFocusNodes[index],),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: statusBar(true),
+                        ),
+                      ],
+                    ),
                   );
                 },
               ),
