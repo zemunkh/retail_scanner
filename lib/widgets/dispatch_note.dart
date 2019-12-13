@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:retail_scanner/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 
 
@@ -24,25 +24,27 @@ class DispatchNoteState extends State<DispatchNote> {
   final _dispatchNode = FocusNode();
   final _numberNode = FocusNode();
 
-  var refreshKey = GlobalKey<RefreshIndicatorState>();
+  // final GlobalKey<ListView> _listKey = GlobalKey();
 
-  Widget _form;
-  bool matched = false;
-  int counter = 0;
+  // var refreshKey = GlobalKey<RefreshIndicatorState>();
+
+  // Widget _form;
+  List<bool> matchList = [true, true, true, true, true, true, true, true];
+  List<int> counterList = [0, 0, 0, 0, 0, 0, 0, 0];
 
 
-  Future<Null> _compareData() async {
-    final masterCode = _dispatchNoController.text;
-    final productCode = _numberOfScanController.text;
+  Future<Null> _compareData(String prodVal, int index) async {
+    final masterCode = _masterControllers[index].text;
+    // final productCode = _productControllers[index].text;
 
-    print('Comparison: $masterCode : $productCode');
+    print('Comparison: $masterCode : $prodVal');
 
     setState(() {
-      if(masterCode == productCode) {
-        matched = true;
-        counter++;
+      if(masterCode == prodVal) {
+        matchList[index] = true;
+        counterList[index]++;
       } else {
-        matched = false;
+        matchList[index] = false;
       }
     });
   }
@@ -81,12 +83,24 @@ class DispatchNoteState extends State<DispatchNote> {
         // set the number of inputs will be built in the screen 
         if(int.parse(trueVal) < 9) {
           _setNumberItems(int.parse(trueVal));
-          for(int i = 0; i < int.parse(trueVal); i++) {
-            _masterControllers.add(new TextEditingController());
-            _productControllers.add(new TextEditingController());
+          
+          print('Controller Length: ${_masterControllers.length}');
 
-            _masterFocusNodes.add(new FocusNode());
-            _productFocusNodes.add(new FocusNode());
+          if(_masterControllers.length < int.parse(trueVal) ) {
+            int diff = int.parse(trueVal) - _masterControllers.length;
+            setState(() {
+              for(int i = 0; i < diff; i++) {
+                print('adding:');
+                _masterControllers.add(new TextEditingController());
+                _productControllers.add(new TextEditingController());
+
+                _masterFocusNodes.add(new FocusNode());
+                _productFocusNodes.add(new FocusNode());
+              }
+            });
+          } else {
+            print('Wrong request!');
+            // _onBasicAlertPressed(BuildContext context);
           }
         } else {
           _setNumberItems(8);
@@ -112,38 +126,60 @@ class DispatchNoteState extends State<DispatchNote> {
   //   return _masterControllers;
   // }
 
-  Future<Null> _refreshList() async {
-    refreshKey.currentState?.show(atTop: false);
-    await Future.delayed(Duration(seconds: 2));
-
-    int number = await _getNumItems();
-    print('Saved Item N: $number');
-
-    if(_masterControllers.length < number) {
-      for(int i = 0; i < number; i++) {
-        setState(() {
-          _masterControllers.add(new TextEditingController());
-          _productControllers.add(new TextEditingController());
-
-          _masterFocusNodes.add(new FocusNode());
-          _productFocusNodes.add(new FocusNode());
-        });
-      }
-    }
-
-    print('Lenght: ${_masterControllers.length}');
-    return null;
-  }
-
   Future<Null> _focusNode(BuildContext context, FocusNode node) async {
     FocusScope.of(context).requestFocus(node);
   }
 
   Future<Null> _clearTextController(BuildContext context, TextEditingController _controller, FocusNode node) async {
-    setState(() {
-      _controller.clear();
+    Future.delayed(Duration(milliseconds: 50), () {
+      setState(() {
+        _controller.clear();
+      });
+      FocusScope.of(context).requestFocus(node);
     });
-    FocusScope.of(context).requestFocus(node);
+  }
+
+  _controllerEventListener(int index, TextEditingController _controller, String _typeController) {
+    int length = _masterControllers.length;
+    print('Length of the controllers: $length, index: $index');
+    if(_typeController == 'master') {
+      buffer = _masterControllers[index].text;
+    } else if(_typeController == 'product') {
+      buffer = _productControllers[index].text;
+    }
+    
+      if(buffer.endsWith(r'$')){
+        buffer = buffer.substring(0, buffer.length - 1);
+        trueVal = buffer;
+        if(_typeController == 'master') {
+          print('I am master!');
+          _masterFocusNodes[index].unfocus();
+        } else if(_typeController == 'product') {
+          print('I am product!');
+          _productFocusNodes[index].unfocus();
+          _compareData(trueVal, index);
+        } else {
+          print('Nothing to do');
+        }
+        
+        Future.delayed(const Duration(milliseconds: 200), (){
+          setState(() {
+            _controller.text = trueVal;
+          });
+          if(length < 8) {
+            if(_typeController == 'master') {
+              FocusScope.of(context).requestFocus(_productFocusNodes[index]);
+            } else if(_typeController == 'product') {
+              if((length - 1) > index){
+                FocusScope.of(context).requestFocus(_masterFocusNodes[index + 1]);
+              } else {
+                FocusScope.of(context).requestFocus(new FocusNode());
+              }
+              
+            }
+          }
+        });
+      }
   }
 
   @override
@@ -158,7 +194,6 @@ class DispatchNoteState extends State<DispatchNote> {
     super.initState();
     _dispatchNoController.addListener(_dipatchNoListener);
     _numberOfScanController.addListener(_numberScanListener);
-    _refreshList();
   }
 
   @override 
@@ -205,6 +240,9 @@ class DispatchNoteState extends State<DispatchNote> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.0),
                         ),
+                        errorStyle: TextStyle(
+                          color: Colors.yellowAccent,
+                        ),
                         suffixIcon: IconButton(
                           icon: Icon(EvaIcons.close, 
                             color: Colors.blueAccent, 
@@ -217,6 +255,13 @@ class DispatchNoteState extends State<DispatchNote> {
                       ),
                       autofocus: true,
                       controller: _mainController,
+                      validator: (String value) {
+                        if(value.isEmpty) {
+                          return 'Enter Scan Number';
+                        } else if(int.parse(value) >= 9){
+                          return 'Too much. Suggestion: 1-8';
+                        }
+                      },
                       focusNode: _mainNode,
                       onTap: () {
                         _focusNode(context, _mainNode);
@@ -231,7 +276,7 @@ class DispatchNoteState extends State<DispatchNote> {
       );
     }
 
-    Widget _scannerInput(String hintext, TextEditingController _controller, FocusNode currentNode, int index) {
+    Widget _scannerInput(String typeController, TextEditingController _controller, FocusNode currentNode, int index) {
       return Stack(
           alignment: const Alignment(1.4, 1.0),
           children: <Widget>[
@@ -247,7 +292,7 @@ class DispatchNoteState extends State<DispatchNote> {
                   decoration: InputDecoration.collapsed(
                     filled: true,
                     fillColor: Colors.white,
-                    hintText: hintext,
+                    hintText: typeController,
                     hintStyle: TextStyle(
                       color: Color(0xFF004B83),
                       fontSize: 20, 
@@ -270,10 +315,11 @@ class DispatchNoteState extends State<DispatchNote> {
                   controller: _controller,
                   focusNode: currentNode,
                   onTap: () {
-                    _focusNode(context, currentNode);
+                    _clearTextController(context, _controller, currentNode);
+                    // _focusNode(context, currentNode);
                   },
                   onChanged: (value){
-                    print('Text: $value');
+                    _controllerEventListener(index, _controller, typeController);
                   },
                 ),
               ),
@@ -282,13 +328,13 @@ class DispatchNoteState extends State<DispatchNote> {
         );
     }
 
-    Widget statusBar(bool matched) {
+    Widget statusBar(int index) {
       return Row(children: <Widget>[
         Expanded(
             flex: 5,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 2),
-              child: matched ? new Icon(
+              child: matchList[index] ? new Icon(
                 EvaIcons.checkmarkCircleOutline,
                 size: 30,
                 color: Colors.green,
@@ -314,7 +360,7 @@ class DispatchNoteState extends State<DispatchNote> {
               ),
               child: Center(
                 child: Text(
-                  '60',// counter.toString(),
+                  counterList[index].toString(),// counter.toString(),
                   style: TextStyle(
                     fontSize: 24,
                   ),
@@ -404,8 +450,7 @@ class DispatchNoteState extends State<DispatchNote> {
     
     String time = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
     
-    Widget createWidget(BuildContext context) {
-      return GestureDetector(
+    return GestureDetector(
         onTap: () {
           FocusScope.of(context).requestFocus(new FocusNode());
         },
@@ -418,8 +463,6 @@ class DispatchNoteState extends State<DispatchNote> {
               _mainInput('Number of item',_numberOfScanController, _numberNode),
               SizedBox(height: 15,),
               new Expanded(
-                child: RefreshIndicator(
-                  key: refreshKey,
                   child: new ListView.builder(
                     itemCount: _masterControllers?.length,
                     itemBuilder: (BuildContext context, int index) {
@@ -432,13 +475,13 @@ class DispatchNoteState extends State<DispatchNote> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
                                   Text('Item: $index'),
-                                  _scannerInput(index.toString(), _masterControllers[index], _masterFocusNodes[index], index),
-                                  _scannerInput(index.toString(), _productControllers[index], _productFocusNodes[index], index),
+                                  _scannerInput('master', _masterControllers[index], _masterFocusNodes[index], index),
+                                  _scannerInput('product', _productControllers[index], _productFocusNodes[index], index),
                                 ],
                               ),
                             ),
                             Expanded(
-                              child: statusBar(true),
+                              child: statusBar(index),
                             ),
                           ],
                         ),
@@ -446,8 +489,6 @@ class DispatchNoteState extends State<DispatchNote> {
                     },
                     
                   ),
-                  onRefresh: _refreshList,
-                ),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -464,13 +505,6 @@ class DispatchNoteState extends State<DispatchNote> {
           ),
         ),
       );
-    }
-
-    if(_form == null) {
-      _form = createWidget(context);
-    }
-
-    return _form;
   }
 }
 
@@ -488,3 +522,11 @@ _setNumberItems(int val) async {
   prefs.setInt(key, val);
   print('Items set to $val');
 }
+
+  _onBasicAlertPressed() {
+    Alert(
+            context: null,
+            title: "RFLUTTER ALERT",
+            desc: "Flutter is more awesome with RFlutter Alert.")
+        .show();
+  }
