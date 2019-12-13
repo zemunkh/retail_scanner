@@ -151,16 +151,19 @@ class StockInState extends State<StockIn> {
             child: TextFormField(
               style: TextStyle(
                 fontSize: 22, 
-                color: Colors.white,
+                color: Color(0xFF004B83),
                 fontWeight: FontWeight.bold,
               ),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Color(0xFF004B83),
+                fillColor: Colors.white,
                 hintText: hintext,
                 hintStyle: TextStyle(
-                  color: Colors.white, 
+                  color: Color(0xFF004B83), 
                   fontWeight: FontWeight.w200,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5.0),
                 ),
               ),
               autofocus: true,
@@ -178,7 +181,7 @@ class StockInState extends State<StockIn> {
                 _productController.clear();
               }
             },
-            child: Icon(EvaIcons.refresh, color: Colors.white, size: 30,),
+            child: Container(padding: EdgeInsets.only(bottom: 16),child: Icon(EvaIcons.refresh, color: Color(0xFF004B83), size: 30,)),
           ),
         ],
       );

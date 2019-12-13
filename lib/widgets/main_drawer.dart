@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
-import 'package:retail_scanner/screens/printer_screen.dart';
-import 'package:retail_scanner/screens/record_saved_screen.dart';
+import 'package:retail_scanner/screens/home_screen.dart';
 
+import '../screens/printer_screen.dart';
+import '../screens/dispatch_saved_screen.dart';
 import '../screens/draft_screen.dart';
-import '../screens/saved_screen.dart';
+import '../screens/stock_saved_screen.dart';
 
 class MainDrawer extends StatelessWidget {
 
@@ -52,7 +53,7 @@ class MainDrawer extends StatelessWidget {
             'Home', 
             EvaIcons.home,
             () {
-              Navigator.of(context).pushReplacementNamed('/');
+              Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
             }
           ),
           SizedBox(height: 20,),
@@ -60,7 +61,7 @@ class MainDrawer extends StatelessWidget {
             'Stock Saved', 
             EvaIcons.checkmarkCircle,
             () {
-              Navigator.of(context).pushReplacementNamed(SavedScreen.routeName);
+              Navigator.of(context).pushReplacementNamed(StockSavedScreen.routeName);
             }
           ),
           SizedBox(height: 20,),
@@ -68,7 +69,7 @@ class MainDrawer extends StatelessWidget {
             'Dispatch Saved', 
             EvaIcons.carOutline,
             () {
-              Navigator.of(context).pushReplacementNamed(RecordSavedScreen.routeName);
+              Navigator.of(context).pushReplacementNamed(DispatchSavedScreen.routeName);
             }
           ),          
           buildListTile(

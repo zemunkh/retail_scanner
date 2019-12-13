@@ -2,25 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../widgets/main_drawer.dart';
-import '../widgets/saved_file_item.dart';
+import '../widgets/stock_saved_file_item.dart';
 
   _getFilesList() async {
     final prefs = await SharedPreferences.getInstance();
-    final key = 'files_list';
+    final key = 'stock_files';
     List<String> files = prefs.getStringList(key);
     print('Files List: $files');
     return files;
   }
 
-class SavedScreen extends StatelessWidget {
-  static const routeName = '/saved';
+class StockSavedScreen extends StatelessWidget {
+  static const routeName = '/stock_saved';
 
   @override
   Widget build(BuildContext context) {
     // final fileData = Provider.of<Files>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Saved Page'),
+        title: Text('Stock Saved Page'),
       ),
       drawer: MainDrawer(),
       body: Container(

@@ -1,17 +1,17 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:retail_scanner/screens/saved_screen.dart';
 import 'package:share_extend/share_extend.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:retail_scanner/screens/dispatch_saved_screen.dart';
 
 
-class SavedFileItem extends StatelessWidget {
+class DispatchSavedFileItem extends StatelessWidget {
   final String filename;
   final int index;
 
-  SavedFileItem(this.filename, this.index);
+  DispatchSavedFileItem(this.filename, this.index);
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class SavedFileItem extends StatelessWidget {
               icon: Icon(EvaIcons.trash2Outline),
               onPressed: () {
                 _deleteFile(filename, index);
-                Navigator.of(context).pushReplacementNamed(SavedScreen.routeName);
+                Navigator.of(context).pushReplacementNamed(DispatchSavedScreen.routeName);
               },
               color: Theme.of(context).errorColor,
             ),
@@ -59,7 +59,7 @@ class SavedFileItem extends StatelessWidget {
     File currentFile = File("${dir.path}/$filename");
 
     final prefs = await SharedPreferences.getInstance();
-    final key = 'files_list';
+    final key = 'dispatch_files';
     List<String> files = prefs.getStringList(key);
     if(prefs != null) {
       files.removeAt(index);

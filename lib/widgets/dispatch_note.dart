@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
-
 
 
 class DispatchNote extends StatefulWidget {
@@ -24,6 +22,7 @@ class DispatchNoteState extends State<DispatchNote> {
   final _dispatchNode = FocusNode();
   final _numberNode = FocusNode();
 
+  bool lockEn = false;
   // final GlobalKey<ListView> _listKey = GlobalKey();
 
   // var refreshKey = GlobalKey<RefreshIndicatorState>();
@@ -51,6 +50,7 @@ class DispatchNoteState extends State<DispatchNote> {
 
   String buffer = '';
   String trueVal = '';
+  String createdAt = '';
 
 
   Future<Null> _dipatchNoListener() async {
@@ -198,7 +198,9 @@ class DispatchNoteState extends State<DispatchNote> {
 
   @override 
   Widget build(BuildContext context) {
-    
+
+    String createdAt = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
+
     Widget _mainInput(String header, TextEditingController _mainController, FocusNode _mainNode) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -289,6 +291,7 @@ class DispatchNoteState extends State<DispatchNote> {
                     color: Color(0xFF004B83),
                     fontWeight: FontWeight.bold,
                   ),
+                  enabled: lockEn,
                   decoration: InputDecoration.collapsed(
                     filled: true,
                     fillColor: Colors.white,
@@ -391,6 +394,18 @@ class DispatchNoteState extends State<DispatchNote> {
         child: MaterialButton(
           onPressed: () {
             print('I am pressed');
+            String currentTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
+            List<String> draftList = [];
+            int len = _masterControllers.length;
+            if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
+              for(int i = 0; i < _masterControllers.length; i++) {
+                String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime';
+
+              }
+            }
+
+            
+            // _setDraftValues(i, draftList);
           },
           child: Text(
             'Print & Ok',
@@ -417,6 +432,24 @@ class DispatchNoteState extends State<DispatchNote> {
         child: MaterialButton(
           onPressed: () {
             print('I am pressed');
+            setState(() {
+              lockEn = !lockEn;
+            });
+
+            String currentTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
+            List<String> draftList = [];
+            int len = _masterControllers.length;
+            if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
+              for(int i = 0; i < _masterControllers.length; i++) {
+                String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime';
+                draftList.add(buff);
+              }
+            }
+
+            // Save data to the 20191213.csv as data
+
+            // Sent a request to print with captured data
+
           },
           child: Text(
             'Save as Draft',
@@ -448,7 +481,7 @@ class DispatchNoteState extends State<DispatchNote> {
     // }
 
     
-    String time = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
+
     
     return GestureDetector(
         onTap: () {
@@ -457,7 +490,7 @@ class DispatchNoteState extends State<DispatchNote> {
         child: Container(
           child: Column(
             children: <Widget>[
-              dateTime(time),
+              // dateTime(time),
 
               _mainInput('Dispatch Number',_dispatchNoController, _dispatchNode),
               _mainInput('Number of item',_numberOfScanController, _numberNode),
@@ -523,10 +556,17 @@ _setNumberItems(int val) async {
   print('Items set to $val');
 }
 
-  _onBasicAlertPressed() {
-    Alert(
-            context: null,
-            title: "RFLUTTER ALERT",
-            desc: "Flutter is more awesome with RFlutter Alert.")
-        .show();
-  }
+
+_setDraftValues(String id, List<String> values) async {
+  final prefs = await SharedPreferences.getInstance();
+  final key = 'draft_#$id';
+  prefs.setStringList(key, values);
+  print('Draft List: $values');
+}
+  // _onBasicAlertPressed() {
+  //   Alert(
+  //           context: null,
+  //           title: "RFLUTTER ALERT",
+  //           desc: "Flutter is more awesome with RFlutter Alert.")
+  //       .show();
+  // }
