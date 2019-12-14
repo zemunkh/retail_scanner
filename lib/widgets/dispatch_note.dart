@@ -183,18 +183,11 @@ class DispatchNoteState extends State<DispatchNote> {
     String createdAt = DateFormat("yyyyMMdd").format(createdDate);
     List<String> draftList = [];
     int len = _masterControllers.length;
-
-    List<String> _masterList = [];
-    List<String> _productList = [];
-    List<String> _counterList = [];  // Matched Counter Value
     
     if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
       for(int i = 0; i < len; i++) {
         String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime\r\n';
         draftList.add(buff);
-        _masterList.add(_masterControllers[i].text);
-        _productList.add(_productControllers[i].text);
-        _counterList.add(counterList[i].toString());
       }
     }
     print('List Data: $draftList');
@@ -202,9 +195,44 @@ class DispatchNoteState extends State<DispatchNote> {
     // prepare the passing value
 
     // start print operation
-
     // printNote.sample(createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
   }
+
+
+  Future<Null> _saveTheDraft(DateTime createdDate) async {
+
+    String draftedTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
+    String createdAt = DateFormat("yyyyMMdd").format(createdDate);
+    int len = _masterControllers.length;
+
+    List<String> _masterList = [];
+    List<String> _productList = [];
+    List<String> _counterList = [];  // Matched Counter Value
+    List<String> _otherList = [];
+    
+    if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
+      for(int i = 0; i < len; i++) {
+        _masterList.add(_masterControllers[i].text);
+        _productList.add(_productControllers[i].text);
+        _counterList.add(counterList[i].toString());
+      }
+    }
+
+    _otherList.add(createdAt);
+    _otherList.add(_dispatchNoController.text);
+    _otherList.add(_numberOfScanController.text);
+    _otherList.add(draftedTime);
+
+    // save the List to Shared Prefs
+    // master_list, product_list, counter_list
+    FileManager.saveDraft('draft_master_list', _masterList);
+    FileManager.saveDraft('draft_product_list', _productList);
+    FileManager.saveDraft('draft_counter_list', _counterList);
+    FileManager.saveDraft('draft_other_list', _otherList);
+
+  }
+
+
 
   @override
   void dispose() {
@@ -403,22 +431,27 @@ class DispatchNoteState extends State<DispatchNote> {
       );
     }
 
-    Widget _saveDraftButton() {
+    Widget _saveDraftButton(BuildContext context) {
       return Padding(
         padding: EdgeInsets.all(10),
         child: MaterialButton(
           onPressed: _isButtonDisabled ? null : () {
             print('You pressed Draft Button!');
-            _saveAndPrint(createdDate).then((_){
+            _saveTheDraft(createdDate).then((_){
               setState(() {
                 lockEn = false;
               });
+
+              Scaffold.of(context).showSnackBar(SnackBar(
+                content: new Text("Draft Saved!", textAlign: TextAlign.center,),
+                duration: const Duration(milliseconds: 500)
+              ));
             });
             
             // _setDraftValues(i, draftList);
           },
           child: Text(
-            'Print & Ok',
+            'Save as Draft',
             style: TextStyle(
               color: Colors.white,
               fontFamily: 'QuickSand',
@@ -436,7 +469,7 @@ class DispatchNoteState extends State<DispatchNote> {
       );
     } 
 
-    Widget _printAndOkButton() {
+    Widget _printAndOkButton(BuildContext context) {
       return Padding(
         padding: EdgeInsets.all(10),
         child: MaterialButton(
@@ -447,10 +480,14 @@ class DispatchNoteState extends State<DispatchNote> {
               setState(() {
                 lockEn = false;
               });
+              Scaffold.of(context).showSnackBar(SnackBar(
+                content: new Text("Saved! Now Printing", textAlign: TextAlign.center,),
+                duration: const Duration(milliseconds: 500)
+              ));
             });
           },
           child: Text(
-            'Save as Draft',
+            'Print & Ok',
             style: TextStyle(
               color: Colors.white,
               fontFamily: 'QuickSand',
@@ -513,10 +550,10 @@ class DispatchNoteState extends State<DispatchNote> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Expanded(
-                    child: _saveDraftButton(),
+                    child: _saveDraftButton(context),
                   ),
                   Expanded(
-                    child: _printAndOkButton(),
+                    child: _printAndOkButton(context),
                   )
                 ],
               ),
@@ -528,31 +565,9 @@ class DispatchNoteState extends State<DispatchNote> {
 }
 
 
-_getNumItems() async {
-  final prefs = await SharedPreferences.getInstance();
-  final key = 'number_items';
-  int num_items = prefs.getInt(key);
-  return num_items;
-}
-
 _setNumberItems(int val) async {
   final prefs = await SharedPreferences.getInstance();
   final key = 'number_items';
   prefs.setInt(key, val);
   print('Items set to $val');
 }
-
-
-_setDraftValues(String id, List<String> values) async {
-  final prefs = await SharedPreferences.getInstance();
-  final key = 'draft_#$id';
-  prefs.setStringList(key, values);
-  print('Draft List: $values');
-}
-  // _onBasicAlertPressed() {
-  //   Alert(
-  //           context: null,
-  //           title: "RFLUTTER ALERT",
-  //           desc: "Flutter is more awesome with RFlutter Alert.")
-  //       .show();
-  // }

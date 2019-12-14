@@ -12,7 +12,7 @@ import '../widgets/main_drawer.dart';
 
 class PrinterScreen extends StatefulWidget {
   static const routeName = '/printer_screen';
-
+  @override
   _PrinterScreenState createState() => _PrinterScreenState();
 }
 
@@ -115,7 +115,7 @@ class _PrinterScreenState extends State<PrinterScreen> {
         ),
       );
     }
-   
+
 
     return Scaffold(
       appBar: AppBar(

@@ -83,7 +83,24 @@ class FileManager {
       newLine = _valuesList[i];
       file.writeAsStringSync(content + newLine);
     }
-
     print(content);
+  }
+
+  static Future<Null> saveDraft(String key, List<String> list) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setStringList(key, list);
+  }
+
+    
+  static Future<Null> readDraft(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> draftedList = prefs.getStringList(key);
+
+    return draftedList;
+  }
+
+  static Future<Null> removeDraft(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove(key);
   }
 }
