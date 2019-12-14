@@ -11,7 +11,7 @@ import '../widgets/main_drawer.dart';
 
 
 class PrinterScreen extends StatefulWidget {
-  static const routeName = '/printer';
+  static const routeName = '/printer_screen';
 
   _PrinterScreenState createState() => _PrinterScreenState();
 }
@@ -25,13 +25,6 @@ class _PrinterScreenState extends State<PrinterScreen> {
   String pathImage;
   TestPrint testPrint;
 
-
-  @override
-  void dispose() {
-    super.dispose();
-    initPlatformState();
-    initSavetoPath();
-  }
 
   @override
   void initState() {
@@ -96,71 +89,91 @@ class _PrinterScreenState extends State<PrinterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Blue Thermal Printer'),
+
+    Widget _myButton (String name, Color _color, double _width){
+      return Padding(
+        padding: EdgeInsets.all(10),
+          child: MaterialButton(
+          onPressed: () {
+            testPrint.sample(pathImage);
+          },
+          child: Text(
+            name,
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'QuickSand',
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
+          shape: StadiumBorder(),
+          color: _color,
+          splashColor: Colors.teal,
+          height: 55,
+          minWidth: _width,
+          elevation: 2,
         ),
-        drawer: MainDrawer(),
-        body: Container(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ListView(
-              children: <Widget>[
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    SizedBox(width: 10,),
-                    Text(
-                      'Device:',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
+      );
+    }
+   
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Bluetooth Printer'),
+      ),
+      drawer: MainDrawer(),
+      body: Container(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ListView(
+            children: <Widget>[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  SizedBox(width: 10,),
+                  Text(
+                    'Device:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
                     ),
-                    SizedBox(width: 30,),
-                    Expanded(
-                      child: DropdownButton(
-                        items: _getDeviceItems(),
-                        onChanged: (value) => setState(() => _device = value),
-                        value: _device,
-                      ),
+                  ),
+                  SizedBox(width: 30,),
+                  Expanded(
+                    child: DropdownButton(
+                      items: _getDeviceItems(),
+                      onChanged: (value) => setState(() => _device = value),
+                      value: _device,
                     ),
-                  ],
-                ),
-                SizedBox(height: 10,),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    RaisedButton(
-                      color: Colors.brown,
-                      onPressed:(){
-                        initPlatformState();
-                      },
-                      child: Text('Refresh', style: TextStyle(color: Colors.white),),
-                    ),
-                    SizedBox(width: 20,),
-                    RaisedButton(
-                      color: _connected ?Colors.red:Colors.green,
-                      onPressed:
-                      _connected ? _disconnect : _connect,
-                      child: Text(_connected ? 'Disconnect' : 'Connect', style: TextStyle(color: Colors.white),),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 10.0, right: 10.0, top: 50),
-                  child:  RaisedButton(
+                  ),
+                ],
+              ),
+              SizedBox(height: 10,),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  FlatButton(
                     color: Colors.brown,
                     onPressed:(){
-                      testPrint.sample(pathImage);
+                      initPlatformState();
                     },
-                    child: Text('PRINT TEST', style: TextStyle(color: Colors.white)),
+                    child: Text('Refresh', style: TextStyle(color: Colors.white),),
                   ),
-                ),
-              ],
-            ),
+                  SizedBox(width: 20,),
+                  FlatButton(
+                    color: _connected ?Colors.red:Colors.green,
+                    onPressed:
+                    _connected ? _disconnect : _connect,
+                    child: Text(_connected ? 'Disconnect' : 'Connect', style: TextStyle(color: Colors.white),),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10.0, right: 10.0, top: 50),
+                child: _myButton('Print Test', Colors.blue, 350),
+              ),
+            ],
           ),
         ),
       ),

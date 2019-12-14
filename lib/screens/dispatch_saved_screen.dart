@@ -4,13 +4,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/main_drawer.dart';
 import '../widgets/dispatch_saved_file_item.dart';
 
-  _getFilesList() async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'dispatch_files';
-    List<String> files = prefs.getStringList(key);
-    print('Files List: $files');
-    return files;
-  }
+_getFilesList() async {
+  final prefs = await SharedPreferences.getInstance();
+  final key = 'dispatch_files';
+  List<String> files = prefs.getStringList(key);
+  print('Dispatch Files List: $files');
+  return files;
+}
 
 class DispatchSavedScreen extends StatelessWidget {
   static const routeName = '/dispatch_saved';

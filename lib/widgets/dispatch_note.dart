@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:retail_scanner/helper/file_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
@@ -23,12 +24,10 @@ class DispatchNoteState extends State<DispatchNote> {
   final _numberNode = FocusNode();
 
   bool lockEn = true;
+  bool _isButtonDisabled = true;
 
-  final _mainFormKey = GlobalKey<FormFieldState>();
+  final _mainFormKey = GlobalKey<FormState>();
   final _scannerFormKey = GlobalKey<FormFieldState>(); 
-  // final GlobalKey<ListView> _listKey = GlobalKey();
-
-  // var refreshKey = GlobalKey<RefreshIndicatorState>();
 
   // Widget _form;
   List<bool> matchList = [true, true, true, true, true, true, true, true];
@@ -53,7 +52,6 @@ class DispatchNoteState extends State<DispatchNote> {
 
   String buffer = '';
   String trueVal = '';
-  String createdAt = '';
 
 
   Future<Null> _dipatchNoListener() async {
@@ -79,6 +77,10 @@ class DispatchNoteState extends State<DispatchNote> {
       buffer = buffer.substring(0, buffer.length - 1);
       trueVal = buffer;
 
+      if(_dispatchNoController.text != null) {
+          _isButtonDisabled = false;
+      }
+
       await Future.delayed(const Duration(milliseconds: 1000), (){
         _numberOfScanController.text = trueVal;
       }).then((value){
@@ -100,6 +102,9 @@ class DispatchNoteState extends State<DispatchNote> {
                 _masterFocusNodes.add(new FocusNode());
                 _productFocusNodes.add(new FocusNode());
               }
+              if(_dispatchNoController.text != null) {
+                _isButtonDisabled = false;
+              }
             });
           } else {
             print('Wrong request!');
@@ -115,19 +120,6 @@ class DispatchNoteState extends State<DispatchNote> {
     }
   }
 
-  // Future<List> _getList() async {
-  //   int number = await _getNumItems();
-  //   print('Saved Item N: $number');
-
-  //   for(int i = 0; i < number; i++) {
-  //     _masterControllers.add(new TextEditingController());
-  //     _productControllers.add(new TextEditingController());
-
-  //     _masterFocusNodes.add(new FocusNode());
-  //     _productFocusNodes.add(new FocusNode());
-  //   }
-  //   return _masterControllers;
-  // }
 
   Future<Null> _focusNode(BuildContext context, FocusNode node) async {
     FocusScope.of(context).requestFocus(node);
@@ -185,6 +177,35 @@ class DispatchNoteState extends State<DispatchNote> {
       }
   }
 
+  Future<Null> _saveAndPrint(DateTime createdDate) async {
+
+    String currentTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
+    String createdAt = DateFormat("yyyyMMdd").format(createdDate);
+    List<String> draftList = [];
+    int len = _masterControllers.length;
+
+    List<String> _masterList = [];
+    List<String> _productList = [];
+    List<String> _counterList = [];  // Matched Counter Value
+    
+    if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
+      for(int i = 0; i < len; i++) {
+        String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime\r\n';
+        draftList.add(buff);
+        _masterList.add(_masterControllers[i].text);
+        _productList.add(_productControllers[i].text);
+        _counterList.add(counterList[i].toString());
+      }
+    }
+    print('List Data: $draftList');
+    FileManager.saveDispatchData(createdAt, draftList);
+    // prepare the passing value
+
+    // start print operation
+
+    // printNote.sample(createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -202,7 +223,7 @@ class DispatchNoteState extends State<DispatchNote> {
   @override 
   Widget build(BuildContext context) {
 
-    String createdAt = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
+    DateTime createdDate = DateTime.now();
 
     Widget _mainInput(String header, TextEditingController _mainController, FocusNode _mainNode) {
       return Row(
@@ -307,15 +328,6 @@ class DispatchNoteState extends State<DispatchNote> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5.0),
                     ),
-                    // suffixIcon: IconButton(
-                    //   icon: Icon(EvaIcons.close, 
-                    //     color: Colors.blueAccent, 
-                    //     size: 32,
-                    //   ),
-                    //   onPressed: () {
-                    //     _clearTextController(context, _controller, currentNode);
-                    //   },
-                    // ),
                   ),
                   autofocus: true,
                   controller: _controller,
@@ -395,18 +407,13 @@ class DispatchNoteState extends State<DispatchNote> {
       return Padding(
         padding: EdgeInsets.all(10),
         child: MaterialButton(
-          onPressed: () {
-            print('I am pressed');
-            String currentTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
-            List<String> draftList = [];
-            int len = _masterControllers.length;
-            if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
-              for(int i = 0; i < _masterControllers.length; i++) {
-                String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime';
-
-              }
-            }
-
+          onPressed: _isButtonDisabled ? null : () {
+            print('You pressed Draft Button!');
+            _saveAndPrint(createdDate).then((_){
+              setState(() {
+                lockEn = false;
+              });
+            });
             
             // _setDraftValues(i, draftList);
           },
@@ -433,26 +440,14 @@ class DispatchNoteState extends State<DispatchNote> {
       return Padding(
         padding: EdgeInsets.all(10),
         child: MaterialButton(
-          onPressed: () {
-            print('I am pressed');
-            setState(() {
-              lockEn = !lockEn;
+          onPressed: _isButtonDisabled ? null : () {
+            print('You pressed Save and Print Button!');
+
+            _saveAndPrint(createdDate).then((_){
+              setState(() {
+                lockEn = false;
+              });
             });
-
-            String currentTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
-            List<String> draftList = [];
-            int len = _masterControllers.length;
-            if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
-              for(int i = 0; i < _masterControllers.length; i++) {
-                String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime';
-                draftList.add(buff);
-              }
-            }
-
-            // Save data to the 20191213.csv as data
-
-            // Sent a request to print with captured data
-
           },
           child: Text(
             'Save as Draft',
@@ -472,19 +467,7 @@ class DispatchNoteState extends State<DispatchNote> {
         )
       );
     }  
-
-    // _getTextFieldList()
-
-    // if(_masterControllers.length == 0) {
-    //   _masterControllers.add(new TextEditingController());
-    //   _productControllers.add(new TextEditingController());
-
-    //   _masterFocusNodes.add(new FocusNode());
-    //   _productFocusNodes.add(new FocusNode());
-    // }
-
     
-
     
     return GestureDetector(
         onTap: () {
@@ -493,7 +476,7 @@ class DispatchNoteState extends State<DispatchNote> {
         child: Container(
           child: Column(
             children: <Widget>[
-              dateTime(createdAt),
+              dateTime(DateFormat("yyyy/MM/dd HH:mm:ss").format(createdDate)),
 
               _mainInput('Dispatch Number',_dispatchNoController, _dispatchNode),
               _mainInput('Number of item',_numberOfScanController, _numberNode),

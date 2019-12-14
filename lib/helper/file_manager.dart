@@ -5,18 +5,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 _saveFilename(String key, String fname) async {
   final prefs = await SharedPreferences.getInstance();
-  final filename = fname;
   List<String> files = prefs.getStringList(key);
   if(files == null || files.isEmpty) {
-    files = [filename];
+    files = [fname];
     prefs.setStringList(key, files);
   } else {
-    if(files[files.length - 1] != filename) {
-      files.add(filename);
+    if(files[files.length - 1] != fname) {
+      files.add(fname);
       prefs.setStringList(key, files);
     }
   }
-  
+
   print('Files List: $files');
 }
 
@@ -24,9 +23,10 @@ _saveFilename(String key, String fname) async {
 class FileManager {
   static get context => null;
 
-  static void saveDispatchData(String createdAt, String dispatchNum, String totalItem, String masterCode, String productCode, String mCounter, String completedDate) {
-    writeToDispatchCsv(createdAt, dispatchNum, totalItem, masterCode, productCode, mCounter, completedDate).then((_){
-      _saveFilename('dispatch_files', '$createdAt.csv');
+  static void saveDispatchData(String _createdAt, List<String> _valuesList) {
+
+    writeToDispatchCsv(_createdAt, _valuesList).then((_){
+      _saveFilename('dispatch_files', 'dispatch_$_createdAt.csv');
     });
   }
 
@@ -38,7 +38,7 @@ class FileManager {
     String matching = matched ? 'matched' : 'unmatched';
 
     writeToStockCsv(filename, time, masterCode, productCode, counter, matching).then((_){
-      _saveFilename('stock_files', '$filename.csv');
+      _saveFilename('stock_files', 'stock_$filename.csv');
     });
   }
 
@@ -65,7 +65,7 @@ class FileManager {
 
   static Future<Null> writeToStockCsv(String filename, String time, String key1, String key2, int counter, String matching) async {
     final file = await getCsvFile(filename);
-    
+
     // String countedValue = await getCounter(filename, key);
     String newData = '$time, $key1, $key2, ${counter.toString()}, $matching \r\n';
 
@@ -74,12 +74,16 @@ class FileManager {
     print(content);
   }
 
-  static Future<Null> writeToDispatchCsv(String createdAt, String dispatchNum, String totalItem, String masterCode, String productCode, String mCounter, String completedDate) async {
-    final file = await getCsvFile('$createdAt.csv');
-    String newData = '$createdAt, $dispatchNum, $totalItem, $masterCode, $productCode, $mCounter, $completedDate';
+  static Future<Null> writeToDispatchCsv(String createdAt, List<String> _valuesList) async {
+    final file = await getCsvFile('$createdAt');
+    String content = '';
+    String newLine = '';
+    for(int i = 0; i < _valuesList.length; i++){
+      content = file.readAsStringSync();
+      newLine = _valuesList[i];
+      file.writeAsStringSync(content + newLine);
+    }
 
-    String content = file.readAsStringSync();
-    file.writeAsStringSync(content + newData);
     print(content);
   }
 }

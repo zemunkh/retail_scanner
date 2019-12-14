@@ -48,6 +48,8 @@ flutter_icons:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
+module:
+  androidX: true
 # The following section is specific to Flutter.
 flutter:
 

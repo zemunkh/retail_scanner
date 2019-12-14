@@ -56,7 +56,6 @@ class MainDrawer extends StatelessWidget {
               Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
             }
           ),
-          SizedBox(height: 20,),
           buildListTile(
             'Stock Saved', 
             EvaIcons.checkmarkCircle,
@@ -64,7 +63,6 @@ class MainDrawer extends StatelessWidget {
               Navigator.of(context).pushReplacementNamed(StockSavedScreen.routeName);
             }
           ),
-          SizedBox(height: 20,),
           buildListTile(
             'Dispatch Saved', 
             EvaIcons.carOutline,
@@ -79,8 +77,6 @@ class MainDrawer extends StatelessWidget {
               Navigator.of(context).pushReplacementNamed(DraftScreen.routeName);
             }
           ),
-
-          SizedBox(height: 20,),
 
           buildListTile(
             'Printer', 
