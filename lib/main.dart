@@ -11,11 +11,12 @@ import './screens/home_screen.dart';
 bool activated = false;
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   try {
     activated = await _read();
     runApp(MyApp());
   } catch(error) {
-    print('Checking Activation Status');
+    print('Activation Status error: $error');
   }
 }
 

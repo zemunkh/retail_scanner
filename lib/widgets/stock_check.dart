@@ -16,7 +16,9 @@ class StockInState extends State<StockIn> {
   final FocusNode _masterNode = FocusNode();
   final FocusNode _productNode = FocusNode();
 
-  bool matched = false;
+  final _formKey = GlobalKey<FormFieldState>();
+
+  bool matched = true;
   bool oneToMany = true;
   var counter = 0;
 
@@ -30,9 +32,6 @@ class StockInState extends State<StockIn> {
       if(masterCode == productCode) {
         matched = true;
         counter++;
-        if(oneToMany) {
-          _productController.clear();
-        } 
       } else {
         matched = false;
       }
@@ -192,7 +191,7 @@ class StockInState extends State<StockIn> {
       children: <Widget>[
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 10),
-          child: matched? new Icon(
+          child: matched ? new Icon(
             EvaIcons.checkmarkCircleOutline,
             size: 80,
             color: Colors.green,
@@ -253,30 +252,33 @@ class StockInState extends State<StockIn> {
       onTap: () {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
-      child: ListView(
-        padding: const EdgeInsets.all(8),
-        children: <Widget>[
-            statusBar,
+      child: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(8),
+          children: <Widget>[
+              statusBar,
 
-            _titleWidget('Barcode #1'),
-            SizedBox(height: 10,),
-            _scannerInput(
-              'Master key',
-              _masterController,
-              _masterNode,
-            ),
+              _titleWidget('Barcode #1'),
+              SizedBox(height: 10,),
+              _scannerInput(
+                'Master key',
+                _masterController,
+                _masterNode,
+              ),
 
-            _titleWidget('Barcode #2'),
-            SizedBox(height: 10,),
-            _scannerInput(
-              'Product key',
-              _productController,
-              _productNode,
-            ),        
+              _titleWidget('Barcode #2'),
+              SizedBox(height: 10,),
+              _scannerInput(
+                'Product key',
+                _productController,
+                _productNode,
+              ),        
 
-            SizedBox(height: 20,),
-            switchButton,
-          ],
+              SizedBox(height: 20,),
+              switchButton,
+            ],
+        ),
       ),
     );
   } 

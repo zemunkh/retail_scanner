@@ -22,7 +22,10 @@ class DispatchNoteState extends State<DispatchNote> {
   final _dispatchNode = FocusNode();
   final _numberNode = FocusNode();
 
-  bool lockEn = false;
+  bool lockEn = true;
+
+  final _mainFormKey = GlobalKey<FormFieldState>();
+  final _scannerFormKey = GlobalKey<FormFieldState>(); 
   // final GlobalKey<ListView> _listKey = GlobalKey();
 
   // var refreshKey = GlobalKey<RefreshIndicatorState>();
@@ -490,7 +493,7 @@ class DispatchNoteState extends State<DispatchNote> {
         child: Container(
           child: Column(
             children: <Widget>[
-              // dateTime(time),
+              dateTime(createdAt),
 
               _mainInput('Dispatch Number',_dispatchNoController, _dispatchNode),
               _mainInput('Number of item',_numberOfScanController, _numberNode),

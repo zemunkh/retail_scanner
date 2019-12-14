@@ -25,6 +25,14 @@ class _PrinterScreenState extends State<PrinterScreen> {
   String pathImage;
   TestPrint testPrint;
 
+
+  @override
+  void dispose() {
+    super.dispose();
+    initPlatformState();
+    initSavetoPath();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +60,7 @@ class _PrinterScreenState extends State<PrinterScreen> {
     try {
       devices = await bluetooth.getBondedDevices();
     } on PlatformException {
+      devices = null;
       // TODO - Error
     }
 
