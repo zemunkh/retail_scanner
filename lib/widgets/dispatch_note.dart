@@ -149,9 +149,13 @@ class DispatchNoteState extends State<DispatchNote> {
         if(_typeController == 'master') {
           print('I am master!');
           _masterFocusNodes[index].unfocus();
+          _productControllers[index].text = '';
         } else if(_typeController == 'product') {
           print('I am product!');
           _productFocusNodes[index].unfocus();
+          if(index < length - 1) {
+            _masterControllers[index + 1].text = '';
+          }
           _compareData(trueVal, index);
         } else {
           print('Nothing to do');
@@ -425,7 +429,7 @@ class DispatchNoteState extends State<DispatchNote> {
         style: TextStyle(
           fontFamily: 'QuickSand',
           fontWeight: FontWeight.bold,
-          fontSize: 30,
+          fontSize: 14,
           color: Colors.black,
         ),
       );
@@ -433,7 +437,7 @@ class DispatchNoteState extends State<DispatchNote> {
 
     Widget _saveDraftButton(BuildContext context) {
       return Padding(
-        padding: EdgeInsets.all(10),
+        padding: EdgeInsets.all(5),
         child: MaterialButton(
           onPressed: _isButtonDisabled ? null : () {
             print('You pressed Draft Button!');
@@ -515,8 +519,8 @@ class DispatchNoteState extends State<DispatchNote> {
             children: <Widget>[
               dateTime(DateFormat("yyyy/MM/dd HH:mm:ss").format(createdDate)),
 
-              _mainInput('Dispatch Number',_dispatchNoController, _dispatchNode),
-              _mainInput('Number of item',_numberOfScanController, _numberNode),
+              _mainInput('Dispatch No:',_dispatchNoController, _dispatchNode),
+              _mainInput('Total Items:',_numberOfScanController, _numberNode),
               SizedBox(height: 15,),
               new Expanded(
                   child: new ListView.builder(

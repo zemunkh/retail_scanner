@@ -6,7 +6,9 @@ enum NavBarItem { STOCKIN, DISPATCHNOTE }
 class BottomNavBarBlock {
   final StreamController<NavBarItem> _navBarController = StreamController<NavBarItem>.broadcast();
 
-  NavBarItem defaultItem = NavBarItem.STOCKIN;
+  // NavBarItem firstItem = NavBarItem.STOCKIN;
+  NavBarItem defaultItem = NavBarItem.DISPATCHNOTE;
+  // NavBarItem secondItem = NavBarItem.DISPATCHNOTE;
 
   Stream<NavBarItem> get itemStream => _navBarController.stream;
 

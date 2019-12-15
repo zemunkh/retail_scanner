@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
+import 'package:retail_scanner/model/screen_arguments.dart';
 import 'package:retail_scanner/screens/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../screens/printer_screen.dart';
 import '../screens/dispatch_saved_screen.dart';
@@ -19,7 +21,7 @@ class MainDrawer extends StatelessWidget {
         title,
         style: TextStyle(
           fontFamily: 'RobotoCondensed',
-          fontSize: 24,
+          fontSize: 16,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -50,10 +52,19 @@ class MainDrawer extends StatelessWidget {
           ),
           SizedBox(height: 20,),
           buildListTile(
-            'Home', 
+            'Home: Stock Check', 
             EvaIcons.home,
             () {
               Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+              _setNavbarItem(true);
+            }
+          ),
+          buildListTile(
+            'Home: Dispatch Note', 
+            EvaIcons.home,
+            () {
+              Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+              _setNavbarItem(false);
             }
           ),
           buildListTile(
@@ -89,4 +100,11 @@ class MainDrawer extends StatelessWidget {
       ),
     );
   }
+}
+
+_setNavbarItem(bool val) async {
+  final prefs = await SharedPreferences.getInstance();
+  final key = 'main_navbar_stock';
+  prefs.setBool(key, val);
+  print('Main navbar Stock: $val');
 }

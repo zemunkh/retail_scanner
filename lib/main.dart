@@ -14,6 +14,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     activated = await _read();
+     _setNavbarItem(true);
     runApp(MyApp());
   } catch(error) {
     print('Activation Status error: $error');
@@ -21,6 +22,7 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
+ 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -78,4 +80,11 @@ _read() async {
   print('Activation Status: $status');
   // activated = status;
   return status;
+}
+
+_setNavbarItem(bool val) async {
+  final prefs = await SharedPreferences.getInstance();
+  final key = 'main_navbar_stock';
+  prefs.setBool(key, val);
+  print('Main navbar Stock: $val');
 }

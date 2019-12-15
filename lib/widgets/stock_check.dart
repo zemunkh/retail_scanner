@@ -186,6 +186,30 @@ class StockInState extends State<StockIn> {
       );
     }
 
+    final switchButton = Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Transform.scale(
+              scale: 1.5,
+              child: Switch(
+                value: oneToMany,
+                activeColor: Colors.blueAccent,
+                onChanged: (isOn) {
+                  _enableOneToMany(isOn);
+                },
+              ),
+            ),
+            Center(
+              child: Text('One to Many'),
+            ),
+          ],
+        ),
+      ], 
+    );
+
     final statusBar = Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
@@ -201,6 +225,11 @@ class StockInState extends State<StockIn> {
             color: Colors.red,
           ),
         ),
+
+        Container(
+          child: switchButton,
+        ),
+        
         Container(
           margin: const EdgeInsets.all(10),
           padding: const EdgeInsets.all(10),
@@ -224,29 +253,6 @@ class StockInState extends State<StockIn> {
       ],
     );
 
-    final switchButton = Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: <Widget>[
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Transform.scale(
-              scale: 2.0,
-              child: Switch(
-                value: oneToMany,
-                activeColor: Colors.blueAccent,
-                onChanged: (isOn) {
-                  _enableOneToMany(isOn);
-                },
-              ),
-            ),
-            Center(
-              child: Text('One to Many'),
-            ),
-          ],
-        ),
-      ], 
-    );
 
     return new GestureDetector(
       onTap: () {
@@ -274,9 +280,6 @@ class StockInState extends State<StockIn> {
                 _productController,
                 _productNode,
               ),        
-
-              SizedBox(height: 20,),
-              switchButton,
             ],
         ),
       ),

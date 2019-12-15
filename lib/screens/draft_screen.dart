@@ -395,7 +395,7 @@ class DraftScreenState extends State<DraftScreen> {
         style: TextStyle(
           fontFamily: 'QuickSand',
           fontWeight: FontWeight.bold,
-          fontSize: 30,
+          fontSize: 16,
           color: Colors.black,
         ),
       );
@@ -415,7 +415,7 @@ class DraftScreenState extends State<DraftScreen> {
             });
           },
           child: Text(
-            'Save as Draft',
+            'Save & Print',
             style: TextStyle(
               color: Colors.white,
               fontFamily: 'QuickSand',
@@ -436,7 +436,7 @@ class DraftScreenState extends State<DraftScreen> {
     
     return Scaffold(
       appBar: AppBar(
-        title: Text('Last Drafted'),
+        title: Text('Draft List'),
       ),
       drawer: MainDrawer(),
       body: GestureDetector(
@@ -448,8 +448,8 @@ class DraftScreenState extends State<DraftScreen> {
             children: <Widget>[
               dateTime(DateFormat("yyyy/MM/dd HH:mm:ss").format(createdDate)),
 
-              _mainInput('Dispatch Number',_dispatchNoController, _dispatchNode),
-              _mainInput('Number of item',_numberOfScanController, _numberNode),
+              _mainInput('Dispatch No',_dispatchNoController, _dispatchNode),
+              _mainInput('Total Items',_numberOfScanController, _numberNode),
               SizedBox(height: 15,),
               new Expanded(
                   child: new ListView.builder(
