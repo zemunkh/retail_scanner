@@ -3,6 +3,8 @@ import 'package:retail_scanner/helper/file_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
+import 'package:blue_thermal_printer/blue_thermal_printer.dart';
+import '../widgets/print_note.dart';
 
 
 class DispatchNote extends StatefulWidget {
@@ -33,6 +35,7 @@ class DispatchNoteState extends State<DispatchNote> {
   List<bool> matchList = [true, true, true, true, true, true, true, true];
   List<int> counterList = [0, 0, 0, 0, 0, 0, 0, 0];
 
+  PrintNote printNote;
 
   Future<Null> _compareData(String prodVal, int index) async {
     final masterCode = _masterControllers[index].text;
@@ -113,6 +116,11 @@ class DispatchNoteState extends State<DispatchNote> {
         } else {
           _setNumberItems(8);
           print('Too many :(');
+
+          Scaffold.of(context).showSnackBar(SnackBar(
+            content: new Text("Too many. Total Items has to be under 8!", textAlign: TextAlign.center,),
+            duration: const Duration(milliseconds: 2000)
+          ));
         } 
         _numberNode.unfocus();
         FocusScope.of(context).requestFocus(new FocusNode());
@@ -187,11 +195,18 @@ class DispatchNoteState extends State<DispatchNote> {
     String createdAt = DateFormat("yyyyMMdd").format(createdDate);
     List<String> draftList = [];
     int len = _masterControllers.length;
-    
+
+    List<String> _masterList = [];
+    List<String> _productList = [];
+    List<String> _counterList = [];  // Matched Counter Value
+
     if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
       for(int i = 0; i < len; i++) {
         String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime\r\n';
         draftList.add(buff);
+        _masterList.add(_masterControllers[i].text);
+        _productList.add(_productControllers[i].text);
+        _counterList.add(counterList[i].toString());
       }
     }
     print('List Data: $draftList');
@@ -199,7 +214,7 @@ class DispatchNoteState extends State<DispatchNote> {
     // prepare the passing value
 
     // start print operation
-    // printNote.sample(createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
+    printNote.sample(createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
   }
 
 
@@ -248,6 +263,7 @@ class DispatchNoteState extends State<DispatchNote> {
   @override
   void initState() {
     super.initState();
+    printNote = PrintNote();
     _dispatchNoController.addListener(_dipatchNoListener);
     _numberOfScanController.addListener(_numberScanListener);
   }
@@ -257,7 +273,7 @@ class DispatchNoteState extends State<DispatchNote> {
 
     DateTime createdDate = DateTime.now();
 
-    Widget _mainInput(String header, TextEditingController _mainController, FocusNode _mainNode) {
+    Widget _mainInput(BuildContext context, String header, TextEditingController _mainController, FocusNode _mainNode) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
@@ -311,7 +327,7 @@ class DispatchNoteState extends State<DispatchNote> {
                           },
                         ),
                       ),
-                      autofocus: true,
+                      autofocus: false,
                       controller: _mainController,
                       validator: (String value) {
                         if(value.isEmpty) {
@@ -334,7 +350,7 @@ class DispatchNoteState extends State<DispatchNote> {
       );
     }
 
-    Widget _scannerInput(String typeController, TextEditingController _controller, FocusNode currentNode, int index) {
+    Widget _scannerInput(BuildContext context, String typeController, TextEditingController _controller, FocusNode currentNode, int index) {
       return Stack(
           alignment: const Alignment(1.4, 1.0),
           children: <Widget>[
@@ -485,8 +501,8 @@ class DispatchNoteState extends State<DispatchNote> {
                 lockEn = false;
               });
               Scaffold.of(context).showSnackBar(SnackBar(
-                content: new Text("Saved! Now Printing", textAlign: TextAlign.center,),
-                duration: const Duration(milliseconds: 500)
+                content: new Text("Saved! Printing Request has sent", textAlign: TextAlign.center,),
+                duration: const Duration(milliseconds: 2000)
               ));
             });
           },
@@ -519,8 +535,8 @@ class DispatchNoteState extends State<DispatchNote> {
             children: <Widget>[
               dateTime(DateFormat("yyyy/MM/dd HH:mm:ss").format(createdDate)),
 
-              _mainInput('Dispatch No:',_dispatchNoController, _dispatchNode),
-              _mainInput('Total Items:',_numberOfScanController, _numberNode),
+              _mainInput(context, 'Dispatch No:',_dispatchNoController, _dispatchNode),
+              _mainInput(context, 'Total Items:',_numberOfScanController, _numberNode),
               SizedBox(height: 15,),
               new Expanded(
                   child: new ListView.builder(
@@ -535,8 +551,8 @@ class DispatchNoteState extends State<DispatchNote> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
                                   Text('Item: $index'),
-                                  _scannerInput('master', _masterControllers[index], _masterFocusNodes[index], index),
-                                  _scannerInput('product', _productControllers[index], _productFocusNodes[index], index),
+                                  _scannerInput(context, 'master', _masterControllers[index], _masterFocusNodes[index], index),
+                                  _scannerInput(context, 'product', _productControllers[index], _productFocusNodes[index], index),
                                 ],
                               ),
                             ),

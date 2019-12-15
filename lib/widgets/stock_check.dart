@@ -165,7 +165,7 @@ class StockInState extends State<StockIn> {
                   borderRadius: BorderRadius.circular(5.0),
                 ),
               ),
-              autofocus: true,
+              autofocus: false,
               controller: _controller,
               focusNode: currentNode,
               onTap: () {

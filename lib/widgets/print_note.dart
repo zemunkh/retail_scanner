@@ -3,7 +3,9 @@ import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 class PrintNote {
   BlueThermalPrinter bluetooth = BlueThermalPrinter.instance;
 
-   sample(String pathImage) async {
+  // createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime
+   sample(String createdAt, String _dispatchNo, String _totalNumber, List<String> _masterList, List<String> _productList, List<String> _counterList, String currentTime) async {
+
     //SIZE
     // 0- normal size text
     // 1- only bold text
@@ -19,28 +21,22 @@ class PrintNote {
         bluetooth.printNewLine();
         bluetooth.printCustom("Dispatch Note",3,1);
         bluetooth.printNewLine();
-        bluetooth.printImage(pathImage);   //path of your image/logo
+        // bluetooth.printImage(pathImage);   //path of your image/logo
         bluetooth.printNewLine();
-        bluetooth.printLeftRight("Created At:", "2019/12/15",0);
-        bluetooth.printLeftRight("Dispatch Number:", "123456R890",0);
-        bluetooth.printLeftRight("Number of Items:", "12",0);
+        bluetooth.printLeftRight("Created At:", createdAt,0);
+        bluetooth.printLeftRight("Dispatch Number:", _dispatchNo,0);
+        bluetooth.printLeftRight("Total Items:", _totalNumber,0);
         bluetooth.printNewLine();
-        bluetooth.printLeftRight("Stock Code:", "1234345",0);
-
-        bluetooth.printCustom("Total Items: 5",2,1);
-        bluetooth.printCustom("Matched Counter: 4",2,1);
-
-        bluetooth.printCustom("Total Items: 5",2,1);
-        bluetooth.printCustom("Matched Counter: 4",2,1);
-
-        bluetooth.printCustom("Total Items: 5",2,1);
-        bluetooth.printCustom("Matched Counter: 4",2,1);
-
+        for(int i = 0; i < _masterList.length; i++) {
+          bluetooth.printLeftRight("#$i Stock Code:", _masterList[i],0);
+          bluetooth.printLeftRight("#$i Product Code:", _productList[i],0);
+          bluetooth.printCustom("Matched Counter: ${_counterList[i]}",2,1);
+        }
         bluetooth.printNewLine();
-        bluetooth.printCustom("Printed Time: 2019/12/16",0,1);
-
+        bluetooth.printNewLine();
+        bluetooth.printCustom("Printed Time: $currentTime",0,1);
         // bluetooth.printQRcode("Insert Your Own Text to Generate", 200, 200, 1);
-        bluetooth.printNewLine();
+        
         bluetooth.printNewLine();
         bluetooth.paperCut();
       }
