@@ -92,7 +92,7 @@ class FileManager {
   }
 
     
-  static Future<Null> readDraft(String key) async {
+  static Future<List> readDraft(String key) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> draftedList = prefs.getStringList(key);
 

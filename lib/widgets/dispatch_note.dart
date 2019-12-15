@@ -3,7 +3,6 @@ import 'package:retail_scanner/helper/file_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
-import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import '../widgets/print_note.dart';
 
 
@@ -28,8 +27,8 @@ class DispatchNoteState extends State<DispatchNote> {
   bool lockEn = true;
   bool _isButtonDisabled = true;
 
-  final _mainFormKey = GlobalKey<FormState>();
-  final _scannerFormKey = GlobalKey<FormFieldState>(); 
+  // final _mainFormKey = GlobalKey<FormState>();
+  // final _scannerFormKey = GlobalKey<FormFieldState>(); 
 
   // Widget _form;
   List<bool> matchList = [true, true, true, true, true, true, true, true];
@@ -249,6 +248,9 @@ class DispatchNoteState extends State<DispatchNote> {
     FileManager.saveDraft('draft_counter_list', _counterList);
     FileManager.saveDraft('draft_other_list', _otherList);
 
+    // add DispatchNote model and Retrieve it on Draft page screen by id {createdAt}.
+    // follow the structure of screen
+
   }
 
 
@@ -280,7 +282,7 @@ class DispatchNoteState extends State<DispatchNote> {
           Expanded(
             flex: 6,
             child: Text(
-              '$header:',
+              '$header',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 20, 

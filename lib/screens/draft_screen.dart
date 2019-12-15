@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:retail_scanner/helper/file_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../widgets/print_note.dart';
 import '../widgets/main_drawer.dart';
 
 
@@ -29,9 +30,12 @@ class DraftScreenState extends State<DraftScreen> {
   bool lockEn = true;
   bool _isButtonDisabled = true;
 
-  final _mainFormKey = GlobalKey<FormState>();
-  final _scannerFormKey = GlobalKey<FormFieldState>(); 
+  // final _mainFormKey = GlobalKey<FormState>();
+  // final _scannerFormKey = GlobalKey<FormFieldState>(); 
 
+  PrintNote printNote;
+
+  String createdDate = '';
   // Widget _form;
   List<bool> matchList = [true, true, true, true, true, true, true, true];
   List<int> counterList = [0, 0, 0, 0, 0, 0, 0, 0];
@@ -73,8 +77,13 @@ class DraftScreenState extends State<DraftScreen> {
     }
   }
 
+  List<String> _masterList = [];
+  List<String> _productList = [];
+  List<String> _counterList = []; 
+  List<String> draft_name = ['draft_master_list', 'draft_product_list', 'draft_counter_list', 'draft_other_list'];
 
   Future<Null> _numberScanListener() async {
+
     buffer = _numberOfScanController.text;
     if(buffer.endsWith(r'$')) {
       buffer = buffer.substring(0, buffer.length - 1);
@@ -83,6 +92,11 @@ class DraftScreenState extends State<DraftScreen> {
       if(_dispatchNoController.text != null) {
           _isButtonDisabled = false;
       }
+
+
+      _masterList =  await FileManager.readDraft(draft_name[0]);
+      _productList = await FileManager.readDraft(draft_name[1]);
+      _counterList = await FileManager.readDraft(draft_name[2]);
 
       await Future.delayed(const Duration(milliseconds: 1000), (){
         _numberOfScanController.text = trueVal;
@@ -102,12 +116,17 @@ class DraftScreenState extends State<DraftScreen> {
                 _masterControllers.add(new TextEditingController());
                 _productControllers.add(new TextEditingController());
 
+                _masterControllers[i].text = _masterList[i];
+                _productControllers[i].text = _productList[i];
+                counterList[i] = int.parse(_counterList[i]);
+ 
                 _masterFocusNodes.add(new FocusNode());
                 _productFocusNodes.add(new FocusNode());
               }
               if(_dispatchNoController.text != null) {
                 _isButtonDisabled = false;
               }
+
             });
           } else {
             print('Wrong request!');
@@ -180,28 +199,52 @@ class DraftScreenState extends State<DraftScreen> {
       }
   }
 
-  Future<Null> _saveAndPrint(DateTime createdDate) async {
+  Future<Null> _saveAndPrint(String createdDate) async {
 
     String currentTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
-    String createdAt = DateFormat("yyyyMMdd").format(createdDate);
+    // String createdAt = DateFormat("yyyyMMdd").format(createdDate);
+    String createdAt = createdDate;
     List<String> draftList = [];
     int len = _masterControllers.length;
+
+    List<String> _masterList = [];
+    List<String> _productList = [];
+    List<String> _counterList = [];  // Matched Counter Value
     
     if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
       for(int i = 0; i < len; i++) {
         String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime\r\n';
         draftList.add(buff);
+        _masterList.add(_masterControllers[i].text);
+        _productList.add(_productControllers[i].text);
+        _counterList.add(counterList[i].toString());
       }
     }
     print('List Data: $draftList');
     FileManager.saveDispatchData(createdAt, draftList);
     // prepare the passing value
 
+    FileManager.removeDraft('draft_master_list');
+    FileManager.removeDraft('draft_product_list');
+    FileManager.removeDraft('draft_counter_list');
+    FileManager.removeDraft('draft_other_list');
     // start print operation
-    // printNote.sample(createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
+    printNote.sample(createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
   }
 
+  void initDraftScreen() async {
+ // Matched Counter Value
+    List<String> _otherList = [];
+    List<String> draft_name = ['draft_master_list', 'draft_product_list', 'draft_counter_list', 'draft_other_list'];
 
+    _otherList = await FileManager.readDraft(draft_name[3]);
+    setState(() {
+      createdDate = _otherList[0];
+      _dispatchNoController.text = _otherList[1];
+      _numberOfScanController.text = _otherList[2] + r'$';
+    });
+
+  }
 
 
   @override
@@ -214,14 +257,14 @@ class DraftScreenState extends State<DraftScreen> {
   @override
   void initState() {
     super.initState();
+    printNote = PrintNote();
     _dispatchNoController.addListener(_dipatchNoListener);
     _numberOfScanController.addListener(_numberScanListener);
+    initDraftScreen();
   }
 
   @override 
   Widget build(BuildContext context) {
-
-    DateTime createdDate = DateTime.now();
 
     Widget _mainInput(String header, TextEditingController _mainController, FocusNode _mainNode) {
       return Row(
@@ -446,7 +489,7 @@ class DraftScreenState extends State<DraftScreen> {
         child: Container(
           child: Column(
             children: <Widget>[
-              dateTime(DateFormat("yyyy/MM/dd HH:mm:ss").format(createdDate)),
+              dateTime(createdDate),
 
               _mainInput('Dispatch No',_dispatchNoController, _dispatchNode),
               _mainInput('Total Items',_numberOfScanController, _numberNode),
