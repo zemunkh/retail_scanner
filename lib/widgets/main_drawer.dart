@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:retail_scanner/screens/home_screen.dart';
+import 'package:retail_scanner/screens/settings_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../screens/printer_screen.dart';
@@ -66,8 +67,12 @@ class MainDrawer extends StatelessWidget {
               _setNavbarItem(false);
             }
           ),
+
+          new Divider(height: 15.0,color: Colors.black87,),
+          
+          SizedBox(height:  20),
           buildListTile(
-            'Stock Saved', 
+            'Stock Check Saved', 
             EvaIcons.checkmarkCircle,
             () {
               Navigator.of(context).pushReplacementNamed(StockSavedScreen.routeName);
@@ -93,6 +98,13 @@ class MainDrawer extends StatelessWidget {
             EvaIcons.printer,
             () {
               Navigator.of(context).pushReplacementNamed(PrinterScreen.routeName);
+            }
+          ),
+          buildListTile(
+            'Settings', 
+            EvaIcons.settings2Outline,
+            () {
+              Navigator.of(context).pushReplacementNamed(SettingScreen.routeName);
             }
           ),
         ],

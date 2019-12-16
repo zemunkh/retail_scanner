@@ -103,4 +103,18 @@ class FileManager {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(key);
   }
+
+ 
+  static Future<Null> saveProfile(String value) async {
+    final key = 'user_profile';
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(key, value);
+  }
+
+  static Future<Null> readProfile() async {
+    final key = 'user_profile';
+    final prefs = await SharedPreferences.getInstance();
+    String profile = prefs.getString(key);
+    return profile;
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
+import 'package:flutter/services.dart';
 
 import '../helper/file_manager.dart';
 
@@ -16,7 +17,7 @@ class StockInState extends State<StockIn> {
   final FocusNode _masterNode = FocusNode();
   final FocusNode _productNode = FocusNode();
 
-  final _formKey = GlobalKey<FormFieldState>();
+  // final _formKey = GlobalKey<FormFieldState>();
 
   bool matched = true;
   bool oneToMany = true;
@@ -65,8 +66,6 @@ class StockInState extends State<StockIn> {
         });
         FocusScope.of(context).requestFocus(_productNode);
       });
-
-     
     }
   }
 
@@ -82,16 +81,13 @@ class StockInState extends State<StockIn> {
       }).then((value){
         _compareData();
         if(oneToMany) {
-          
           Future.delayed(const Duration(milliseconds: 500), (){
             _productController.clear();
           });
-
         } else {
           _productNode.unfocus();
           FocusScope.of(context).requestFocus(new FocusNode());
         }
-        
       });
     }
   }
@@ -128,6 +124,7 @@ class StockInState extends State<StockIn> {
   @override
   Widget build(BuildContext context) {
     // To hide keyboards on the restart.
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
 
     Widget _titleWidget(String title) {
       return Text(
@@ -165,7 +162,7 @@ class StockInState extends State<StockIn> {
                   borderRadius: BorderRadius.circular(5.0),
                 ),
               ),
-              autofocus: false,
+              // autofocus: false,
               controller: _controller,
               focusNode: currentNode,
               onTap: () {
@@ -258,30 +255,27 @@ class StockInState extends State<StockIn> {
       onTap: () {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
-      child: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(8),
-          children: <Widget>[
-              statusBar,
+      child: ListView(
+        padding: const EdgeInsets.all(8),
+        children: <Widget>[
+            statusBar,
 
-              _titleWidget('Barcode #1'),
-              SizedBox(height: 10,),
-              _scannerInput(
-                'Master key',
-                _masterController,
-                _masterNode,
-              ),
+            _titleWidget('Barcode #1'),
+            SizedBox(height: 10,),
+            _scannerInput(
+              'Master key',
+              _masterController,
+              _masterNode,
+            ),
 
-              _titleWidget('Barcode #2'),
-              SizedBox(height: 10,),
-              _scannerInput(
-                'Product key',
-                _productController,
-                _productNode,
-              ),        
-            ],
-        ),
+            _titleWidget('Barcode #2'),
+            SizedBox(height: 10,),
+            _scannerInput(
+              'Product key',
+              _productController,
+              _productNode,
+            ),        
+          ],
       ),
     );
   } 

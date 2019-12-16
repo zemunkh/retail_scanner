@@ -246,6 +246,25 @@ class DraftScreenState extends State<DraftScreen> {
 
   }
 
+  Future<bool> _backButtonPressed() {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Exit the Stock App?"),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Yes'),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+          FlatButton(
+            child: Text('No'),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+        ],
+      )
+    );
+  }
+
 
   @override
   void dispose() {
@@ -477,60 +496,63 @@ class DraftScreenState extends State<DraftScreen> {
     }  
     
     
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Draft List'),
-      ),
-      drawer: MainDrawer(),
-      body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).requestFocus(new FocusNode());
-        },
-        child: Container(
-          child: Column(
-            children: <Widget>[
-              dateTime(createdDate),
+    return WillPopScope(
+      onWillPop: _backButtonPressed,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Draft List'),
+        ),
+        drawer: MainDrawer(),
+        body: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).requestFocus(new FocusNode());
+          },
+          child: Container(
+            child: Column(
+              children: <Widget>[
+                dateTime(createdDate),
 
-              _mainInput('Dispatch No',_dispatchNoController, _dispatchNode),
-              _mainInput('Total Items',_numberOfScanController, _numberNode),
-              SizedBox(height: 15,),
-              new Expanded(
-                  child: new ListView.builder(
-                    itemCount: _masterControllers?.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        padding: const EdgeInsets.all(4),
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                  Text('Item: $index'),
-                                  _scannerInput('master', _masterControllers[index], _masterFocusNodes[index], index),
-                                  _scannerInput('product', _productControllers[index], _productFocusNodes[index], index),
-                                ],
+                _mainInput('Dispatch No',_dispatchNoController, _dispatchNode),
+                _mainInput('Total Items',_numberOfScanController, _numberNode),
+                SizedBox(height: 15,),
+                new Expanded(
+                    child: new ListView.builder(
+                      itemCount: _masterControllers?.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Container(
+                          padding: const EdgeInsets.all(4),
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                    Text('Item: $index'),
+                                    _scannerInput('master', _masterControllers[index], _masterFocusNodes[index], index),
+                                    _scannerInput('product', _productControllers[index], _productFocusNodes[index], index),
+                                  ],
+                                ),
                               ),
-                            ),
-                            Expanded(
-                              child: statusBar(index),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    
-                  ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                    child: _printAndOkButton(),
-                  )
-                ],
-              ),
-            ],
+                              Expanded(
+                                child: statusBar(index),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      
+                    ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: _printAndOkButton(),
+                    )
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

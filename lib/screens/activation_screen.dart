@@ -27,6 +27,7 @@ class ActivationScreen extends StatelessWidget {
     } else {
       print('Unsuccessful!');
     }
+    return null;
   }
 
   @override
