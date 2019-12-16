@@ -191,7 +191,7 @@ class DispatchNoteState extends State<DispatchNote> {
   Future<Null> _saveAndPrint(DateTime createdDate) async {
 
     String currentTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
-    String createdAt = DateFormat("yyyyMMdd").format(createdDate);
+    String createdAt = DateFormat("yyyy/MM/dd HH:mm").format(createdDate);
     List<String> draftList = [];
     int len = _masterControllers.length;
 
@@ -211,9 +211,10 @@ class DispatchNoteState extends State<DispatchNote> {
     print('List Data: $draftList');
     FileManager.saveDispatchData(createdAt, draftList);
     // prepare the passing value
-
+    String deviceName = await FileManager.readProfile('device_name');
+    String userName = await FileManager.readProfile('user_name');
     // start print operation
-    printNote.sample(createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
+    printNote.sample(deviceName, userName, createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
   }
 
 
@@ -280,19 +281,19 @@ class DispatchNoteState extends State<DispatchNote> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           Expanded(
-            flex: 6,
+            flex: 3,
             child: Text(
               '$header',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 20, 
+                fontSize: 16, 
                 color: Color(0xFF004B83),
                 fontWeight: FontWeight.bold,
               ),
             )
           ),
           Expanded(
-            flex: 4,
+            flex: 7,
             child: Stack(
               alignment: Alignment(1.0, 1.0),
               children: <Widget>[
@@ -301,7 +302,7 @@ class DispatchNoteState extends State<DispatchNote> {
                   child: Center(
                     child: TextFormField(
                       style: TextStyle(
-                        fontSize: 16, 
+                        fontSize: 12, 
                         color: Color(0xFF004B83),
                         fontWeight: FontWeight.bold,
                       ),
@@ -322,7 +323,7 @@ class DispatchNoteState extends State<DispatchNote> {
                         suffixIcon: IconButton(
                           icon: Icon(EvaIcons.close, 
                             color: Colors.blueAccent, 
-                            size: 32,
+                            size: 24,
                           ),
                           onPressed: () {
                             _clearTextController(context, _mainController, _mainNode);

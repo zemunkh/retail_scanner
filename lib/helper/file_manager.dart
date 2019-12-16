@@ -105,14 +105,12 @@ class FileManager {
   }
 
  
-  static Future<Null> saveProfile(String value) async {
-    final key = 'user_profile';
+  static Future<Null> saveProfile(String key, String value) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString(key, value);
   }
 
-  static Future<Null> readProfile() async {
-    final key = 'user_profile';
+  static Future<String> readProfile(String key) async {
     final prefs = await SharedPreferences.getInstance();
     String profile = prefs.getString(key);
     return profile;

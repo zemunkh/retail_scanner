@@ -43,8 +43,8 @@ class SettingScreenState extends State<SettingScreen> {
     String dname = _deviceController.text;
     String uname = _usernameController.text;
     if(dname != '' && uname !='') {
-      FileManager.saveProfile(dname).then((_){
-        FileManager.saveProfile(uname);
+      FileManager.saveProfile('device_name', dname).then((_){
+        FileManager.saveProfile('user_name', uname);
         Scaffold.of(context).showSnackBar(SnackBar(
           content: new Text("User data is saved successfully!", textAlign: TextAlign.center,),
           duration: const Duration(milliseconds: 2000)
@@ -183,8 +183,8 @@ class SettingScreenState extends State<SettingScreen> {
             String dname = _deviceController.text;
             String uname = _usernameController.text;
             if(dname != '' && uname != '') {
-              FileManager.saveProfile(dname).then((_){
-                FileManager.saveProfile(uname);
+              FileManager.saveProfile('device_name', dname).then((_){
+                FileManager.saveProfile('user_name',uname);
               });
               print('Saving now!');
               _scaffoldKey.currentState.showSnackBar(SnackBar(

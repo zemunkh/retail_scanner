@@ -228,8 +228,10 @@ class DraftScreenState extends State<DraftScreen> {
     FileManager.removeDraft('draft_product_list');
     FileManager.removeDraft('draft_counter_list');
     FileManager.removeDraft('draft_other_list');
+    String deviceName = await FileManager.readProfile('device_name');
+    String userName = await FileManager.readProfile('user_name');
     // start print operation
-    printNote.sample(createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
+    printNote.sample(deviceName, userName, createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
   }
 
   void initDraftScreen() async {
