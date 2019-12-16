@@ -25,7 +25,6 @@ class DispatchNoteState extends State<DispatchNote> {
   final _dispatchNode = FocusNode();
   final _numberNode = FocusNode();
 
-  bool lockEn = true;
   bool _isButtonDisabled = true;
 
   // final _mainFormKey = GlobalKey<FormState>();
@@ -80,10 +79,6 @@ class DispatchNoteState extends State<DispatchNote> {
       buffer = buffer.substring(0, buffer.length - 1);
       trueVal = buffer;
 
-      if(_dispatchNoController.text != null) {
-          _isButtonDisabled = false;
-      }
-
       await Future.delayed(const Duration(milliseconds: 1000), (){
         _numberOfScanController.text = trueVal;
       }).then((value){
@@ -104,9 +99,6 @@ class DispatchNoteState extends State<DispatchNote> {
 
                 _masterFocusNodes.add(new FocusNode());
                 _productFocusNodes.add(new FocusNode());
-              }
-              if(_dispatchNoController.text != null) {
-                _isButtonDisabled = false;
               }
             });
           } else {
@@ -157,7 +149,6 @@ class DispatchNoteState extends State<DispatchNote> {
         if(_typeController == 'master') {
           print('I am master!');
           _masterFocusNodes[index].unfocus();
-          // _productControllers[index].text = '';
         } else if(_typeController == 'product') {
           print('I am product!');
           Future.delayed(const Duration(milliseconds: 1000), (){
@@ -168,6 +159,19 @@ class DispatchNoteState extends State<DispatchNote> {
               _productControllers[index].clear();
             });
           });
+
+          // ================================================ //
+          // Auto Saving Draft Feature can be started in here //
+          // ================================================ //
+          int total = 0;
+          for(int i = 0; i < length; i++) {
+            total += counterList[i];
+          }
+          if(_dispatchNoController.text != '' && _numberOfScanController.text != '' && total >= length) {
+            setState(() {
+              _isButtonDisabled = false;
+            });
+          }
         }
         
         Future.delayed(const Duration(milliseconds: 200), (){
@@ -181,18 +185,9 @@ class DispatchNoteState extends State<DispatchNote> {
               if((length - 1) > index){
                 FocusScope.of(context).requestFocus(_masterFocusNodes[index + 1]);
               } else {
-                // _masterFocusNodes[index].unfocus();
                 FocusScope.of(context).requestFocus(_productFocusNodes[0]);
               }
-            } //else if(_typeController == 'product') {
-            //   if((length - 1) > index){
-            //     FocusScope.of(context).requestFocus(_productFocusNodes[index + 1]);
-            //   } else {
-            //     FocusScope.of(context).requestFocus(_productFocusNodes[0]);
-            //   }             
-            // }
-          } else {
-            FocusScope.of(context).requestFocus(_productFocusNodes[0]);
+            } 
           }
         });
       }
@@ -376,7 +371,6 @@ class DispatchNoteState extends State<DispatchNote> {
                     color: Color(0xFF004B83),
                     fontWeight: FontWeight.bold,
                   ),
-                  enabled: lockEn,
                   decoration: InputDecoration.collapsed(
                     filled: true,
                     fillColor: Colors.white,
@@ -471,9 +465,6 @@ class DispatchNoteState extends State<DispatchNote> {
           onPressed: _isButtonDisabled ? null : () {
             print('You pressed Draft Button!');
             _saveTheDraft(createdDate).then((_){
-              setState(() {
-                lockEn = false;
-              });
 
               Scaffold.of(context).showSnackBar(SnackBar(
                 content: new Text("Draft Saved!", textAlign: TextAlign.center,),
@@ -510,9 +501,6 @@ class DispatchNoteState extends State<DispatchNote> {
             print('You pressed Save and Print Button!');
 
             _saveAndPrint(createdDate).then((_){
-              setState(() {
-                lockEn = false;
-              });
               Scaffold.of(context).showSnackBar(SnackBar(
                 content: new Text("Saved! Printing Request has sent", textAlign: TextAlign.center,),
                 duration: const Duration(milliseconds: 2000)

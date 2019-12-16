@@ -38,30 +38,6 @@ class SettingScreenState extends State<SettingScreen> {
   }
 
 
-
-  Future<Null> _saveData(BuildContext context) async {
-    String dname = _deviceController.text;
-    String uname = _usernameController.text;
-    if(dname != '' && uname !='') {
-      FileManager.saveProfile('device_name', dname).then((_){
-        FileManager.saveProfile('user_name', uname);
-        Scaffold.of(context).showSnackBar(SnackBar(
-          content: new Text("User data is saved successfully!", textAlign: TextAlign.center,),
-          duration: const Duration(milliseconds: 2000)
-        ));
-      });
-    }
-    else {
-      // Input values are empty
-      Scaffold.of(context).showSnackBar(SnackBar(
-        content: new Text("Can't be saved!", textAlign: TextAlign.center,),
-        duration: const Duration(milliseconds: 2000)
-      ));
-    }
-  }
-
-
-
   @override
   void dispose() {
     super.dispose();
