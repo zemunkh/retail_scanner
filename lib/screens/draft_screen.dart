@@ -1,5 +1,6 @@
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:retail_scanner/helper/file_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,7 +38,7 @@ class DraftScreenState extends State<DraftScreen> {
 
   String createdDate = '';
   // Widget _form;
-  List<bool> matchList = [true, true, true, true, true, true, true, true];
+  List<bool> matchList = [false, false, false, false, false, false, false, false];
   List<int> counterList = [0, 0, 0, 0, 0, 0, 0, 0];
 
 
@@ -415,11 +416,11 @@ class DraftScreenState extends State<DraftScreen> {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 2),
               child: matchList[index] ? new Icon(
-                EvaIcons.checkmarkCircleOutline,
+                FontAwesomeIcons.solidCircle,
                 size: 30,
                 color: Colors.green,
               ) : new Icon(
-                EvaIcons.closeCircleOutline,
+                FontAwesomeIcons.solidCircle,
                 size: 30,
                 color: Colors.red,
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:retail_scanner/helper/file_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
@@ -31,7 +32,7 @@ class DispatchNoteState extends State<DispatchNote> {
   // final _scannerFormKey = GlobalKey<FormFieldState>(); 
 
   // Widget _form;
-  List<bool> matchList = [true, true, true, true, true, true, true, true];
+  List<bool> matchList = [false, false, false, false, false, false, false, false];
   List<int> counterList = [0, 0, 0, 0, 0, 0, 0, 0];
 
   PrintNote printNote;
@@ -156,33 +157,42 @@ class DispatchNoteState extends State<DispatchNote> {
         if(_typeController == 'master') {
           print('I am master!');
           _masterFocusNodes[index].unfocus();
-          _productControllers[index].text = '';
+          // _productControllers[index].text = '';
         } else if(_typeController == 'product') {
           print('I am product!');
-          _productFocusNodes[index].unfocus();
-          if(index < length - 1) {
-            _masterControllers[index + 1].text = '';
-          }
-          _compareData(trueVal, index);
-        } else {
-          print('Nothing to do');
+          Future.delayed(const Duration(milliseconds: 1000), (){
+            _productControllers[index].text = trueVal;
+          }).then((value){
+            _compareData(trueVal, index);
+            Future.delayed(const Duration(milliseconds: 500), (){
+              _productControllers[index].clear();
+            });
+          });
         }
         
         Future.delayed(const Duration(milliseconds: 200), (){
           setState(() {
-            _controller.text = trueVal;
+            if(_typeController == 'master') { 
+              _controller.text = trueVal;
+            }   
           });
           if(length < 8) {
             if(_typeController == 'master') {
-              FocusScope.of(context).requestFocus(_productFocusNodes[index]);
-            } else if(_typeController == 'product') {
               if((length - 1) > index){
                 FocusScope.of(context).requestFocus(_masterFocusNodes[index + 1]);
               } else {
-                FocusScope.of(context).requestFocus(new FocusNode());
+                // _masterFocusNodes[index].unfocus();
+                FocusScope.of(context).requestFocus(_productFocusNodes[0]);
               }
-              
-            }
+            } //else if(_typeController == 'product') {
+            //   if((length - 1) > index){
+            //     FocusScope.of(context).requestFocus(_productFocusNodes[index + 1]);
+            //   } else {
+            //     FocusScope.of(context).requestFocus(_productFocusNodes[0]);
+            //   }             
+            // }
+          } else {
+            FocusScope.of(context).requestFocus(_productFocusNodes[0]);
           }
         });
       }
@@ -302,7 +312,7 @@ class DispatchNoteState extends State<DispatchNote> {
                   child: Center(
                     child: TextFormField(
                       style: TextStyle(
-                        fontSize: 12, 
+                        fontSize: 16, 
                         color: Color(0xFF004B83),
                         fontWeight: FontWeight.bold,
                       ),
@@ -404,11 +414,11 @@ class DispatchNoteState extends State<DispatchNote> {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 2),
               child: matchList[index] ? new Icon(
-                EvaIcons.checkmarkCircleOutline,
+                FontAwesomeIcons.solidCircle,
                 size: 30,
                 color: Colors.green,
               ) : new Icon(
-                EvaIcons.closeCircleOutline,
+                FontAwesomeIcons.solidCircle,
                 size: 30,
                 color: Colors.red,
               ),
@@ -553,7 +563,7 @@ class DispatchNoteState extends State<DispatchNote> {
                               child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                  Text('Item: $index'),
+                                  Text('Item: ${index + 1}'),
                                   _scannerInput(context, 'master', _masterControllers[index], _masterFocusNodes[index], index),
                                   _scannerInput(context, 'product', _productControllers[index], _productFocusNodes[index], index),
                                 ],
