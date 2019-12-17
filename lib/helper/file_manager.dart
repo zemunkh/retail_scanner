@@ -90,7 +90,7 @@ class FileManager {
     prefs.setStringList(key, list);
   }
 
-    
+
   static Future<List> readDraft(String key) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> draftedList = prefs.getStringList(key);
@@ -103,7 +103,7 @@ class FileManager {
     prefs.remove(key);
   }
 
- 
+
   static Future<Null> saveProfile(String key, String value) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString(key, value);
@@ -131,10 +131,13 @@ class FileManager {
     return null;
   }
 
-  static Future<List> _getDraftList(String key) async {
+  static Future<List> getDraftList(String key) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> drafts = prefs.getStringList(key);
-    print('Files List: $drafts');
+    if(drafts == null) {
+      drafts = [];
+    }
+    print('Draft List: $drafts');
     return drafts;
   }
 }

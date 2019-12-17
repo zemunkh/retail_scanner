@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:retail_scanner/helper/file_manager.dart';
+import 'package:retail_scanner/model/dispatch.dart';
+import 'package:retail_scanner/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
@@ -21,14 +23,14 @@ class DispatchNoteState extends State<DispatchNote> {
 
   final _dispatchNoController = TextEditingController();
   final _numberOfScanController = TextEditingController();
-  
+
   final _dispatchNode = FocusNode();
   final _numberNode = FocusNode();
 
   bool _isButtonDisabled = true;
 
   // final _mainFormKey = GlobalKey<FormState>();
-  // final _scannerFormKey = GlobalKey<FormFieldState>(); 
+  // final _scannerFormKey = GlobalKey<FormFieldState>();
 
   // Widget _form;
   List<bool> matchList = [false, false, false, false, false, false, false, false];
@@ -82,11 +84,11 @@ class DispatchNoteState extends State<DispatchNote> {
       await Future.delayed(const Duration(milliseconds: 1000), (){
         _numberOfScanController.text = trueVal;
       }).then((value){
-        
-        // set the number of inputs will be built in the screen 
+
+        // set the number of inputs will be built in the screen
         if(int.parse(trueVal) < 9) {
           _setNumberItems(int.parse(trueVal));
-          
+
           print('Controller Length: ${_masterControllers.length}');
 
           if(_masterControllers.length < int.parse(trueVal) ) {
@@ -113,7 +115,7 @@ class DispatchNoteState extends State<DispatchNote> {
             content: new Text("Too many. Total Items has to be under 8!", textAlign: TextAlign.center,),
             duration: const Duration(milliseconds: 2000)
           ));
-        } 
+        }
         _numberNode.unfocus();
         FocusScope.of(context).requestFocus(new FocusNode());
       });
@@ -142,7 +144,7 @@ class DispatchNoteState extends State<DispatchNote> {
     } else if(_typeController == 'product') {
       buffer = _productControllers[index].text;
     }
-    
+
       if(buffer.endsWith(r'$')){
         buffer = buffer.substring(0, buffer.length - 1);
         trueVal = buffer;
@@ -173,12 +175,12 @@ class DispatchNoteState extends State<DispatchNote> {
             });
           }
         }
-        
+
         Future.delayed(const Duration(milliseconds: 200), (){
           setState(() {
-            if(_typeController == 'master') { 
+            if(_typeController == 'master') {
               _controller.text = trueVal;
-            }   
+            }
           });
           if(length < 8) {
             if(_typeController == 'master') {
@@ -187,7 +189,7 @@ class DispatchNoteState extends State<DispatchNote> {
               } else {
                 FocusScope.of(context).requestFocus(_productFocusNodes[0]);
               }
-            } 
+            }
           }
         });
       }
@@ -237,7 +239,7 @@ class DispatchNoteState extends State<DispatchNote> {
     List<String> _productList = [];
     List<String> _counterList = [];  // Matched Counter Value
     List<String> _otherList = [];
-    
+
     if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
       for(int i = 0; i < len; i++) {
         _masterList.add(_masterControllers[i].text);
@@ -246,6 +248,7 @@ class DispatchNoteState extends State<DispatchNote> {
       }
     }
 
+    // _otherList.add(dtime);
     _otherList.add(createdAt);
     _otherList.add(_dispatchNoController.text);
     _otherList.add(_numberOfScanController.text);
@@ -253,16 +256,22 @@ class DispatchNoteState extends State<DispatchNote> {
 
     // save the List to Shared Prefs
     // master_list, product_list, counter_list
-    String draftName = '$dtime-${_dispatchNoController.text}';
-    
-    // 20191217-1234
+
+    List<String> draftBank = await FileManager.getDraftList('draft_bank');
+    String index = '${draftBank.length}';
+    String draftName = '$dtime-$index';
+
+    // 20191217-1
     FileManager.saveDraftList('draft_bank', draftName);
+    // length will decide what number of the draft list.
 
+    FileManager.saveDraft('draft_master_$index', _masterList);
+    FileManager.saveDraft('draft_product_$index', _productList);
+    FileManager.saveDraft('draft_counter_$index', _counterList);
+    FileManager.saveDraft('draft_other_$index', _otherList);
 
-    FileManager.saveDraft('draft_master_list', _masterList);
-    FileManager.saveDraft('draft_product_list', _productList);
-    FileManager.saveDraft('draft_counter_list', _counterList);
-    FileManager.saveDraft('draft_other_list', _otherList);
+    Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+    _setNavbarItem(false);
 
     // add DispatchNote model and Retrieve it on Draft page screen by id {createdAt}.
     // follow the structure of screen
@@ -286,7 +295,7 @@ class DispatchNoteState extends State<DispatchNote> {
     _numberOfScanController.addListener(_numberScanListener);
   }
 
-  @override 
+  @override
   Widget build(BuildContext context) {
 
     DateTime createdDate = DateTime.now();
@@ -301,7 +310,7 @@ class DispatchNoteState extends State<DispatchNote> {
               '$header',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 16, 
+                fontSize: 16,
                 color: Color(0xFF004B83),
                 fontWeight: FontWeight.bold,
               ),
@@ -317,7 +326,7 @@ class DispatchNoteState extends State<DispatchNote> {
                   child: Center(
                     child: TextFormField(
                       style: TextStyle(
-                        fontSize: 16, 
+                        fontSize: 16,
                         color: Color(0xFF004B83),
                         fontWeight: FontWeight.bold,
                       ),
@@ -326,7 +335,7 @@ class DispatchNoteState extends State<DispatchNote> {
                         fillColor: Colors.white,
                         hintText: header,
                         hintStyle: TextStyle(
-                          color: Color(0xFF004B83), 
+                          color: Color(0xFF004B83),
                           fontWeight: FontWeight.w200,
                         ),
                         border: OutlineInputBorder(
@@ -336,8 +345,8 @@ class DispatchNoteState extends State<DispatchNote> {
                           color: Colors.yellowAccent,
                         ),
                         suffixIcon: IconButton(
-                          icon: Icon(EvaIcons.close, 
-                            color: Colors.blueAccent, 
+                          icon: Icon(EvaIcons.close,
+                            color: Colors.blueAccent,
                             size: 24,
                           ),
                           onPressed: () {
@@ -377,7 +386,7 @@ class DispatchNoteState extends State<DispatchNote> {
               child: Center(
                 child: TextFormField(
                   style: TextStyle(
-                    fontSize: 20, 
+                    fontSize: 20,
                     color: Color(0xFF004B83),
                     fontWeight: FontWeight.bold,
                   ),
@@ -387,7 +396,7 @@ class DispatchNoteState extends State<DispatchNote> {
                     hintText: typeController,
                     hintStyle: TextStyle(
                       color: Color(0xFF004B83),
-                      fontSize: 20, 
+                      fontSize: 20,
                       fontWeight: FontWeight.w300,
                     ),
                     border: OutlineInputBorder(
@@ -399,6 +408,11 @@ class DispatchNoteState extends State<DispatchNote> {
                   focusNode: currentNode,
                   onTap: () {
                     _clearTextController(context, _controller, currentNode);
+                    if(typeController == 'master') {
+                      setState(() {
+                        counterList[index] = 0;
+                      });
+                    }
                     // _focusNode(context, currentNode);
                   },
                   onChanged: (value){
@@ -438,7 +452,7 @@ class DispatchNoteState extends State<DispatchNote> {
                   borderRadius: BorderRadius.all(
                       Radius.circular(3),
                   ),
-                  side: BorderSide(width: 1, color: Colors.black), 
+                  side: BorderSide(width: 1, color: Colors.black),
                 ),
               ),
               child: Center(
@@ -481,7 +495,7 @@ class DispatchNoteState extends State<DispatchNote> {
                 duration: const Duration(milliseconds: 500)
               ));
             });
-            
+
             // _setDraftValues(i, draftList);
           },
           child: Text(
@@ -501,7 +515,7 @@ class DispatchNoteState extends State<DispatchNote> {
           elevation: 2,
         )
       );
-    } 
+    }
 
     Widget _printAndOkButton(BuildContext context) {
       return Padding(
@@ -534,9 +548,9 @@ class DispatchNoteState extends State<DispatchNote> {
           elevation: 2,
         )
       );
-    }  
-    
-    
+    }
+
+
     return GestureDetector(
         onTap: () {
           FocusScope.of(context).requestFocus(new FocusNode());
@@ -545,7 +559,7 @@ class DispatchNoteState extends State<DispatchNote> {
           child: Column(
             children: <Widget>[
               dateTime(DateFormat("yyyy/MM/dd HH:mm:ss").format(createdDate)),
-      
+
               _mainInput(context, 'Dispatch No:',_dispatchNoController, _dispatchNode),
               _mainInput(context, 'Total Items:',_numberOfScanController, _numberNode),
               SizedBox(height: 15,),
@@ -574,7 +588,7 @@ class DispatchNoteState extends State<DispatchNote> {
                         ),
                       );
                     },
-                    
+
                   ),
               ),
               Row(
@@ -601,4 +615,11 @@ _setNumberItems(int val) async {
   final key = 'number_items';
   prefs.setInt(key, val);
   print('Items set to $val');
+}
+
+_setNavbarItem(bool val) async {
+  final prefs = await SharedPreferences.getInstance();
+  final key = 'main_navbar_stock';
+  prefs.setBool(key, val);
+  print('Main navbar Stock: $val');
 }

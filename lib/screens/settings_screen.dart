@@ -37,6 +37,10 @@ class SettingScreenState extends State<SettingScreen> {
     });
   }
 
+  Future<Null> setInitialValue() async {
+    _usernameController.text = await FileManager.readProfile('user_name');
+    _deviceController.text = await FileManager.readProfile('device_name');
+  }
 
   @override
   void dispose() {
@@ -48,6 +52,7 @@ class SettingScreenState extends State<SettingScreen> {
   @override
   void initState() {
     super.initState();
+    setInitialValue();
   }
 
   Future<bool> _backButtonPressed() {

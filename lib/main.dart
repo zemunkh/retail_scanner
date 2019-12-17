@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:retail_scanner/screens/activation_screen.dart';
+import 'package:retail_scanner/screens/dispatch_draft_edit_screen.dart';
 import 'package:retail_scanner/screens/printer_screen.dart';
 import 'package:retail_scanner/screens/dispatch_saved_screen.dart';
 import 'package:retail_scanner/screens/settings_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import './screens/draft_screen.dart';
+import './screens/dispatch_draft_screen.dart';
 import './screens/stock_saved_screen.dart';
 import './screens/home_screen.dart';
 
@@ -56,11 +57,12 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (ctx) => activated ? HomeScreen() : ActivationScreen(),
         '/main': (ctx) => HomeScreen(),
-        DraftScreen.routeName: (ctx) => DraftScreen(),
+        DispatchDraftScreen.routeName: (ctx) => DispatchDraftScreen(),
         StockSavedScreen.routeName: (ctx) => StockSavedScreen(),
         DispatchSavedScreen.routeName: (ctx) => DispatchSavedScreen(),
         PrinterScreen.routeName: (ctx) => PrinterScreen(),
         SettingScreen.routeName: (ctx) => SettingScreen(),
+        DispatchDraftEditScreen.routeName: (ctx) => DispatchDraftEditScreen(), 
       },
       onGenerateRoute: (settings) {
         print(settings.arguments);

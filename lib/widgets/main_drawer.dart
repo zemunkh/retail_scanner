@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../screens/printer_screen.dart';
 import '../screens/dispatch_saved_screen.dart';
-import '../screens/draft_screen.dart';
+import '../screens/dispatch_draft_screen.dart';
 import '../screens/stock_saved_screen.dart';
 
 class MainDrawer extends StatelessWidget {
@@ -89,7 +89,7 @@ class MainDrawer extends StatelessWidget {
             'Dispatch Draft', 
             EvaIcons.clock,
             () {
-              Navigator.of(context).pushReplacementNamed(DraftScreen.routeName);
+              Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName);
             }
           ),
 
