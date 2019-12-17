@@ -1,19 +1,20 @@
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:retail_scanner/helper/file_manager.dart';
-import 'package:retail_scanner/model/dispatch_arguments.dart';
-import 'package:retail_scanner/screens/dispatch_draft_screen.dart';
-import 'package:retail_scanner/widgets/print_note.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../widgets/print_note.dart';
+import '../widgets/main_drawer.dart';
 
 
-class DispatchDraftEditScreen extends StatefulWidget {
-  static const routeName = '/draft_edit';
+class DraftScreen extends StatefulWidget {
+  static const routeName = '/drafts';
   @override
-  DispatchDraftEditScreenState createState() => DispatchDraftEditScreenState();
+  DraftScreenState createState() => DraftScreenState();
 }
 
-class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
+class DraftScreenState extends State<DraftScreen> {
 
   List<TextEditingController> _masterControllers = new List();
   List<TextEditingController> _productControllers = new List();
@@ -26,8 +27,6 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
   
   final _dispatchNode = FocusNode();
   final _numberNode = FocusNode();
-
-  List<String> _otherList = [];
 
   bool lockEn = true;
   bool _isButtonDisabled = true;
@@ -82,7 +81,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
   List<String> _masterList = [];
   List<String> _productList = [];
   List<String> _counterList = []; 
-  List<String> draft_name = ['draft_master_', 'draft_product_', 'draft_counter_', 'draft_other_'];
+  List<String> draft_name = ['draft_master_list', 'draft_product_list', 'draft_counter_list', 'draft_other_list'];
 
   Future<Null> _numberScanListener() async {
 
@@ -96,7 +95,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
       }
 
 
-      _masterList =  await FileManager.readDraft('${draft_name[0]}${args.}');
+      _masterList =  await FileManager.readDraft(draft_name[0]);
       _productList = await FileManager.readDraft(draft_name[1]);
       _counterList = await FileManager.readDraft(draft_name[2]);
 
@@ -239,9 +238,10 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
 
   void initDraftScreen() async {
  // Matched Counter Value
-    // List<String> draft_name = ['draft_master_list', 'draft_product_list', 'draft_counter_list', 'draft_other_list'];
+    List<String> _otherList = [];
+    List<String> draft_name = ['draft_master_list', 'draft_product_list', 'draft_counter_list', 'draft_other_list'];
 
-    // _otherList = await FileManager.readDraft('draft_other_list');
+    _otherList = await FileManager.readDraft(draft_name[3]);
     setState(() {
       createdDate = _otherList[0];
       _dispatchNoController.text = _otherList[1];
@@ -288,12 +288,6 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
 
   @override 
   Widget build(BuildContext context) {
-
-    final DraftScreenArguments args = ModalRoute.of(context).settings.arguments;
-    
-    var draftname = args.name;
-    var draftIndex = args.draftIndex;
-    // _otherList =  await FileManager.readDraft('draft_other_${args.draftIndex}');
 
     Widget _mainInput(String header, TextEditingController _mainController, FocusNode _mainNode) {
       return Row(
@@ -510,17 +504,9 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
       onWillPop: _backButtonPressed,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Draft Edit Page'),
-          leading: IconButton(
-            icon: Icon(
-              EvaIcons.arrowBack,
-            ),
-            color: Colors.white,
-            onPressed: () {
-              Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName);
-            },
-          ),
+          title: Text('Draft List'),
         ),
+        drawer: MainDrawer(),
         body: GestureDetector(
           onTap: () {
             FocusScope.of(context).requestFocus(new FocusNode());
@@ -575,6 +561,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
         ),
       ),
     );
+    
   }
 }
 

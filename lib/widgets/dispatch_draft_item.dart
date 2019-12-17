@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:retail_scanner/model/dispatch_arguments.dart';
+import 'package:retail_scanner/screens/dispatch_draft_edit_screen.dart';
 import 'package:retail_scanner/screens/dispatch_draft_screen.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,6 +37,7 @@ class DispatchDraftItem extends StatelessWidget {
               icon: Icon(EvaIcons.trash2Outline),
               onPressed: () {
                 _deleteDraft(draftName, index);
+                print('Draft name: $draftName');
                 Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName);
               },
               color: Theme.of(context).errorColor,
@@ -45,21 +47,22 @@ class DispatchDraftItem extends StatelessWidget {
       ),
       onTap: (){
         print('Tapped, Move to next screen');
-        // Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName,
-        //   arguments: DraftScreenArguments('Some Draft', index),
-        // );
+        print('Draft name: $draftName');
+        Navigator.of(context).pushReplacementNamed(DispatchDraftEditScreen.routeName,
+          arguments: DraftScreenArguments(draftName, index),
+        );
       },
     );
   }
 
   _deleteDraft(String draftName, int index) async {
     final prefs = await SharedPreferences.getInstance();
-    final key = 'draft_list';
-    List<String> files = prefs.getStringList(key);
+    final key = 'draft_bank';
+    List<String> drafts = prefs.getStringList(key);
     if(prefs != null) {
-      files.removeAt(index);
-      prefs.setStringList(key, files);
+      drafts.removeAt(index);
+      prefs.setStringList(key, drafts);
     }
-    print('Files List: $files');
+    print('Draft List: $drafts');
   }
 }
