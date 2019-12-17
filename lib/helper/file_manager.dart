@@ -15,7 +15,6 @@ _saveFilename(String key, String fname) async {
       prefs.setStringList(key, files);
     }
   }
-
   print('Files List: $files');
 }
 
@@ -114,5 +113,28 @@ class FileManager {
     final prefs = await SharedPreferences.getInstance();
     String profile = prefs.getString(key);
     return profile;
+  }
+
+  static Future<Null> saveDraftList(String key, String draft_name) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> drafts = prefs.getStringList(key);
+    if(drafts == null || drafts.isEmpty) {
+      drafts = [draft_name];
+      prefs.setStringList(key, drafts);
+    } else {
+      if(drafts[drafts.length - 1] != draft_name) {
+        drafts.add(draft_name);
+        prefs.setStringList(key, drafts);
+      }
+    }
+    print('Files List: $drafts');
+    return null;
+  }
+
+  static Future<List> _getDraftList(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> drafts = prefs.getStringList(key);
+    print('Files List: $drafts');
+    return drafts;
   }
 }

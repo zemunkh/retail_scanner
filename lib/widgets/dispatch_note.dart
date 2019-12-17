@@ -197,6 +197,10 @@ class DispatchNoteState extends State<DispatchNote> {
 
     String currentTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
     String createdAt = DateFormat("yyyy/MM/dd HH:mm").format(createdDate);
+
+    String deviceName = await FileManager.readProfile('device_name');
+    String userName = await FileManager.readProfile('user_name');
+
     List<String> draftList = [];
     int len = _masterControllers.length;
 
@@ -206,7 +210,7 @@ class DispatchNoteState extends State<DispatchNote> {
 
     if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
       for(int i = 0; i < len; i++) {
-        String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime\r\n';
+        String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime, $deviceName, $userName\r\n';
         draftList.add(buff);
         _masterList.add(_masterControllers[i].text);
         _productList.add(_productControllers[i].text);
@@ -216,8 +220,7 @@ class DispatchNoteState extends State<DispatchNote> {
     print('List Data: $draftList');
     FileManager.saveDispatchData(createdAt, draftList);
     // prepare the passing value
-    String deviceName = await FileManager.readProfile('device_name');
-    String userName = await FileManager.readProfile('user_name');
+
     // start print operation
     printNote.sample(deviceName, userName, createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
   }
@@ -226,7 +229,8 @@ class DispatchNoteState extends State<DispatchNote> {
   Future<Null> _saveTheDraft(DateTime createdDate) async {
 
     String draftedTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
-    String createdAt = DateFormat("yyyyMMdd").format(createdDate);
+    String dtime = DateFormat("yyyyMMdd").format(DateTime.now());
+    String createdAt = DateFormat("yyyy/MM/dd HH:mm::ss").format(createdDate);
     int len = _masterControllers.length;
 
     List<String> _masterList = [];
@@ -249,6 +253,12 @@ class DispatchNoteState extends State<DispatchNote> {
 
     // save the List to Shared Prefs
     // master_list, product_list, counter_list
+    String draftName = '$dtime-${_dispatchNoController.text}';
+    
+    // 20191217-1234
+    FileManager.saveDraftList('draft_bank', draftName);
+
+
     FileManager.saveDraft('draft_master_list', _masterList);
     FileManager.saveDraft('draft_product_list', _productList);
     FileManager.saveDraft('draft_counter_list', _counterList);
@@ -535,7 +545,7 @@ class DispatchNoteState extends State<DispatchNote> {
           child: Column(
             children: <Widget>[
               dateTime(DateFormat("yyyy/MM/dd HH:mm:ss").format(createdDate)),
-
+      
               _mainInput(context, 'Dispatch No:',_dispatchNoController, _dispatchNode),
               _mainInput(context, 'Total Items:',_numberOfScanController, _numberNode),
               SizedBox(height: 15,),

@@ -208,13 +208,16 @@ class DraftScreenState extends State<DraftScreen> {
     List<String> draftList = [];
     int len = _masterControllers.length;
 
+    String deviceName = await FileManager.readProfile('device_name');
+    String userName = await FileManager.readProfile('user_name');
+
     List<String> _masterList = [];
     List<String> _productList = [];
     List<String> _counterList = [];  // Matched Counter Value
     
     if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
       for(int i = 0; i < len; i++) {
-        String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime\r\n';
+        String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime, $deviceName, $userName\r\n';    
         draftList.add(buff);
         _masterList.add(_masterControllers[i].text);
         _productList.add(_productControllers[i].text);
@@ -229,8 +232,6 @@ class DraftScreenState extends State<DraftScreen> {
     FileManager.removeDraft('draft_product_list');
     FileManager.removeDraft('draft_counter_list');
     FileManager.removeDraft('draft_other_list');
-    String deviceName = await FileManager.readProfile('device_name');
-    String userName = await FileManager.readProfile('user_name');
     // start print operation
     printNote.sample(deviceName, userName, createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
   }
