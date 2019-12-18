@@ -23,9 +23,15 @@ class StockInState extends State<StockIn> {
   bool oneToMany = true;
   var counter = 0;
 
+  String deviceName;
+  String userName;
+
   Future<Null> _compareData() async {
     final masterCode = _masterController.text;
     final productCode = _productController.text;
+
+    userName = await FileManager.readProfile('user_name');
+    deviceName = await FileManager.readProfile('device_name');
 
     print('Comparison: $masterCode : $productCode');
 
@@ -36,7 +42,7 @@ class StockInState extends State<StockIn> {
       } else {
         matched = false;
       }
-      FileManager.saveScanData(masterCode, productCode, counter, matched, DateTime.now());
+      FileManager.saveScanData(masterCode, productCode, counter, matched, DateTime.now(), userName, deviceName);
     });
   }
 
@@ -106,7 +112,7 @@ class StockInState extends State<StockIn> {
 
     FocusScope.of(context).requestFocus(node);
   }
-    
+
   @override
   void dispose() {
     super.dispose();

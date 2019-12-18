@@ -1,7 +1,8 @@
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:retail_scanner/helper/file_manager.dart';
-import 'package:retail_scanner/model/dispatch_arguments.dart';
 import 'package:retail_scanner/screens/dispatch_draft_screen.dart';
 import 'package:retail_scanner/widgets/print_note.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -95,10 +96,10 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
           _isButtonDisabled = false;
       }
 
-
-      _masterList =  await FileManager.readDraft('${draft_name[0]}${args.}');
-      _productList = await FileManager.readDraft(draft_name[1]);
-      _counterList = await FileManager.readDraft(draft_name[2]);
+      int draftIndex = await FileManager.getSelectedIndex();
+      _masterList =  await FileManager.readDraft('draft_master_$draftIndex');
+      _productList = await FileManager.readDraft('draft_product_$draftIndex');
+      _counterList = await FileManager.readDraft('draft_counter_$draftIndex');
 
       await Future.delayed(const Duration(milliseconds: 1000), (){
         _numberOfScanController.text = trueVal;
@@ -208,9 +209,17 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     String createdAt = createdDate;
     List<String> draftList = [];
     int len = _masterControllers.length;
+    
+    int draftIndex = await FileManager.getSelectedIndex();
 
     String deviceName = await FileManager.readProfile('device_name');
+    if(deviceName.isEmpty) {
+      deviceName = 'Unknown';
+    }
     String userName = await FileManager.readProfile('user_name');
+    if(userName.isEmpty) {
+      userName = 'Unknown';
+    }
 
     List<String> _masterList = [];
     List<String> _productList = [];
@@ -229,25 +238,26 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     FileManager.saveDispatchData(createdAt, draftList);
     // prepare the passing value
 
-    FileManager.removeDraft('draft_master_list');
-    FileManager.removeDraft('draft_product_list');
-    FileManager.removeDraft('draft_counter_list');
-    FileManager.removeDraft('draft_other_list');
+    FileManager.removeDraft('draft_master_$draftIndex');
+    FileManager.removeDraft('draft_product_$draftIndex');
+    FileManager.removeDraft('draft_counter_$draftIndex');
+    FileManager.removeDraft('draft_other_$draftIndex');
+    FileManager.removeFromBank(draftIndex);
     // start print operation
     printNote.sample(deviceName, userName, createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
   }
 
   void initDraftScreen() async {
  // Matched Counter Value
-    // List<String> draft_name = ['draft_master_list', 'draft_product_list', 'draft_counter_list', 'draft_other_list'];
-
-    // _otherList = await FileManager.readDraft('draft_other_list');
+    int draftIndex = await FileManager.getSelectedIndex();
+    print('Selected number: $draftIndex');
+    _otherList = await FileManager.readDraft('draft_other_$draftIndex');
+    print('Other list: $_otherList');
     setState(() {
       createdDate = _otherList[0];
       _dispatchNoController.text = _otherList[1];
       _numberOfScanController.text = _otherList[2] + r'$';
     });
-
   }
 
   Future<bool> _backButtonPressed() {
@@ -279,20 +289,20 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
 
   @override
   void initState() {
-    super.initState();
     printNote = PrintNote();
     _dispatchNoController.addListener(_dipatchNoListener);
     _numberOfScanController.addListener(_numberScanListener);
     initDraftScreen();
+    super.initState();
   }
 
   @override 
   Widget build(BuildContext context) {
 
-    final DraftScreenArguments args = ModalRoute.of(context).settings.arguments;
+    // final DraftScreenArguments args = ModalRoute.of(context).settings.arguments;
     
-    var draftname = args.name;
-    var draftIndex = args.draftIndex;
+    // var draftname = args.name;
+    // var draftIndex = args.draftIndex;
     // _otherList =  await FileManager.readDraft('draft_other_${args.draftIndex}');
 
     Widget _mainInput(String header, TextEditingController _mainController, FocusNode _mainNode) {
@@ -300,19 +310,19 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           Expanded(
-            flex: 6,
+            flex: 3,
             child: Text(
               '$header:',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 20, 
+                fontSize: 16, 
                 color: Color(0xFF004B83),
                 fontWeight: FontWeight.bold,
               ),
             )
           ),
           Expanded(
-            flex: 4,
+            flex: 7,
             child: Stack(
               alignment: Alignment(1.0, 1.0),
               children: <Widget>[
@@ -381,18 +391,18 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
               child: Center(
                 child: TextFormField(
                   style: TextStyle(
-                    fontSize: 20, 
+                    fontSize: 16, 
                     color: Color(0xFF004B83),
                     fontWeight: FontWeight.bold,
                   ),
-                  enabled: lockEn,
+                  enabled: typeController == 'master' ? false : true,
                   decoration: InputDecoration.collapsed(
                     filled: true,
                     fillColor: Colors.white,
                     hintText: typeController,
                     hintStyle: TextStyle(
                       color: Color(0xFF004B83),
-                      fontSize: 20, 
+                      fontSize: 16, 
                       fontWeight: FontWeight.w300,
                     ),
                     border: OutlineInputBorder(
@@ -484,6 +494,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
               setState(() {
                 lockEn = false;
               });
+              Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName);
             });
           },
           child: Text(
@@ -498,8 +509,8 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
           shape: StadiumBorder(),
           color: Colors.teal[400],
           splashColor: Colors.blue[100],
-          height: 50,
-          minWidth: 200,
+          height: 30,
+          minWidth: 100,
           elevation: 2,
         )
       );

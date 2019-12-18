@@ -239,15 +239,14 @@ class DraftScreenState extends State<DraftScreen> {
   void initDraftScreen() async {
  // Matched Counter Value
     List<String> _otherList = [];
-    List<String> draft_name = ['draft_master_list', 'draft_product_list', 'draft_counter_list', 'draft_other_list'];
+    List<String> draftName = ['draft_master_list', 'draft_product_list', 'draft_counter_list', 'draft_other_list'];
 
-    _otherList = await FileManager.readDraft(draft_name[3]);
+    _otherList = await FileManager.readDraft(draftName[3]);
     setState(() {
       createdDate = _otherList[0];
       _dispatchNoController.text = _otherList[1];
       _numberOfScanController.text = _otherList[2] + r'$';
     });
-
   }
 
   Future<bool> _backButtonPressed() {

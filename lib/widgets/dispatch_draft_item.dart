@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:retail_scanner/model/dispatch_arguments.dart';
+import 'package:retail_scanner/helper/file_manager.dart';
 import 'package:retail_scanner/screens/dispatch_draft_edit_screen.dart';
 import 'package:retail_scanner/screens/dispatch_draft_screen.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
@@ -12,21 +12,10 @@ class DispatchDraftItem extends StatelessWidget {
 
   DispatchDraftItem(this.draftName, this.index);
 
-  List<String> _masterList = [];
-  List<String> _productList = [];
-  List<String> _counterList = [];  // Matched Counter Value
-  List<String> _otherList = [];
-
-  Future<Null> loadData() {
-    List<String> header = ['draft_master_$index', 'draft_product_$index', 'draft_counter_$index', 'draft_other_$index'];
-
-    
-
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      leading: Text('${index + 1}', style: TextStyle(fontWeight: FontWeight.bold),),
       title: Text(draftName),
       trailing: Container(
         width: 100,
@@ -36,7 +25,7 @@ class DispatchDraftItem extends StatelessWidget {
             IconButton(
               icon: Icon(EvaIcons.trash2Outline),
               onPressed: () {
-                _deleteDraft(draftName, index);
+                FileManager.removeFromBank(index);
                 print('Draft name: $draftName');
                 Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName);
               },
@@ -48,21 +37,10 @@ class DispatchDraftItem extends StatelessWidget {
       onTap: (){
         print('Tapped, Move to next screen');
         print('Draft name: $draftName');
-        Navigator.of(context).pushReplacementNamed(DispatchDraftEditScreen.routeName,
-          arguments: DraftScreenArguments(draftName, index),
-        );
+        FileManager.setSelectedIndex(index);
+
+        Navigator.of(context).pushReplacementNamed(DispatchDraftEditScreen.routeName);
       },
     );
-  }
-
-  _deleteDraft(String draftName, int index) async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'draft_bank';
-    List<String> drafts = prefs.getStringList(key);
-    if(prefs != null) {
-      drafts.removeAt(index);
-      prefs.setStringList(key, drafts);
-    }
-    print('Draft List: $drafts');
   }
 }

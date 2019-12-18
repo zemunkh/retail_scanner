@@ -29,14 +29,14 @@ class FileManager {
     });
   }
 
-  static void saveScanData(String masterCode, String productCode, int counter, bool matched, DateTime currentDate) {
+  static void saveScanData(String masterCode, String productCode, int counter, bool matched, DateTime currentDate, String userName, String deviceName) {
     String filename = '${DateFormat("yyyyMMdd").format(currentDate)}';
     String time = DateFormat("yyyy/MM/dd HH:mm:ss").format(currentDate);
     print('Time: $time');
 
     String matching = matched ? 'matched' : 'unmatched';
 
-    writeToStockCsv(filename, time, masterCode, productCode, counter, matching).then((_){
+    writeToStockCsv(filename, time, masterCode, productCode, counter, matching, userName, deviceName).then((_){
       _saveFilename('stock_files', 'stock_$filename.csv');
     });
   }
@@ -54,7 +54,6 @@ class FileManager {
     if(!await file.exists()) {
       print('Creating CSV file');
       file.createSync(recursive: true);
-
       return file;
     } else {
       print('Opening Existing CSV file');
@@ -62,11 +61,11 @@ class FileManager {
     }
   }
 
-  static Future<Null> writeToStockCsv(String filename, String time, String key1, String key2, int counter, String matching) async {
+  static Future<Null> writeToStockCsv(String filename, String time, String key1, String key2, int counter, String matching, String userName, String deviceName) async {
     final file = await getCsvFile(filename);
 
     // String countedValue = await getCounter(filename, key);
-    String newData = '$time, $key1, $key2, ${counter.toString()}, $matching \r\n';
+    String newData = '$time, $key1, $key2, ${counter.toString()}, $matching, $userName, $deviceName \r\n';
 
     String content = file.readAsStringSync();
     file.writeAsStringSync(content + newData);
@@ -115,15 +114,15 @@ class FileManager {
     return profile;
   }
 
-  static Future<Null> saveDraftList(String key, String draft_name) async {
+  static Future<Null> saveDraftList(String key, String draftName) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> drafts = prefs.getStringList(key);
     if(drafts == null || drafts.isEmpty) {
-      drafts = [draft_name];
+      drafts = [draftName];
       prefs.setStringList(key, drafts);
     } else {
-      if(drafts[drafts.length - 1] != draft_name) {
-        drafts.add(draft_name);
+      if(drafts[drafts.length - 1] != draftName) {
+        drafts.add(draftName);
         prefs.setStringList(key, drafts);
       }
     }
@@ -140,4 +139,38 @@ class FileManager {
     print('Draft List: $drafts');
     return drafts;
   }
+
+  static Future<Null> setSelectedIndex(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('draft_selected', index);
+    return null;
+  }
+  static Future<int> getSelectedIndex() async {
+    final prefs = await SharedPreferences.getInstance();
+    int index = prefs.getInt('draft_selected');
+    return index;
+  }
+
+  static Future<List> getDraftBank() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'draft_bank';
+    List<String> drafts = prefs.getStringList(key);
+    if(drafts == null) {
+      drafts = [];
+    }
+    print('Draft Bank: $drafts');
+    return drafts;
+  }
+  static Future<List> removeFromBank(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'draft_bank';
+    List<String> drafts = prefs.getStringList(key);
+    if(prefs != null) {
+      drafts.removeAt(index);
+      prefs.setStringList(key, drafts);
+    }
+    print('Draft List: $drafts');
+  }
+
+
 }

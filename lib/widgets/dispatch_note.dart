@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:retail_scanner/helper/file_manager.dart';
-import 'package:retail_scanner/model/dispatch.dart';
 import 'package:retail_scanner/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
@@ -28,11 +27,12 @@ class DispatchNoteState extends State<DispatchNote> {
   final _numberNode = FocusNode();
 
   bool _isButtonDisabled = true;
-
+  bool _isFormEnabled = true;
   // final _mainFormKey = GlobalKey<FormState>();
   // final _scannerFormKey = GlobalKey<FormFieldState>();
 
   // Widget _form;
+  List<bool> keyEnableList = [false, false, false, false, false, false, false, false];
   List<bool> matchList = [false, false, false, false, false, false, false, false];
   List<int> counterList = [0, 0, 0, 0, 0, 0, 0, 0];
 
@@ -187,6 +187,9 @@ class DispatchNoteState extends State<DispatchNote> {
               if((length - 1) > index){
                 FocusScope.of(context).requestFocus(_masterFocusNodes[index + 1]);
               } else {
+                setState(() {
+                  _isFormEnabled = false;
+                });
                 FocusScope.of(context).requestFocus(_productFocusNodes[0]);
               }
             }
@@ -201,8 +204,13 @@ class DispatchNoteState extends State<DispatchNote> {
     String createdAt = DateFormat("yyyy/MM/dd HH:mm").format(createdDate);
 
     String deviceName = await FileManager.readProfile('device_name');
+    if(deviceName.isEmpty) {
+      deviceName = 'Unknown';
+    }
     String userName = await FileManager.readProfile('user_name');
-
+    if(userName.isEmpty) {
+      userName = 'Unknown';
+    }
     List<String> draftList = [];
     int len = _masterControllers.length;
 
@@ -232,7 +240,7 @@ class DispatchNoteState extends State<DispatchNote> {
 
     String draftedTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
     String dtime = DateFormat("yyyyMMdd").format(DateTime.now());
-    String createdAt = DateFormat("yyyy/MM/dd HH:mm::ss").format(createdDate);
+    String createdAt = DateFormat("yyyy/MM/dd HH:mm:ss").format(createdDate);
     int len = _masterControllers.length;
 
     List<String> _masterList = [];
@@ -259,11 +267,12 @@ class DispatchNoteState extends State<DispatchNote> {
 
     List<String> draftBank = await FileManager.getDraftList('draft_bank');
     String index = '${draftBank.length}';
-    String draftName = '$dtime-$index';
+    String draftName = '${_dispatchNoController.text} /$dtime/';
 
     // 20191217-1
     FileManager.saveDraftList('draft_bank', draftName);
     // length will decide what number of the draft list.
+    print('Draft names: draft_master_$index, draft_product_$index');
 
     FileManager.saveDraft('draft_master_$index', _masterList);
     FileManager.saveDraft('draft_product_$index', _productList);
@@ -390,6 +399,7 @@ class DispatchNoteState extends State<DispatchNote> {
                     color: Color(0xFF004B83),
                     fontWeight: FontWeight.bold,
                   ),
+                  enabled: typeController == 'master' ? _isFormEnabled : true,
                   decoration: InputDecoration.collapsed(
                     filled: true,
                     fillColor: Colors.white,
