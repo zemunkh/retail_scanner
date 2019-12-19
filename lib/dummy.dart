@@ -24,7 +24,7 @@ class DraftScreenState extends State<DraftScreen> {
 
   final _dispatchNoController = TextEditingController();
   final _numberOfScanController = TextEditingController();
-  
+
   final _dispatchNode = FocusNode();
   final _numberNode = FocusNode();
 
@@ -32,7 +32,7 @@ class DraftScreenState extends State<DraftScreen> {
   bool _isButtonDisabled = true;
 
   // final _mainFormKey = GlobalKey<FormState>();
-  // final _scannerFormKey = GlobalKey<FormFieldState>(); 
+  // final _scannerFormKey = GlobalKey<FormFieldState>();
 
   PrintNote printNote;
 
@@ -80,7 +80,7 @@ class DraftScreenState extends State<DraftScreen> {
 
   List<String> _masterList = [];
   List<String> _productList = [];
-  List<String> _counterList = []; 
+  List<String> _counterList = [];
   List<String> draft_name = ['draft_master_list', 'draft_product_list', 'draft_counter_list', 'draft_other_list'];
 
   Future<Null> _numberScanListener() async {
@@ -102,11 +102,11 @@ class DraftScreenState extends State<DraftScreen> {
       await Future.delayed(const Duration(milliseconds: 1000), (){
         _numberOfScanController.text = trueVal;
       }).then((value){
-        
-        // set the number of inputs will be built in the screen 
+
+        // set the number of inputs will be built in the screen
         if(int.parse(trueVal) < 9) {
           _setNumberItems(int.parse(trueVal));
-          
+
           print('Controller Length: ${_masterControllers.length}');
 
           if(_masterControllers.length < int.parse(trueVal) ) {
@@ -120,7 +120,7 @@ class DraftScreenState extends State<DraftScreen> {
                 _masterControllers[i].text = _masterList[i];
                 _productControllers[i].text = _productList[i];
                 counterList[i] = int.parse(_counterList[i]);
- 
+
                 _masterFocusNodes.add(new FocusNode());
                 _productFocusNodes.add(new FocusNode());
               }
@@ -136,7 +136,7 @@ class DraftScreenState extends State<DraftScreen> {
         } else {
           _setNumberItems(8);
           print('Too many :(');
-        } 
+        }
         _numberNode.unfocus();
         FocusScope.of(context).requestFocus(new FocusNode());
       });
@@ -165,7 +165,7 @@ class DraftScreenState extends State<DraftScreen> {
     } else if(_typeController == 'product') {
       buffer = _productControllers[index].text;
     }
-    
+
       if(buffer.endsWith(r'$')){
         buffer = buffer.substring(0, buffer.length - 1);
         trueVal = buffer;
@@ -179,7 +179,7 @@ class DraftScreenState extends State<DraftScreen> {
         } else {
           print('Nothing to do');
         }
-        
+
         Future.delayed(const Duration(milliseconds: 200), (){
           setState(() {
             _controller.text = trueVal;
@@ -193,7 +193,7 @@ class DraftScreenState extends State<DraftScreen> {
               } else {
                 FocusScope.of(context).requestFocus(new FocusNode());
               }
-              
+
             }
           }
         });
@@ -214,10 +214,10 @@ class DraftScreenState extends State<DraftScreen> {
     List<String> _masterList = [];
     List<String> _productList = [];
     List<String> _counterList = [];  // Matched Counter Value
-    
+
     if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
       for(int i = 0; i < len; i++) {
-        String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime, $deviceName, $userName\r\n';    
+        String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime, $deviceName, $userName\r\n';
         draftList.add(buff);
         _masterList.add(_masterControllers[i].text);
         _productList.add(_productControllers[i].text);
@@ -285,7 +285,7 @@ class DraftScreenState extends State<DraftScreen> {
     initDraftScreen();
   }
 
-  @override 
+  @override
   Widget build(BuildContext context) {
 
     Widget _mainInput(String header, TextEditingController _mainController, FocusNode _mainNode) {
@@ -298,7 +298,7 @@ class DraftScreenState extends State<DraftScreen> {
               '$header:',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 20, 
+                fontSize: 20,
                 color: Color(0xFF004B83),
                 fontWeight: FontWeight.bold,
               ),
@@ -314,7 +314,7 @@ class DraftScreenState extends State<DraftScreen> {
                   child: Center(
                     child: TextFormField(
                       style: TextStyle(
-                        fontSize: 16, 
+                        fontSize: 16,
                         color: Color(0xFF004B83),
                         fontWeight: FontWeight.bold,
                       ),
@@ -323,7 +323,7 @@ class DraftScreenState extends State<DraftScreen> {
                         fillColor: Colors.white,
                         hintText: header,
                         hintStyle: TextStyle(
-                          color: Color(0xFF004B83), 
+                          color: Color(0xFF004B83),
                           fontWeight: FontWeight.w200,
                         ),
                         border: OutlineInputBorder(
@@ -333,8 +333,8 @@ class DraftScreenState extends State<DraftScreen> {
                           color: Colors.yellowAccent,
                         ),
                         suffixIcon: IconButton(
-                          icon: Icon(EvaIcons.close, 
-                            color: Colors.blueAccent, 
+                          icon: Icon(EvaIcons.close,
+                            color: Colors.blueAccent,
                             size: 32,
                           ),
                           onPressed: () {
@@ -374,7 +374,7 @@ class DraftScreenState extends State<DraftScreen> {
               child: Center(
                 child: TextFormField(
                   style: TextStyle(
-                    fontSize: 20, 
+                    fontSize: 20,
                     color: Color(0xFF004B83),
                     fontWeight: FontWeight.bold,
                   ),
@@ -385,7 +385,7 @@ class DraftScreenState extends State<DraftScreen> {
                     hintText: typeController,
                     hintStyle: TextStyle(
                       color: Color(0xFF004B83),
-                      fontSize: 20, 
+                      fontSize: 20,
                       fontWeight: FontWeight.w300,
                     ),
                     border: OutlineInputBorder(
@@ -436,7 +436,7 @@ class DraftScreenState extends State<DraftScreen> {
                   borderRadius: BorderRadius.all(
                       Radius.circular(3),
                   ),
-                  side: BorderSide(width: 1, color: Colors.black), 
+                  side: BorderSide(width: 1, color: Colors.black),
                 ),
               ),
               child: Center(
@@ -496,9 +496,9 @@ class DraftScreenState extends State<DraftScreen> {
           elevation: 2,
         )
       );
-    }  
-    
-    
+    }
+
+
     return WillPopScope(
       onWillPop: _backButtonPressed,
       child: Scaffold(
@@ -543,7 +543,7 @@ class DraftScreenState extends State<DraftScreen> {
                           ),
                         );
                       },
-                      
+
                     ),
                 ),
                 Row(
@@ -560,7 +560,7 @@ class DraftScreenState extends State<DraftScreen> {
         ),
       ),
     );
-    
+
   }
 }
 

@@ -33,81 +33,84 @@ class MainDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: Column(
-        children: <Widget>[
-          Container(
-            height: 120,
-            width: double.infinity,
-            padding: EdgeInsets.all(20),
-            alignment: Alignment.centerLeft,
-            color: Theme.of(context).accentColor,
-            child: Text(
-              'Documents',
-              style: TextStyle(
-                fontWeight: FontWeight.w900,
-                fontSize: 30,
-                color: Colors.grey[700],
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Column(
+          children: <Widget>[
+            Container(
+              height: 80,
+              width: double.infinity,
+              padding: EdgeInsets.all(10),
+              alignment: Alignment.bottomLeft,
+              color: Theme.of(context).accentColor,
+              child: Text(
+                'Menu',
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 24,
+                  color: Colors.grey[700],
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 20,),
-          buildListTile(
-            'Home: Stock Check', 
-            EvaIcons.home,
-            () {
-              Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
-              _setNavbarItem(true);
-            }
-          ),
-          buildListTile(
-            'Home: Dispatch Note', 
-            EvaIcons.home,
-            () {
-              Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
-              _setNavbarItem(false);
-            }
-          ),
+            SizedBox(height: 20,),
+            buildListTile(
+              'Home: Stock Check', 
+              EvaIcons.home,
+              () {
+                Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+                _setNavbarItem(true);
+              }
+            ),
+            buildListTile(
+              'Home: Dispatch Note', 
+              EvaIcons.home,
+              () {
+                Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+                _setNavbarItem(false);
+              }
+            ),
 
-          new Divider(height: 15.0,color: Colors.black87,),
-          
-          SizedBox(height:  20),
-          buildListTile(
-            'Stock Check Saved', 
-            EvaIcons.checkmarkCircle,
-            () {
-              Navigator.of(context).pushReplacementNamed(StockSavedScreen.routeName);
-            }
-          ),
-          buildListTile(
-            'Dispatch Saved', 
-            EvaIcons.carOutline,
-            () {
-              Navigator.of(context).pushReplacementNamed(DispatchSavedScreen.routeName);
-            }
-          ),          
-          buildListTile(
-            'Dispatch Draft', 
-            EvaIcons.clock,
-            () {
-              Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName);
-            }
-          ),
+            new Divider(height: 15.0,color: Colors.black87,),
+            
+            SizedBox(height:  20),
+            buildListTile(
+              'Stock Check Saved', 
+              EvaIcons.checkmarkCircle,
+              () {
+                Navigator.of(context).pushReplacementNamed(StockSavedScreen.routeName);
+              }
+            ),
+            buildListTile(
+              'Dispatch Saved', 
+              EvaIcons.carOutline,
+              () {
+                Navigator.of(context).pushReplacementNamed(DispatchSavedScreen.routeName);
+              }
+            ),          
+            buildListTile(
+              'Dispatch Draft', 
+              EvaIcons.clock,
+              () {
+                Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName);
+              }
+            ),
 
-          buildListTile(
-            'Printer', 
-            EvaIcons.printer,
-            () {
-              Navigator.of(context).pushReplacementNamed(PrinterScreen.routeName);
-            }
-          ),
-          buildListTile(
-            'Settings', 
-            EvaIcons.settings2Outline,
-            () {
-              Navigator.of(context).pushReplacementNamed(SettingScreen.routeName);
-            }
-          ),
-        ],
+            buildListTile(
+              'Printer', 
+              EvaIcons.printer,
+              () {
+                Navigator.of(context).pushReplacementNamed(PrinterScreen.routeName);
+              }
+            ),
+            buildListTile(
+              'Settings', 
+              EvaIcons.settings2Outline,
+              () {
+                Navigator.of(context).pushReplacementNamed(SettingScreen.routeName);
+              }
+            ),
+          ],
+        ),
       ),
     );
   }

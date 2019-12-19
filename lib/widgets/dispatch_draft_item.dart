@@ -3,7 +3,6 @@ import 'package:retail_scanner/helper/file_manager.dart';
 import 'package:retail_scanner/screens/dispatch_draft_edit_screen.dart';
 import 'package:retail_scanner/screens/dispatch_draft_screen.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 
 class DispatchDraftItem extends StatelessWidget {

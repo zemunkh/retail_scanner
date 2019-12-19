@@ -16,9 +16,15 @@ class SettingScreenState extends State<SettingScreen> {
 
   final _deviceController = TextEditingController();
   final _usernameController = TextEditingController();
+  final _companyController = TextEditingController();
+  final _remark1Controller = TextEditingController();
+  final _remark2Controller = TextEditingController();
   
   FocusNode _deviceNode = FocusNode();
   FocusNode _usernameNode = FocusNode();
+  FocusNode _companyNode = FocusNode();
+  FocusNode _remark1Node = FocusNode();
+  FocusNode _remark2Node = FocusNode();
 
   bool lockEn = true;
 
@@ -163,10 +169,15 @@ class SettingScreenState extends State<SettingScreen> {
             print('You pressed Save!');
             String dname = _deviceController.text;
             String uname = _usernameController.text;
+            String company = _companyController.text;
+            String remark1 = _remark1Controller.text;
+            String remark2 = _remark2Controller.text;
             if(dname != '' && uname != '') {
-              FileManager.saveProfile('device_name', dname).then((_){
-                FileManager.saveProfile('user_name',uname);
-              });
+              FileManager.saveProfile('device_name', dname);
+              FileManager.saveProfile('user_name',uname);
+              FileManager.saveProfile('company_name',uname);
+              FileManager.saveProfile('remark1',uname);
+              FileManager.saveProfile('remark2',uname);
               print('Saving now!');
               _scaffoldKey.currentState.showSnackBar(SnackBar(
                 content: new Text("User data is saved successfully!", textAlign: TextAlign.center,),
@@ -221,6 +232,9 @@ class SettingScreenState extends State<SettingScreen> {
                 
                 _mainInput('Device Name',_deviceController, _deviceNode),
                 _mainInput('Username',_usernameController, _usernameNode),
+                _mainInput('Company',_companyController, _companyNode),
+                _mainInput('Remark 1',_remark1Controller, _remark1Node),
+                _mainInput('Remark 2',_remark2Controller, _remark2Node),
                 SizedBox(height: 15,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

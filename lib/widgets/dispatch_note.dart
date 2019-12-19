@@ -165,11 +165,13 @@ class DispatchNoteState extends State<DispatchNote> {
           // ================================================ //
           // Auto Saving Draft Feature can be started in here //
           // ================================================ //
-          int total = 0;
+          bool isEmpty = true;
           for(int i = 0; i < length; i++) {
-            total += counterList[i];
-          }
-          if(_dispatchNoController.text != '' && _numberOfScanController.text != '' && total >= length) {
+            if(_masterControllers[index].text == ''){
+              isEmpty = isEmpty && false;
+            }
+           }
+          if(_dispatchNoController.text != '' && _numberOfScanController.text != '' && isEmpty) {
             setState(() {
               _isButtonDisabled = false;
             });
@@ -204,13 +206,27 @@ class DispatchNoteState extends State<DispatchNote> {
     String createdAt = DateFormat("yyyy/MM/dd HH:mm").format(createdDate);
 
     String deviceName = await FileManager.readProfile('device_name');
-    if(deviceName.isEmpty) {
+    if(deviceName == null) {
       deviceName = 'Unknown';
     }
     String userName = await FileManager.readProfile('user_name');
-    if(userName.isEmpty) {
+    if(userName == null) {
       userName = 'Unknown';
     }
+    String companyName = await FileManager.readProfile('company_name');
+    if(companyName == null) {
+      companyName = 'Unknown';
+    }
+    String remark1 = await FileManager.readProfile('remark1');
+    if(remark1 == null) {
+      remark1 = 'Unknown';
+    }
+    String remark2 = await FileManager.readProfile('remark2');
+    if(remark2 == null) {
+      remark2 = 'Unknown';
+    }
+
+
     List<String> draftList = [];
     int len = _masterControllers.length;
 
@@ -232,7 +248,7 @@ class DispatchNoteState extends State<DispatchNote> {
     // prepare the passing value
 
     // start print operation
-    printNote.sample(deviceName, userName, createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
+    printNote.sample(deviceName, userName, companyName, remark1, remark2, createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
   }
 
 

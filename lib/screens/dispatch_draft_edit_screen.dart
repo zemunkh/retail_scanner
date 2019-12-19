@@ -122,7 +122,9 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                 _masterControllers[i].text = _masterList[i];
                 _productControllers[i].text = _productList[i];
                 counterList[i] = int.parse(_counterList[i]);
- 
+                if(counterList[i] > 0) {
+                  matchList[i] = true;
+                }
                 _masterFocusNodes.add(new FocusNode());
                 _productFocusNodes.add(new FocusNode());
               }
@@ -220,7 +222,18 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     if(userName.isEmpty) {
       userName = 'Unknown';
     }
-
+    String companyName = await FileManager.readProfile('company_name');
+    if(companyName.isEmpty) {
+      companyName = 'Unknown';
+    }
+    String remark1 = await FileManager.readProfile('remark1');
+    if(remark1.isEmpty) {
+      remark1 = 'Unknown';
+    }
+    String remark2 = await FileManager.readProfile('remark2');
+    if(remark2.isEmpty) {
+      remark2 = 'Unknown';
+    }
     List<String> _masterList = [];
     List<String> _productList = [];
     List<String> _counterList = [];  // Matched Counter Value
@@ -244,7 +257,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     FileManager.removeDraft('draft_other_$draftIndex');
     FileManager.removeFromBank(draftIndex);
     // start print operation
-    printNote.sample(deviceName, userName, createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
+    printNote.sample(deviceName, userName, companyName, remark1, remark2, createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
   }
 
   void initDraftScreen() async {

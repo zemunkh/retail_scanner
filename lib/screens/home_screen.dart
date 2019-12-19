@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Style.Colors.background,
         key: _scaffoldKey,
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(50.0),
+          preferredSize: Size.fromHeight(40.0),
           child: AppBar(
             elevation: 2.0,
             backgroundColor: Colors.redAccent,
@@ -123,43 +123,6 @@ class _HomeScreenState extends State<HomeScreen> {
               default:
                 return null;
             }
-          },
-        ),
-        bottomNavigationBar: StreamBuilder(
-          stream: _bottomNavBarBlock.itemStream,
-          initialData: _bottomNavBarBlock.defaultItem,
-          builder: (BuildContext context, AsyncSnapshot<NavBarItem> snapshot) {
-            return BottomNavigationBar(
-              elevation: 10,
-              unselectedFontSize: 8,
-              selectedFontSize: 12,
-              fixedColor: Style.Colors.mainColor,
-              type: BottomNavigationBarType.fixed,
-              currentIndex: snapshot.data.index,
-              onTap: _bottomNavBarBlock.pickItem,
-              items: [
-                BottomNavigationBarItem(
-                  title: Text(
-                    'Stock Check',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold
-                    ),
-                  ),
-                  icon: Icon(EvaIcons.checkmarkCircle),
-                  activeIcon: Icon(EvaIcons.checkmarkCircleOutline),
-                ),
-                BottomNavigationBarItem(
-                  title: Text(
-                    'Dispatch Note',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold
-                    ),
-                  ),
-                  icon: Icon(EvaIcons.carOutline),
-                  activeIcon: Icon(EvaIcons.car),
-                ),                          
-              ],
-            );
           },
         ),
       ),
