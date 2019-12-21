@@ -1,10 +1,7 @@
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
-import 'package:retail_scanner/helper/file_manager.dart';
 
 class PrintNote {
   BlueThermalPrinter bluetooth = BlueThermalPrinter.instance;
-
-
 
    sample(String dname, String username, String companyName, String remark1, String remark2, String createdAt, String _dispatchNo, String _totalNumber, List<String> _masterList, List<String> _productList, List<String> _counterList, String currentTime) async {
 
@@ -19,6 +16,7 @@ class PrintNote {
     // 2- ESC_ALIGN_RIGHT
     bluetooth.isConnected.then((isConnected) {
       if (isConnected) {
+        bluetooth.printNewLine();
         bluetooth.printCustom("Dispatch Note:",3,1);
         bluetooth.printCustom("Company: $companyName",0,1);
         bluetooth.printCustom("Remark 1: $remark1",0,1);

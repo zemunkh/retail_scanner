@@ -54,16 +54,16 @@ class MainDrawer extends StatelessWidget {
             ),
             SizedBox(height: 20,),
             buildListTile(
-              'Home: Stock Check', 
-              EvaIcons.home,
+              'Stock Check', 
+              EvaIcons.checkmarkCircleOutline,
               () {
                 Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
                 _setNavbarItem(true);
               }
             ),
             buildListTile(
-              'Home: Dispatch Note', 
-              EvaIcons.home,
+              'Dispatch Note', 
+              EvaIcons.carOutline,
               () {
                 Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
                 _setNavbarItem(false);

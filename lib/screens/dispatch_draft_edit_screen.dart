@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:retail_scanner/helper/file_manager.dart';
 import 'package:retail_scanner/screens/dispatch_draft_screen.dart';
 import 'package:retail_scanner/widgets/print_note.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -58,6 +59,15 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
         matchList[index] = false;
       }
     });
+    for(int i=0; i < _masterControllers.length; i++){
+      setState(() {
+        if(counterList[i] > 0) {
+          _isButtonDisabled = _isButtonDisabled && false;
+        } else {
+          _isButtonDisabled = false;
+        }
+      });
+    }
   }
 
   String buffer = '';
@@ -83,7 +93,6 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
   List<String> _masterList = [];
   List<String> _productList = [];
   List<String> _counterList = []; 
-  List<String> draft_name = ['draft_master_', 'draft_product_', 'draft_counter_', 'draft_other_'];
 
   Future<Null> _numberScanListener() async {
 
@@ -91,10 +100,6 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     if(buffer.endsWith(r'$')) {
       buffer = buffer.substring(0, buffer.length - 1);
       trueVal = buffer;
-
-      if(_dispatchNoController.text != null) {
-          _isButtonDisabled = false;
-      }
 
       int draftIndex = await FileManager.getSelectedIndex();
       _masterList =  await FileManager.readDraft('draft_master_$draftIndex');
@@ -105,41 +110,43 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
         _numberOfScanController.text = trueVal;
       }).then((value){
         
-        // set the number of inputs will be built in the screen 
-        if(int.parse(trueVal) < 9) {
-          _setNumberItems(int.parse(trueVal));
-          
-          print('Controller Length: ${_masterControllers.length}');
+        // set the number of inputs will be built in the screen
+        if(trueVal != '') {
+          if(int.parse(trueVal) < 9) {
+            _setNumberItems(int.parse(trueVal));
+            
+            print('Controller Length: ${_masterControllers.length}');
 
-          if(_masterControllers.length < int.parse(trueVal) ) {
-            int diff = int.parse(trueVal) - _masterControllers.length;
-            setState(() {
-              for(int i = 0; i < diff; i++) {
-                print('adding:');
-                _masterControllers.add(new TextEditingController());
-                _productControllers.add(new TextEditingController());
+            if(_masterControllers.length < int.parse(trueVal) ) {
+              int diff = int.parse(trueVal) - _masterControllers.length;
+              setState(() {
+                for(int i = 0; i < diff; i++) {
+                  print('adding:');
+                  _masterControllers.add(new TextEditingController());
+                  _productControllers.add(new TextEditingController());
 
-                _masterControllers[i].text = _masterList[i];
-                _productControllers[i].text = _productList[i];
-                counterList[i] = int.parse(_counterList[i]);
-                if(counterList[i] > 0) {
-                  matchList[i] = true;
+                  _masterControllers[i].text = _masterList[i];
+                  _productControllers[i].text = _productList[i];
+                  counterList[i] = int.parse(_counterList[i]);
+                  if(counterList[i] > 0 && _dispatchNoController.text != null) {
+                    matchList[i] = true;
+                    _isButtonDisabled = _isButtonDisabled && false;
+                  } else {
+                    _isButtonDisabled = _isButtonDisabled || true;
+                  }
+                  _masterFocusNodes.add(new FocusNode());
+                  _productFocusNodes.add(new FocusNode());
                 }
-                _masterFocusNodes.add(new FocusNode());
-                _productFocusNodes.add(new FocusNode());
-              }
-              if(_dispatchNoController.text != null) {
-                _isButtonDisabled = false;
-              }
 
-            });
+              });
+            } else {
+              print('Wrong request!');
+              // _onBasicAlertPressed(BuildContext context);
+            }
           } else {
-            print('Wrong request!');
-            // _onBasicAlertPressed(BuildContext context);
-          }
-        } else {
-          _setNumberItems(8);
-          print('Too many :(');
+            _setNumberItems(8);
+            print('Too many :(');
+          } 
         } 
         _numberNode.unfocus();
         FocusScope.of(context).requestFocus(new FocusNode());
@@ -258,6 +265,53 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     FileManager.removeFromBank(draftIndex);
     // start print operation
     printNote.sample(deviceName, userName, companyName, remark1, remark2, createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
+    return null;
+  }
+
+  Future<Null> _saveTheDraft(String createdDate) async {
+
+    String draftedTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
+    String dtime = DateFormat("yyyyMMdd").format(DateTime.now());
+    // String createdAt = DateFormat("yyyy/MM/dd HH:mm:ss").format(createdDate);
+    int len = _masterControllers.length;
+
+    int totalMatched = 0;
+    int index = await FileManager.getSelectedIndex();
+
+    List<String> _masterList = [];
+    List<String> _productList = [];
+    List<String> _counterList = [];  // Matched Counter Value
+    List<String> _otherList = [];
+
+    if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
+      for(int i = 0; i < len; i++) {
+        _masterList.add(_masterControllers[i].text);
+        _productList.add(_productControllers[i].text);
+        _counterList.add(counterList[i].toString());
+        totalMatched +=counterList[i];
+      }
+    }
+    // _otherList.add(dtime);
+    _otherList.add(createdDate);
+    _otherList.add(_dispatchNoController.text);
+    _otherList.add(_numberOfScanController.text);
+    _otherList.add(draftedTime);
+
+    // save the List to Shared Prefs
+    // master_list, product_list, counter_list
+
+    String draftName = '${_dispatchNoController.text}/$dtime/${_numberOfScanController.text}/$totalMatched';
+
+    // Updating drafts and re-writing draft name on the list of draft_bank
+    FileManager.updateDraftList(index, 'draft_bank', draftName);
+    // length will decide what number of the draft list.
+    print('Updated Draft names: draft_master_$index, draft_product_$index');
+
+    FileManager.saveDraft('draft_master_$index', _masterList);
+    FileManager.saveDraft('draft_product_$index', _productList);
+    FileManager.saveDraft('draft_counter_$index', _counterList);
+    FileManager.saveDraft('draft_other_$index', _otherList);
+
   }
 
   void initDraftScreen() async {
@@ -312,12 +366,6 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
   @override 
   Widget build(BuildContext context) {
 
-    // final DraftScreenArguments args = ModalRoute.of(context).settings.arguments;
-    
-    // var draftname = args.name;
-    // var draftIndex = args.draftIndex;
-    // _otherList =  await FileManager.readDraft('draft_other_${args.draftIndex}');
-
     Widget _mainInput(String header, TextEditingController _mainController, FocusNode _mainNode) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -336,59 +384,58 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
           ),
           Expanded(
             flex: 7,
-            child: Stack(
-              alignment: Alignment(1.0, 1.0),
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child: Center(
-                    child: TextFormField(
-                      style: TextStyle(
-                        fontSize: 16, 
-                        color: Color(0xFF004B83),
-                        fontWeight: FontWeight.bold,
-                      ),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        hintText: header,
-                        hintStyle: TextStyle(
-                          color: Color(0xFF004B83), 
-                          fontWeight: FontWeight.w200,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                        errorStyle: TextStyle(
-                          color: Colors.yellowAccent,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(EvaIcons.close, 
-                            color: Colors.blueAccent, 
-                            size: 32,
-                          ),
-                          onPressed: () {
-                            _clearTextController(context, _mainController, _mainNode);
-                          },
-                        ),
-                      ),
-                      autofocus: true,
-                      controller: _mainController,
-                      validator: (String value) {
-                        if(value.isEmpty) {
-                          return 'Enter Scan Number';
-                        } else if(int.parse(value) >= 9){
-                          return 'Too much. Suggestion: 1-8';
-                        }
-                      },
-                      focusNode: _mainNode,
-                      onTap: () {
-                        _focusNode(context, _mainNode);
-                      },
+            child: Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: Container(
+                height: 30,
+                child: Center(
+                  child: TextFormField(
+                    style: TextStyle(
+                      fontSize: 16, 
+                      color: Color(0xFF004B83),
+                      fontWeight: FontWeight.bold,
                     ),
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.all(8.0),
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: header,
+                      hintStyle: TextStyle(
+                        color: Color(0xFF004B83), 
+                        fontWeight: FontWeight.w200,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      errorStyle: TextStyle(
+                        color: Colors.yellowAccent,
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(EvaIcons.close, 
+                          color: Colors.blueAccent, 
+                          size: 24,
+                        ),
+                        onPressed: () {
+                          _clearTextController(context, _mainController, _mainNode);
+                        },
+                      ),
+                    ),
+                    autofocus: true,
+                    controller: _mainController,
+                    validator: (String value) {
+                      if(value.isEmpty) {
+                        return 'Enter Scan Number';
+                      } else if(int.parse(value) >= 9){
+                        return 'Too much. Suggestion: 1-8';
+                      }
+                    },
+                    focusNode: _mainNode,
+                    onTap: () {
+                      _focusNode(context, _mainNode);
+                    },
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ],
@@ -396,47 +443,43 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     }
 
     Widget _scannerInput(String typeController, TextEditingController _controller, FocusNode currentNode, int index) {
-      return Stack(
-          alignment: const Alignment(1.4, 1.0),
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: Center(
-                child: TextFormField(
-                  style: TextStyle(
-                    fontSize: 16, 
-                    color: Color(0xFF004B83),
-                    fontWeight: FontWeight.bold,
-                  ),
-                  enabled: typeController == 'master' ? false : true,
-                  decoration: InputDecoration.collapsed(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: typeController,
-                    hintStyle: TextStyle(
-                      color: Color(0xFF004B83),
-                      fontSize: 16, 
-                      fontWeight: FontWeight.w300,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                  autofocus: true,
-                  controller: _controller,
-                  focusNode: currentNode,
-                  onTap: () {
-                    _clearTextController(context, _controller, currentNode);
-                    // _focusNode(context, currentNode);
-                  },
-                  onChanged: (value){
-                    _controllerEventListener(index, _controller, typeController);
-                  },
-                ),
+      return Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Container(
+          height: 25,
+          child: TextFormField(
+            style: TextStyle(
+              fontSize: 14, 
+              color: Color(0xFF004B83),
+              fontWeight: FontWeight.bold,
+            ),
+            enabled: typeController == 'master' ? false : true,
+            decoration: InputDecoration.collapsed(
+              filled: true,
+              fillColor: Colors.white,
+              hintText: typeController,
+              hintStyle: TextStyle(
+                color: Color(0xFF004B83),
+                fontSize: 14, 
+                fontWeight: FontWeight.w300,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
               ),
             ),
-          ],
-        );
+            autofocus: true,
+            controller: _controller,
+            focusNode: currentNode,
+            onTap: () {
+              _clearTextController(context, _controller, currentNode);
+              // _focusNode(context, currentNode);
+            },
+            onChanged: (value){
+              _controllerEventListener(index, _controller, typeController);
+            },
+          ),
+        ),
+      );
     }
 
     Widget statusBar(int index) {
@@ -447,11 +490,11 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
               padding: EdgeInsets.symmetric(horizontal: 2),
               child: matchList[index] ? new Icon(
                 FontAwesomeIcons.solidCircle,
-                size: 30,
+                size: 28,
                 color: Colors.green,
               ) : new Icon(
                 FontAwesomeIcons.solidCircle,
-                size: 30,
+                size: 28,
                 color: Colors.red,
               ),
             ),
@@ -473,7 +516,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                 child: Text(
                   counterList[index].toString(),// counter.toString(),
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: 20,
                   ),
                 ),
               ),
@@ -496,7 +539,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
       );
     }
 
-    Widget _printAndOkButton() {
+    Widget _printAndOkButton(BuildContext context) {
       return Padding(
         padding: EdgeInsets.all(10),
         child: MaterialButton(
@@ -504,10 +547,22 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
             print('You pressed Save and Print Button!');
 
             _saveAndPrint(createdDate).then((_){
-              setState(() {
-                lockEn = false;
-              });
-              Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName);
+              Alert(
+                context: context,
+                type: AlertType.success,
+                title: "Dispatch note is saved successfully",
+                desc: "Printing request has sent.",
+                buttons: [
+                  DialogButton(
+                    child: Text(
+                      "OK",
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                    onPressed: () => Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName),
+                    width: 120,
+                  )
+                ],
+              ).show();
             });
           },
           child: Text(
@@ -528,7 +583,52 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
         )
       );
     }  
-    
+
+    Widget _saveDraftButton(BuildContext context) {
+      return Padding(
+        padding: EdgeInsets.all(10),
+        child: MaterialButton(
+          onPressed: () {
+            print('You pressed Draft Button!');
+            _saveTheDraft(createdDate).then((_){
+              // Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName);
+              Alert(
+                context: context,
+                type: AlertType.success,
+                title: "Draft is saved successfully",
+                desc: "You saved the draft again.",
+                buttons: [
+                  DialogButton(
+                    child: Text(
+                      "OK",
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    width: 120,
+                  )
+                ],
+              ).show();
+            });
+
+          },
+          child: Text(
+            'Save as Draft',
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'QuickSand',
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+          shape: StadiumBorder(),
+          color: Colors.orange[800],
+          splashColor: Colors.yellow[200],
+          height: 30,
+          minWidth: 120,
+          elevation: 2,
+        )
+      );
+    }  
     
     return WillPopScope(
       onWillPop: _backButtonPressed,
@@ -566,6 +666,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                           child: Row(
                             children: <Widget>[
                               Expanded(
+                                flex: 7,
                                 child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
@@ -576,6 +677,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                                 ),
                               ),
                               Expanded(
+                                flex: 3,
                                 child: statusBar(index),
                               ),
                             ],
@@ -589,8 +691,11 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Expanded(
-                      child: _printAndOkButton(),
-                    )
+                      child: _saveDraftButton(context),
+                    ),
+                    Expanded(
+                      child: _printAndOkButton(context),
+                    ),
                   ],
                 ),
               ],

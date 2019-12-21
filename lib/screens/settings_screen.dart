@@ -1,7 +1,6 @@
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:retail_scanner/helper/file_manager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/main_drawer.dart';
 
 
@@ -46,6 +45,9 @@ class SettingScreenState extends State<SettingScreen> {
   Future<Null> setInitialValue() async {
     _usernameController.text = await FileManager.readProfile('user_name');
     _deviceController.text = await FileManager.readProfile('device_name');
+    _companyController.text = await FileManager.readProfile('company_name');
+    _remark1Controller.text = await FileManager.readProfile('remark1');
+    _remark2Controller.text = await FileManager.readProfile('remark2');
   }
 
   @override
@@ -138,6 +140,7 @@ class SettingScreenState extends State<SettingScreen> {
                         ),
                       ),
                       autofocus: false,
+                      autocorrect: false,
                       controller: _mainController,
                       validator: (String value) {
                         if(value.isEmpty) {
@@ -172,12 +175,12 @@ class SettingScreenState extends State<SettingScreen> {
             String company = _companyController.text;
             String remark1 = _remark1Controller.text;
             String remark2 = _remark2Controller.text;
-            if(dname != '' && uname != '') {
+            if(dname != '' && uname != '' && company != '' && remark1 != '' && remark2 != '') {
               FileManager.saveProfile('device_name', dname);
               FileManager.saveProfile('user_name',uname);
-              FileManager.saveProfile('company_name',uname);
-              FileManager.saveProfile('remark1',uname);
-              FileManager.saveProfile('remark2',uname);
+              FileManager.saveProfile('company_name',company);
+              FileManager.saveProfile('remark1',remark1);
+              FileManager.saveProfile('remark2',remark2);
               print('Saving now!');
               _scaffoldKey.currentState.showSnackBar(SnackBar(
                 content: new Text("User data is saved successfully!", textAlign: TextAlign.center,),

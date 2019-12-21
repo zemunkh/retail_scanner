@@ -126,7 +126,22 @@ class FileManager {
         prefs.setStringList(key, drafts);
       }
     }
-    print('Files List: $drafts');
+    print('Draft List: $drafts');
+    return null;
+  }
+
+  static Future<Null> updateDraftList(int index, String key, String draftName) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> drafts = prefs.getStringList(key);
+    if(drafts == null || drafts.isEmpty) {
+      drafts = [draftName];
+      prefs.setStringList(key, drafts);
+    } else {
+      // drafts.add(draftName);
+      drafts[index] = draftName;
+      prefs.setStringList(key, drafts);
+    }
+    print('Draft Updated List: $drafts');
     return null;
   }
 

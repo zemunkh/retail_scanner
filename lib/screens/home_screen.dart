@@ -20,10 +20,6 @@ class _HomeScreenState extends State<HomeScreen> {
   BottomNavBarBlock _bottomNavBarBlock;
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-
-  NavBarItem dd;
-  // NavBarItem _userSelectedNavBar = _bottomNavBarBlock.firstItem;
-
   @override
   void initState() {
     super.initState();
@@ -69,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  @override 
+  @override
   Widget build(BuildContext context) {
 
     return WillPopScope(
@@ -115,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (BuildContext context, AsyncSnapshot<NavBarItem> snapshot) {
             switch (snapshot.data) {
               case NavBarItem.STOCKIN:
-                return StockIn(); 
+                return StockIn();
                 break;
               case NavBarItem.DISPATCHNOTE:
                 return DispatchNote();
