@@ -15,7 +15,7 @@ _saveFilename(String key, String fname) async {
       prefs.setStringList(key, files);
     }
   }
-  print('Files List: $files');
+  print('Stock Files are saved: $files');
 }
 
 
@@ -24,7 +24,7 @@ class FileManager {
 
   static void saveDispatchData(String _createdAt, List<String> _valuesList) {
 
-    writeToDispatchCsv(_createdAt, _valuesList).then((_){
+    writeToDispatchCsv('dispatch_$_createdAt', _valuesList).then((_){
       _saveFilename('dispatch_files', 'dispatch_$_createdAt.csv');
     });
   }
@@ -36,7 +36,7 @@ class FileManager {
 
     String matching = matched ? 'matched' : 'unmatched';
 
-    writeToStockCsv(filename, time, masterCode, productCode, counter, matching, userName, deviceName).then((_){
+    writeToStockCsv('stock_$filename', time, masterCode, productCode, counter, matching, userName, deviceName).then((_){
       _saveFilename('stock_files', 'stock_$filename.csv');
     });
   }

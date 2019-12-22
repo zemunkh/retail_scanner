@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:retail_scanner/helper/file_manager.dart';
-import 'package:retail_scanner/widgets/dispatch_draft_item.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../helper/file_manager.dart';
+import '../widgets/dispatch_draft_item.dart';
 import '../widgets/main_drawer.dart';
 
 

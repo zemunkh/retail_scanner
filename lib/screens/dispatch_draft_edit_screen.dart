@@ -48,7 +48,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
   Future<Null> _compareData(String prodVal, int index) async {
     final masterCode = _masterControllers[index].text;
     // final productCode = _productControllers[index].text;
-
+    bool isEmpty = false;
     print('Comparison: $masterCode : $prodVal');
 
     setState(() {
@@ -59,15 +59,16 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
         matchList[index] = false;
       }
     });
-    for(int i=0; i < _masterControllers.length; i++){
-      setState(() {
-        if(counterList[i] > 0) {
-          _isButtonDisabled = _isButtonDisabled && false;
-        } else {
-          _isButtonDisabled = false;
-        }
-      });
+    for(int i = 0; i < _masterControllers.length; i++) {
+      if(counterList[i] > 0 && _dispatchNoController.text != null && _numberOfScanController.text != null) {
+        isEmpty = isEmpty || false;
+      } else {
+        isEmpty = isEmpty || true;
+      }
     }
+    setState(() {
+      _isButtonDisabled = isEmpty;
+    });
   }
 
   String buffer = '';
@@ -130,6 +131,8 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                   counterList[i] = int.parse(_counterList[i]);
                   if(counterList[i] > 0 && _dispatchNoController.text != null) {
                     matchList[i] = true;
+
+                    // at least counter > 0, that will add up 1/3
                     _isButtonDisabled = _isButtonDisabled && false;
                   } else {
                     _isButtonDisabled = _isButtonDisabled || true;
@@ -185,8 +188,14 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
           _masterFocusNodes[index].unfocus();
         } else if(_typeController == 'product') {
           print('I am product!');
-          _productFocusNodes[index].unfocus();
-          _compareData(trueVal, index);
+          Future.delayed(const Duration(milliseconds: 1000), (){
+            _productControllers[index].text = trueVal;
+          }).then((value){
+            _compareData(trueVal, index);
+            Future.delayed(const Duration(milliseconds: 500), (){
+              _productControllers[index].clear();
+            });
+          });
         } else {
           print('Nothing to do');
         }
@@ -288,7 +297,9 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
         _masterList.add(_masterControllers[i].text);
         _productList.add(_productControllers[i].text);
         _counterList.add(counterList[i].toString());
-        totalMatched +=counterList[i];
+        if(counterList[i] > 0) {
+          totalMatched++;
+        }
       }
     }
     // _otherList.add(dtime);

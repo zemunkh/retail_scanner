@@ -8,7 +8,7 @@ import '../widgets/stock_saved_file_item.dart';
     final prefs = await SharedPreferences.getInstance();
     final key = 'stock_files';
     List<String> files = prefs.getStringList(key);
-    print('Files List: $files');
+    print('Stock Files List: $files');
     return files;
   }
 

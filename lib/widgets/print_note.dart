@@ -17,9 +17,11 @@ class PrintNote {
     bluetooth.isConnected.then((isConnected) {
       if (isConnected) {
         bluetooth.printNewLine();
+        bluetooth.printNewLine();
         bluetooth.printCustom("Dispatch Note:",3,1);
         bluetooth.printCustom("Company: $companyName",0,1);
         bluetooth.printCustom("Remark 1: $remark1",0,1);
+        bluetooth.printNewLine();
         bluetooth.printCustom("Device ID: $dname",0,0);
         bluetooth.printCustom("Username: $username",0,0);
         bluetooth.printNewLine();
@@ -37,7 +39,7 @@ class PrintNote {
           bluetooth.printNewLine();
         }
         bluetooth.printNewLine();
-        bluetooth.printCustom("PrintedTime: $currentTime",0,0);
+        bluetooth.printCustom("PrintedTime: $currentTime",0,1);
         // bluetooth.printQRcode("Insert Your Own Text to Generate", 200, 200, 1);
         bluetooth.printNewLine();
         bluetooth.printCustom("$remark2",0,1);

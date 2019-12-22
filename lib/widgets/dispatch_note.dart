@@ -192,12 +192,12 @@ class DispatchNoteState extends State<DispatchNote> {
               if((length - 1) > index){
                 FocusScope.of(context).requestFocus(_masterFocusNodes[index + 1]);
               } else {
-                bool isEmpty = true;
-                for(int i = length; i < length; i++) {
-                  if(_masterControllers[index].text == ''){
-                    isEmpty = isEmpty && false;
-                  }
-                }
+                // bool isEmpty = true;
+                // for(int i = length; i < length; i++) {
+                //   if(_masterControllers[index].text == ''){
+                //     isEmpty = isEmpty && false;
+                //   }
+                // }
                 setState(() {
                   _isFormEnabled = false;
                 });
@@ -213,6 +213,7 @@ class DispatchNoteState extends State<DispatchNote> {
 
     String currentTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
     String createdAt = DateFormat("yyyy/MM/dd HH:mm").format(createdDate);
+    String filenameDate = DateFormat("yyyyMMdd").format(createdDate);
 
     String deviceName = await FileManager.readProfile('device_name');
     if(deviceName == null) {
@@ -253,7 +254,7 @@ class DispatchNoteState extends State<DispatchNote> {
       }
     }
     print('List Data: $draftList');
-    FileManager.saveDispatchData(createdAt, draftList);
+    FileManager.saveDispatchData(filenameDate, draftList);
     // prepare the passing value
 
     // start print operation
@@ -445,7 +446,6 @@ class DispatchNoteState extends State<DispatchNote> {
                   counterList[index] = 0;
                 });
               }
-              // _focusNode(context, currentNode);
             },
             onChanged: (value){
               _controllerEventListener(index, _controller, typeController);
