@@ -40,6 +40,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
   PrintNote printNote;
 
   String createdDate = '';
+  DateTime createdDateTime;
   // Widget _form;
   List<bool> matchList = [false, false, false, false, false, false, false, false];
   List<int> counterList = [0, 0, 0, 0, 0, 0, 0, 0];
@@ -220,11 +221,10 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
       }
   }
 
-  Future<Null> _saveAndPrint(String createdDate) async {
+  Future<Null> _saveAndPrint(DateTime createdDateTime) async {
 
     String currentTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
-    // String createdAt = DateFormat("yyyyMMdd").format(createdDate);
-    String createdAt = createdDate;
+    String createdAt = DateFormat("yyyyMMdd").format(createdDateTime);
     List<String> draftList = [];
     int len = _masterControllers.length;
     
@@ -277,11 +277,10 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     return null;
   }
 
-  Future<Null> _saveTheDraft(String createdDate) async {
+  Future<Null> _saveTheDraft(DateTime createdDateTime) async {
 
     String draftedTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
-    String dtime = DateFormat("yyyyMMdd").format(DateTime.now());
-    // String createdAt = DateFormat("yyyy/MM/dd HH:mm:ss").format(createdDate);
+    String createdAt = DateFormat("yyyyMMdd").format(createdDateTime);
     int len = _masterControllers.length;
 
     int totalMatched = 0;
@@ -303,7 +302,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
       }
     }
     // _otherList.add(dtime);
-    _otherList.add(createdDate);
+    _otherList.add(createdAt);
     _otherList.add(_dispatchNoController.text);
     _otherList.add(_numberOfScanController.text);
     _otherList.add(draftedTime);
@@ -311,7 +310,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     // save the List to Shared Prefs
     // master_list, product_list, counter_list
 
-    String draftName = '${_dispatchNoController.text}/$dtime/${_numberOfScanController.text}/$totalMatched';
+    String draftName = '${_dispatchNoController.text}/$createdAt/${_numberOfScanController.text}/$totalMatched';
 
     // Updating drafts and re-writing draft name on the list of draft_bank
     FileManager.updateDraftList(index, 'draft_bank', draftName);
@@ -332,8 +331,9 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     _otherList = await FileManager.readDraft('draft_other_$draftIndex');
     print('Other list: $_otherList');
     setState(() {
-      createdDate = _otherList[0];
-      _dispatchNoController.text = _otherList[1];
+      createdDateTime = DateTime.parse(_otherList[0]);
+      createdDate = DateFormat("yyyy/MM/dd HH:mm:ss").format(createdDateTime);
+      _dispatchNoController.text = _otherList[1]; 
       _numberOfScanController.text = _otherList[2] + r'$';
     });
   }
@@ -557,7 +557,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
           onPressed: _isButtonDisabled ? null : () {
             print('You pressed Save and Print Button!');
 
-            _saveAndPrint(createdDate).then((_){
+            _saveAndPrint(createdDateTime).then((_){
               Alert(
                 context: context,
                 type: AlertType.success,
@@ -601,7 +601,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
         child: MaterialButton(
           onPressed: () {
             print('You pressed Draft Button!');
-            _saveTheDraft(createdDate).then((_){
+            _saveTheDraft(createdDateTime).then((_){
               // Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName);
               Alert(
                 context: context,

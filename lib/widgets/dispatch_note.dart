@@ -266,7 +266,6 @@ class DispatchNoteState extends State<DispatchNote> {
 
     String draftedTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
     String dtime = DateFormat("yyyyMMdd").format(DateTime.now());
-    String createdAt = DateFormat("yyyy/MM/dd HH:mm:ss").format(createdDate);
     int len = _masterControllers.length;
 
     int totalMatched = 0;
@@ -281,11 +280,13 @@ class DispatchNoteState extends State<DispatchNote> {
         _masterList.add(_masterControllers[i].text);
         _productList.add(_productControllers[i].text);
         _counterList.add(counterList[i].toString());
-        totalMatched +=counterList[i];
+        if(counterList[i] > 0) {
+          totalMatched++;
+        }
       }
     }
     // _otherList.add(dtime);
-    _otherList.add(createdAt);
+    _otherList.add(createdDate.toString());
     _otherList.add(_dispatchNoController.text);
     _otherList.add(_numberOfScanController.text);
     _otherList.add(draftedTime);
