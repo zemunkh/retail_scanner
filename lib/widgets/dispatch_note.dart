@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import '../widgets/print_note.dart';
 
-
 class DispatchNote extends StatefulWidget {
   @override
   DispatchNoteState createState() => DispatchNoteState();
@@ -32,9 +31,9 @@ class DispatchNoteState extends State<DispatchNote> {
   // final _scannerFormKey = GlobalKey<FormFieldState>();
 
   // Widget _form;
-  List<bool> keyEnableList = [false, false, false, false, false, false, false, false];
-  List<bool> matchList = [false, false, false, false, false, false, false, false];
-  List<int> counterList = [0, 0, 0, 0, 0, 0, 0, 0];
+  List<bool> keyEnableList = [];
+  List<bool> matchList = [];
+  List<int> counterList = [];
 
   PrintNote printNote;
 
@@ -45,15 +44,17 @@ class DispatchNoteState extends State<DispatchNote> {
     print('Comparison: $masterCode : $prodVal');
 
     setState(() {
-      if(masterCode == prodVal) {
+      if (masterCode == prodVal) {
         matchList[index] = true;
         counterList[index]++;
       } else {
         matchList[index] = false;
       }
     });
-    for(int i = 0; i < _masterControllers.length; i++) {
-      if(counterList[i] > 0 && _dispatchNoController.text != null && _numberOfScanController.text != null) {
+    for (int i = 0; i < _masterControllers.length; i++) {
+      if (counterList[i] > 0 &&
+          _dispatchNoController.text != null &&
+          _numberOfScanController.text != null) {
         isEmpty = isEmpty || false;
       } else {
         isEmpty = isEmpty || true;
@@ -67,15 +68,14 @@ class DispatchNoteState extends State<DispatchNote> {
   String buffer = '';
   String trueVal = '';
 
-
   Future<Null> _dipatchNoListener() async {
     print('Current text: ${_dispatchNoController.text}');
     buffer = _dispatchNoController.text;
-    if(buffer.endsWith(r'$')){
+    if (buffer.endsWith(r'$')) {
       buffer = buffer.substring(0, buffer.length - 1);
       trueVal = buffer;
       _dispatchNode.unfocus();
-      await Future.delayed(const Duration(milliseconds: 200), (){
+      await Future.delayed(const Duration(milliseconds: 200), () {
         setState(() {
           _dispatchNoController.text = trueVal;
         });
@@ -84,28 +84,24 @@ class DispatchNoteState extends State<DispatchNote> {
     }
   }
 
-
   Future<Null> _numberScanListener() async {
     buffer = _numberOfScanController.text;
-    if(buffer.endsWith(r'$')) {
+    if (buffer.endsWith(r'$')) {
       buffer = buffer.substring(0, buffer.length - 1);
       trueVal = buffer;
 
-      await Future.delayed(const Duration(milliseconds: 1000), (){
+      await Future.delayed(const Duration(milliseconds: 1000), () {
         _numberOfScanController.text = trueVal;
-      }).then((value){
-
+      }).then((value) {
         // set the number of inputs will be built in the screen
-        if(trueVal != '') {
-          if(int.parse(trueVal) < 9) {
-            _setNumberItems(int.parse(trueVal));
-
+        if (trueVal != '') {
+          if (int.parse(trueVal) < 51) {
             print('Controller Length: ${_masterControllers.length}');
 
-            if(_masterControllers.length < int.parse(trueVal) ) {
+            if (_masterControllers.length < int.parse(trueVal)) {
               int diff = int.parse(trueVal) - _masterControllers.length;
               setState(() {
-                for(int i = 0; i < diff; i++) {
+                for (int i = 0; i < diff; i++) {
                   print('adding:');
                   _masterControllers.add(new TextEditingController());
                   _productControllers.add(new TextEditingController());
@@ -119,13 +115,14 @@ class DispatchNoteState extends State<DispatchNote> {
               // _onBasicAlertPressed(BuildContext context);
             }
           } else {
-            _setNumberItems(8);
             print('Too many :(');
 
             Scaffold.of(context).showSnackBar(SnackBar(
-              content: new Text("Too many. Total Items has to be under 8!", textAlign: TextAlign.center,),
-              duration: const Duration(milliseconds: 2000)
-            ));
+                content: new Text(
+                  "Too many. Total Items has to be under 50!",
+                  textAlign: TextAlign.center,
+                ),
+                duration: const Duration(milliseconds: 2000)));
           }
         }
 
@@ -135,12 +132,12 @@ class DispatchNoteState extends State<DispatchNote> {
     }
   }
 
-
   Future<Null> _focusNode(BuildContext context, FocusNode node) async {
     FocusScope.of(context).requestFocus(node);
   }
 
-  Future<Null> _clearTextController(BuildContext context, TextEditingController _controller, FocusNode node) async {
+  Future<Null> _clearTextController(BuildContext context,
+      TextEditingController _controller, FocusNode node) async {
     Future.delayed(Duration(milliseconds: 50), () {
       setState(() {
         _controller.clear();
@@ -149,104 +146,105 @@ class DispatchNoteState extends State<DispatchNote> {
     });
   }
 
-  _controllerEventListener(int index, TextEditingController _controller, String _typeController) {
+  _controllerEventListener(
+      int index, TextEditingController _controller, String _typeController) {
     int length = _masterControllers.length;
 
     print('Length of the controllers: $length, index: $index');
-    if(_typeController == 'master') {
+    if (_typeController == 'master') {
       buffer = _masterControllers[index].text;
-    } else if(_typeController == 'product') {
+    } else if (_typeController == 'product') {
       buffer = _productControllers[index].text;
     }
 
-      if(buffer.endsWith(r'$')){
-        buffer = buffer.substring(0, buffer.length - 1);
-        trueVal = buffer;
-        if(_typeController == 'master') {
-          print('I am master!');
-          _masterFocusNodes[index].unfocus();
-          
-        } else if(_typeController == 'product') {
-          print('I am product!');
-          Future.delayed(const Duration(milliseconds: 1000), (){
-            _productControllers[index].text = trueVal;
-          }).then((value){
-            _compareData(trueVal, index);
-            Future.delayed(const Duration(milliseconds: 500), (){
-              _productControllers[index].clear();
-            });
+    if (buffer.endsWith(r'$')) {
+      buffer = buffer.substring(0, buffer.length - 1);
+      trueVal = buffer;
+      if (_typeController == 'master') {
+        print('I am master!');
+        _masterFocusNodes[index].unfocus();
+      } else if (_typeController == 'product') {
+        print('I am product!');
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          _productControllers[index].text = trueVal;
+        }).then((value) {
+          _compareData(trueVal, index);
+          Future.delayed(const Duration(milliseconds: 500), () {
+            _productControllers[index].clear();
           });
-          // ================================================ //
-          // Auto Saving Draft Feature can be started in here //
-          // ================================================ //
-        }
+        });
+        // ================================================ //
+        // Auto Saving Draft Feature can be started in here //
+        // ================================================ //
+      }
 
-        Future.delayed(const Duration(milliseconds: 200), (){
-          setState(() {
-            if(_typeController == 'master') {
-              _controller.text = trueVal;
-            }
-          });
-          if(length < 8) {
-            if(_typeController == 'master') {
-              if((length - 1) > index){
-                FocusScope.of(context).requestFocus(_masterFocusNodes[index + 1]);
-              } else {
-                // bool isEmpty = true;
-                // for(int i = length; i < length; i++) {
-                //   if(_masterControllers[index].text == ''){
-                //     isEmpty = isEmpty && false;
-                //   }
-                // }
-                setState(() {
-                  _isFormEnabled = false;
-                });
-                FocusScope.of(context).requestFocus(_productFocusNodes[0]);
-              }
-            }
+      Future.delayed(const Duration(milliseconds: 200), () {
+        setState(() {
+          if (_typeController == 'master') {
+            _controller.text = trueVal;
           }
         });
-      }
+        if (length < 50) {
+          if (_typeController == 'master') {
+            if ((length - 1) > index) {
+              FocusScope.of(context).requestFocus(_masterFocusNodes[index + 1]);
+            } else {
+              // bool isEmpty = true;
+              // for(int i = length; i < length; i++) {
+              //   if(_masterControllers[index].text == ''){
+              //     isEmpty = isEmpty && false;
+              //   }
+              // }
+              setState(() {
+                _isFormEnabled = false;
+              });
+              FocusScope.of(context).requestFocus(_productFocusNodes[0]);
+            }
+          }
+        }
+      });
+    }
   }
 
   Future<Null> _saveAndPrint(DateTime createdDate) async {
-
-    String currentTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
+    String currentTime =
+        DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
     String createdAt = DateFormat("yyyy/MM/dd HH:mm").format(createdDate);
     String filenameDate = DateFormat("yyyyMMdd").format(createdDate);
 
     String deviceName = await FileManager.readProfile('device_name');
-    if(deviceName == null) {
+    if (deviceName == null) {
       deviceName = 'Unknown';
     }
     String userName = await FileManager.readProfile('user_name');
-    if(userName == null) {
+    if (userName == null) {
       userName = 'Unknown';
     }
     String companyName = await FileManager.readProfile('company_name');
-    if(companyName == null) {
+    if (companyName == null) {
       companyName = 'Unknown';
     }
     String remark1 = await FileManager.readProfile('remark1');
-    if(remark1 == null) {
+    if (remark1 == null) {
       remark1 = 'Unknown';
     }
     String remark2 = await FileManager.readProfile('remark2');
-    if(remark2 == null) {
+    if (remark2 == null) {
       remark2 = 'Unknown';
     }
-
 
     List<String> draftList = [];
     int len = _masterControllers.length;
 
     List<String> _masterList = [];
     List<String> _productList = [];
-    List<String> _counterList = [];  // Matched Counter Value
+    List<String> _counterList = []; // Matched Counter Value
 
-    if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
-      for(int i = 0; i < len; i++) {
-        String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime, $deviceName, $userName\r\n';
+    if (_dispatchNoController.text != null ||
+        _numberOfScanController.text != null) {
+      for (int i = 0; i < len; i++) {
+        String buff =
+            '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_masterControllers[i].text}, ${counterList[i].toString()}, $currentTime, $deviceName, $userName\r\n';
         draftList.add(buff);
         _masterList.add(_masterControllers[i].text);
         _productList.add(_productControllers[i].text);
@@ -258,13 +256,24 @@ class DispatchNoteState extends State<DispatchNote> {
     // prepare the passing value
 
     // start print operation
-    printNote.sample(deviceName, userName, companyName, remark1, remark2, createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
+    printNote.sample(
+        deviceName,
+        userName,
+        companyName,
+        remark1,
+        remark2,
+        createdAt,
+        _dispatchNoController.text,
+        _numberOfScanController.text,
+        _masterList,
+        _productList,
+        _counterList,
+        currentTime);
   }
 
-
   Future<Null> _saveTheDraft(DateTime createdDate) async {
-
-    String draftedTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
+    String draftedTime =
+        DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
     String dtime = DateFormat("yyyyMMdd").format(DateTime.now());
     int len = _masterControllers.length;
 
@@ -272,15 +281,16 @@ class DispatchNoteState extends State<DispatchNote> {
 
     List<String> _masterList = [];
     List<String> _productList = [];
-    List<String> _counterList = [];  // Matched Counter Value
+    List<String> _counterList = []; // Matched Counter Value
     List<String> _otherList = [];
 
-    if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
-      for(int i = 0; i < len; i++) {
+    if (_dispatchNoController.text != null ||
+        _numberOfScanController.text != null) {
+      for (int i = 0; i < len; i++) {
         _masterList.add(_masterControllers[i].text);
         _productList.add(_productControllers[i].text);
         _counterList.add(counterList[i].toString());
-        if(counterList[i] > 0) {
+        if (counterList[i] > 0) {
           totalMatched++;
         }
       }
@@ -296,7 +306,8 @@ class DispatchNoteState extends State<DispatchNote> {
 
     List<String> draftBank = await FileManager.getDraftList('draft_bank');
     String index = '${draftBank.length}';
-    String draftName = '${_dispatchNoController.text}/$dtime/${_numberOfScanController.text}/$totalMatched';
+    String draftName =
+        '${_dispatchNoController.text}/$dtime/${_numberOfScanController.text}/$totalMatched';
 
     // Saving new draft list to Draft Bank for the Draft list page.
     FileManager.saveDraftList('draft_bank', draftName);
@@ -313,10 +324,72 @@ class DispatchNoteState extends State<DispatchNote> {
 
     // add DispatchNote model and Retrieve it on Draft page screen by id {createdAt}.
     // follow the structure of screen
-
   }
 
+  Future<Null> _disableInput(int index) {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Do you want to disable #${index + 1} input?"),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Yes'),
+            onPressed: () {
+              print('Yes clicked');
+              setState(() {
+                keyEnableList[index] = false;
+              });
+              Navigator.pop(context);
+            },
+          ),
+          FlatButton(
+            child: Text('No'),
+            onPressed: () {
+              print('No clicked');
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      )
+    );
+  }
 
+  Future<Null> _enableInput(int index) async {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Do you want to enable #${index + 1} input?"),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Yes'),
+            onPressed: () {
+              print('Yes clicked');
+              setState(() {
+                keyEnableList[index] = true;
+              });
+              Navigator.pop(context);
+            },
+          ),
+          FlatButton(
+            child: Text('No'),
+            onPressed: () {
+              print('No clicked');
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      )
+    );
+  }
+
+  Future<Null> _initValues() async {
+    for (int i = 0; i < 50; i++) {
+      keyEnableList.add(true);
+      matchList.add(false);
+      counterList.add(0);
+    }
+    return null;
+  }
 
   @override
   void dispose() {
@@ -331,29 +404,29 @@ class DispatchNoteState extends State<DispatchNote> {
     printNote = PrintNote();
     _dispatchNoController.addListener(_dipatchNoListener);
     _numberOfScanController.addListener(_numberScanListener);
+    _initValues();
   }
 
   @override
   Widget build(BuildContext context) {
-
     DateTime createdDate = DateTime.now();
 
-    Widget _mainInput(BuildContext context, String header, TextEditingController _mainController, FocusNode _mainNode) {
+    Widget _mainInput(BuildContext context, String header,
+        TextEditingController _mainController, FocusNode _mainNode) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           Expanded(
-            flex: 3,
-            child: Text(
-              '$header',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(0xFF004B83),
-                fontWeight: FontWeight.bold,
-              ),
-            )
-          ),
+              flex: 3,
+              child: Text(
+                '$header',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF004B83),
+                  fontWeight: FontWeight.bold,
+                ),
+              )),
           Expanded(
             flex: 7,
             child: Padding(
@@ -382,22 +455,24 @@ class DispatchNoteState extends State<DispatchNote> {
                       color: Colors.yellowAccent,
                     ),
                     suffixIcon: IconButton(
-                      icon: Icon(EvaIcons.close,
+                      icon: Icon(
+                        EvaIcons.close,
                         color: Colors.blueAccent,
                         size: 24,
                       ),
                       onPressed: () {
-                        _clearTextController(context, _mainController, _mainNode);
+                        _clearTextController(
+                            context, _mainController, _mainNode);
                       },
                     ),
                   ),
                   autofocus: false,
                   controller: _mainController,
                   validator: (String value) {
-                    if(value.isEmpty) {
+                    if (value.isEmpty) {
                       return 'Enter Scan Number';
-                    } else if(int.parse(value) >= 9){
-                      return 'Too much. Suggestion: 1-8';
+                    } else if (int.parse(value) >= 50) {
+                      return 'Too much. Suggestion: 1-50';
                     }
                   },
                   focusNode: _mainNode,
@@ -412,7 +487,8 @@ class DispatchNoteState extends State<DispatchNote> {
       );
     }
 
-    Widget _scannerInput(BuildContext context, String typeController, TextEditingController _controller, FocusNode currentNode, int index) {
+    Widget _scannerInput(BuildContext context, String typeController,
+        TextEditingController _controller, FocusNode currentNode, int index) {
       return Padding(
         padding: const EdgeInsets.all(2.0),
         child: Container(
@@ -442,13 +518,13 @@ class DispatchNoteState extends State<DispatchNote> {
             focusNode: currentNode,
             onTap: () {
               _clearTextController(context, _controller, currentNode);
-              if(typeController == 'master') {
+              if (typeController == 'master') {
                 setState(() {
                   counterList[index] = 0;
                 });
               }
             },
-            onChanged: (value){
+            onChanged: (value) {
               _controllerEventListener(index, _controller, typeController);
             },
           ),
@@ -457,38 +533,63 @@ class DispatchNoteState extends State<DispatchNote> {
     }
 
     Widget statusBar(int index) {
-      return Row(children: <Widget>[
-        Expanded(
-            flex: 5,
+      return Row(
+        children: <Widget>[
+          Expanded(
+            flex: 2,
+            child: keyEnableList[index]
+                ? IconButton(
+                    icon: Icon(
+                      EvaIcons.checkmarkOutline,
+                      color: Colors.green,
+                    ),
+                    onPressed: () {
+                      _disableInput(index);
+                    },
+                  )
+                : IconButton(
+                    icon: Icon(
+                      EvaIcons.closeCircleOutline,
+                      color: Colors.red,
+                    ),
+                    onPressed: () {
+                      _enableInput(index);
+                    },
+                  ),
+          ),
+          Expanded(
+            flex: 4,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 2),
-              child: matchList[index] ? new Icon(
-                FontAwesomeIcons.solidCircle,
-                size: 28,
-                color: Colors.green,
-              ) : new Icon(
-                FontAwesomeIcons.solidCircle,
-                size: 28,
-                color: Colors.red,
-              ),
+              child: matchList[index]
+                  ? new Icon(
+                      FontAwesomeIcons.solidCircle,
+                      size: 28,
+                      color: Colors.green,
+                    )
+                  : new Icon(
+                      FontAwesomeIcons.solidCircle,
+                      size: 28,
+                      color: Colors.red,
+                    ),
             ),
           ),
           Expanded(
-            flex: 5,
+            flex: 4,
             child: Container(
               margin: const EdgeInsets.all(2),
               padding: const EdgeInsets.all(2),
               decoration: ShapeDecoration(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(
-                      Radius.circular(3),
+                    Radius.circular(3),
                   ),
                   side: BorderSide(width: 1, color: Colors.black),
                 ),
               ),
               child: Center(
                 child: Text(
-                  counterList[index].toString(),// counter.toString(),
+                  counterList[index].toString(), // counter.toString(),
                   style: TextStyle(
                     fontSize: 20,
                   ),
@@ -515,145 +616,152 @@ class DispatchNoteState extends State<DispatchNote> {
 
     Widget _saveDraftButton(BuildContext context) {
       return Padding(
-        padding: EdgeInsets.all(5),
-        child: MaterialButton(
-          onPressed: () {
-            print('You pressed Draft Button!');
-            _saveTheDraft(createdDate).then((_){
+          padding: EdgeInsets.all(5),
+          child: MaterialButton(
+            onPressed: () {
+              print('You pressed Draft Button!');
+              _saveTheDraft(createdDate).then((_) {
+                Scaffold.of(context).showSnackBar(SnackBar(
+                    content: new Text(
+                      "Draft Saved!",
+                      textAlign: TextAlign.center,
+                    ),
+                    duration: const Duration(milliseconds: 500)));
+              });
 
-              Scaffold.of(context).showSnackBar(SnackBar(
-                content: new Text("Draft Saved!", textAlign: TextAlign.center,),
-                duration: const Duration(milliseconds: 500)
-              ));
-            });
-
-            // _setDraftValues(i, draftList);
-          },
-          child: Text(
-            'Save as Draft',
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'QuickSand',
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
+              // _setDraftValues(i, draftList);
+            },
+            child: Text(
+              'Save as Draft',
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'QuickSand',
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
             ),
-          ),
-          shape: StadiumBorder(),
-          color: Colors.orange[800],
-          splashColor: Colors.yellow[200],
-          height: 30,
-          minWidth: 120,
-          elevation: 2,
-        )
-      );
+            shape: StadiumBorder(),
+            color: Colors.orange[800],
+            splashColor: Colors.yellow[200],
+            height: 30,
+            minWidth: 120,
+            elevation: 2,
+          ));
     }
 
     Widget _printAndOkButton(BuildContext context) {
       return Padding(
-        padding: EdgeInsets.all(10),
-        child: MaterialButton(
-          onPressed: _isButtonDisabled ? null : () {
-            print('You pressed Save and Print Button!');
+          padding: EdgeInsets.all(10),
+          child: MaterialButton(
+            onPressed: _isButtonDisabled
+                ? null
+                : () {
+                    print('You pressed Save and Print Button!');
 
-            _saveAndPrint(createdDate).then((_){
-              Scaffold.of(context).showSnackBar(SnackBar(
-                content: new Text("Saved! Printing Request has sent", textAlign: TextAlign.center,),
-                duration: const Duration(milliseconds: 2000)
-              ));
-            });
-          },
-          child: Text(
-            'Print & Ok',
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'QuickSand',
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
+                    _saveAndPrint(createdDate).then((_) {
+                      Scaffold.of(context).showSnackBar(SnackBar(
+                          content: new Text(
+                            "Saved! Printing Request has sent",
+                            textAlign: TextAlign.center,
+                          ),
+                          duration: const Duration(milliseconds: 2000)));
+                    });
+                  },
+            child: Text(
+              'Print & Ok',
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'QuickSand',
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
             ),
-          ),
-          shape: StadiumBorder(),
-          color: Colors.teal[400],
-          splashColor: Colors.blue[100],
-          height: 30,
-          minWidth: 120,
-          elevation: 2,
-        )
-      );
+            shape: StadiumBorder(),
+            color: Colors.teal[400],
+            splashColor: Colors.blue[100],
+            height: 30,
+            minWidth: 120,
+            elevation: 2,
+          ));
     }
 
     // Widget buildContainer(Widget child) {
     //   return Container(
 
     //     child: child,
-    //   );  
+    //   );
     // }
 
     return GestureDetector(
-        onTap: () {
-          FocusScope.of(context).requestFocus(new FocusNode());
-        },
-        child: Container(
-          child: Column(
-            children: <Widget>[
-              dateTime(DateFormat("yyyy/MM/dd HH:mm:ss").format(createdDate)),
-
-              _mainInput(context, 'Dispatch No:',_dispatchNoController, _dispatchNode),
-              _mainInput(context, 'Total Items:',_numberOfScanController, _numberNode),
-              SizedBox(height: 15,),
-              new Expanded(
-                  child: new ListView.builder(
-                    itemCount: _masterControllers?.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        padding: const EdgeInsets.all(4),
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              flex: 7,
-                              child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                  Text('Item: ${index + 1}'),
-                                  _scannerInput(context, 'master', _masterControllers[index], _masterFocusNodes[index], index),
-                                  _scannerInput(context, 'product', _productControllers[index], _productFocusNodes[index], index),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              flex: 3,
-                              child: statusBar(index),
-                            ),
-                          ],
+      onTap: () {
+        FocusScope.of(context).requestFocus(new FocusNode());
+      },
+      child: Container(
+        child: Column(
+          children: <Widget>[
+            dateTime(DateFormat("yyyy/MM/dd HH:mm:ss").format(createdDate)),
+            _mainInput(
+                context, 'Dispatch No:', _dispatchNoController, _dispatchNode),
+            _mainInput(
+                context, 'Total Items:', _numberOfScanController, _numberNode),
+            SizedBox(
+              height: 15,
+            ),
+            new Expanded(
+              child: new ListView.builder(
+                itemCount: _masterControllers?.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Container(
+                    padding: const EdgeInsets.all(4),
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          flex: 5,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text('Item: ${index + 1}'),
+                              _scannerInput(
+                                  context,
+                                  'master',
+                                  _masterControllers[index],
+                                  _masterFocusNodes[index],
+                                  index),
+                              _scannerInput(
+                                  context,
+                                  'product',
+                                  _productControllers[index],
+                                  _productFocusNodes[index],
+                                  index),
+                            ],
+                          ),
                         ),
-                      );
-                    },
-
-                  ),
+                        Expanded(
+                          flex: 5,
+                          child: statusBar(index),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Expanded(
-                    child: _saveDraftButton(context),
-                  ),
-                  Expanded(
-                    child: _printAndOkButton(context),
-                  )
-                ],
-              ),
-            ],
-          ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Expanded(
+                  child: _saveDraftButton(context),
+                ),
+                Expanded(
+                  child: _printAndOkButton(context),
+                )
+              ],
+            ),
+          ],
         ),
-      );
+      ),
+    );
   }
-}
-
-
-_setNumberItems(int val) async {
-  final prefs = await SharedPreferences.getInstance();
-  final key = 'number_items';
-  prefs.setInt(key, val);
-  print('Items set to $val');
 }
 
 _setNavbarItem(bool val) async {

@@ -6,7 +6,6 @@ import 'package:retail_scanner/helper/file_manager.dart';
 import 'package:retail_scanner/screens/dispatch_draft_screen.dart';
 import 'package:retail_scanner/widgets/print_note.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 
 class DispatchDraftEditScreen extends StatefulWidget {
@@ -42,8 +41,8 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
   String createdDate = '';
   DateTime createdDateTime;
   // Widget _form;
-  List<bool> matchList = [false, false, false, false, false, false, false, false];
-  List<int> counterList = [0, 0, 0, 0, 0, 0, 0, 0];
+  List<bool> matchList = [];
+  List<int> counterList = [];
 
 
   Future<Null> _compareData(String prodVal, int index) async {
@@ -114,8 +113,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
         
         // set the number of inputs will be built in the screen
         if(trueVal != '') {
-          if(int.parse(trueVal) < 9) {
-            _setNumberItems(int.parse(trueVal));
+          if(int.parse(trueVal) < 51) {
             
             print('Controller Length: ${_masterControllers.length}');
 
@@ -148,7 +146,6 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
               // _onBasicAlertPressed(BuildContext context);
             }
           } else {
-            _setNumberItems(8);
             print('Too many :(');
           } 
         } 
@@ -205,7 +202,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
           setState(() {
             _controller.text = trueVal;
           });
-          if(length < 8) {
+          if(length < 50) {
             if(_typeController == 'master') {
               FocusScope.of(context).requestFocus(_productFocusNodes[index]);
             } else if(_typeController == 'product') {
@@ -256,7 +253,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     
     if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
       for(int i = 0; i < len; i++) {
-        String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime, $deviceName, $userName\r\n';    
+        String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_masterControllers[i].text}, ${counterList[i].toString()}, $currentTime, $deviceName, $userName\r\n';    
         draftList.add(buff);
         _masterList.add(_masterControllers[i].text);
         _productList.add(_productControllers[i].text);
@@ -357,6 +354,13 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     );
   }
 
+  Future<Null> _initValues() async {
+    for(int i = 0; i < 50; i++) {
+      matchList.add(false);
+      counterList.add(0);
+    }
+    return null;
+  }
 
   @override
   void dispose() {
@@ -367,11 +371,12 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
 
   @override
   void initState() {
+    super.initState();
     printNote = PrintNote();
     _dispatchNoController.addListener(_dipatchNoListener);
     _numberOfScanController.addListener(_numberScanListener);
     initDraftScreen();
-    super.initState();
+    _initValues();
   }
 
   @override 
@@ -436,8 +441,8 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                     validator: (String value) {
                       if(value.isEmpty) {
                         return 'Enter Scan Number';
-                      } else if(int.parse(value) >= 9){
-                        return 'Too much. Suggestion: 1-8';
+                      } else if(int.parse(value) >= 50){
+                        return 'Too much. Suggestion: 1-50';
                       }
                     },
                     focusNode: _mainNode,
@@ -716,12 +721,4 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
       ),
     );
   }
-}
-
-
-_setNumberItems(int val) async {
-  final prefs = await SharedPreferences.getInstance();
-  final key = 'number_items';
-  prefs.setInt(key, val);
-  print('Items set to $val');
 }

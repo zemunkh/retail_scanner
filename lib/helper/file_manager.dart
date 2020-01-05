@@ -176,7 +176,7 @@ class FileManager {
     print('Draft Bank: $drafts');
     return drafts;
   }
-  static Future<List> removeFromBank(int index) async {
+  static Future<Null> removeFromBank(int index) async {
     final prefs = await SharedPreferences.getInstance();
     final key = 'draft_bank';
     List<String> drafts = prefs.getStringList(key);
