@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -102,7 +103,6 @@ class FileManager {
     prefs.remove(key);
   }
 
-
   static Future<Null> saveProfile(String key, String value) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString(key, value);
@@ -187,5 +187,84 @@ class FileManager {
     print('Draft List: $drafts');
   }
 
+  static Future<List> getStockFilesList() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> files = prefs.getStringList('stock_files');
+    print('Files List: $files');
+    final dateNow = DateTime.now();
+    DateTime fileCreatedDate;
+    int diff;
+    String expiryDay = await readProfile('expiry_day');
+    if(expiryDay == null) {
+      expiryDay = '30';
+    }
 
+    if(files.isNotEmpty) {
+      for(int i = 0; i < files.length; i++) {
+        fileCreatedDate = _getCreatedDate(files[i]);
+        diff = dateNow.difference(fileCreatedDate).inDays;
+        if(diff > int.parse(expiryDay)) {
+          print('${files[i]} is expired!. Now deleting');
+          await deleteFile(files[i], i, 'stock_files');
+        } else {
+          print("Not expired: Remaining ${int.parse(expiryDay) - diff}");
+        }
+      }
+      return files;
+    }
+    return null;
+  }
+
+  static Future<List> getDispatchFilesList() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> files = prefs.getStringList('dispatch_files');
+    print('Files List: $files');
+    final dateNow = DateTime.now();
+    DateTime fileCreatedDate;
+    int diff;
+    String expiryDay = await readProfile('expiry_day');
+    if(expiryDay == null) {
+      expiryDay = '30';
+    }
+
+    if(files.isNotEmpty) {
+      for(int i = 0; i < files.length; i++) {
+        fileCreatedDate = _getCreatedDate(files[i]);
+        diff = dateNow.difference(fileCreatedDate).inDays;
+        if(diff > int.parse(expiryDay)) {
+          print('${files[i]} is expired!. Now deleting');
+          await deleteFile(files[i], i, 'dispatch_files');
+        } else {
+          print("Not expired: Remaining ${int.parse(expiryDay) - diff}");
+        }
+      }
+      return files;
+    }
+    return null;
+  }
+
+  static Future<Null> deleteFile(String filename, int index, String key) async {
+    Directory dir = await getApplicationDocumentsDirectory();
+    File currentFile = File("${dir.path}/$filename");
+    final prefs = await SharedPreferences.getInstance();
+    List<String> dispatchFiles = prefs.getStringList(key);
+    if(prefs != null) {
+      dispatchFiles.removeAt(index);
+      prefs.setStringList(key, dispatchFiles);
+      currentFile.deleteSync(recursive: true);
+    }
+    print('Files List: $dispatchFiles');
+  }
 }
+
+  DateTime _getCreatedDate(String filename) {
+    String date, year, month, day;
+    date = filename.split('_')[1];
+    date = date.split('.')[0];
+    print('Date: $date');
+    year = date[0] + date[1] + date[2] + date[3];
+    month = date[4] + date[5];
+    day = date[6] + date[7];
+    print("Data: $year, $month, $day");
+    return DateTime(int.parse(year), int.parse(month), int.parse(day));
+  }

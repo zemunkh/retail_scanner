@@ -13,21 +13,22 @@ class SettingScreen extends StatefulWidget {
 class SettingScreenState extends State<SettingScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final _deviceController = TextEditingController();
-  final _usernameController = TextEditingController();
-  final _companyController = TextEditingController();
-  final _remark1Controller = TextEditingController();
-  final _remark2Controller = TextEditingController();
+  final _deviceController = new TextEditingController();
+  final _usernameController = new TextEditingController();
+  final _companyController = new TextEditingController();
+  final _remark1Controller = new TextEditingController();
+  final _remark2Controller = new TextEditingController();
   
-  FocusNode _deviceNode = FocusNode();
-  FocusNode _usernameNode = FocusNode();
-  FocusNode _companyNode = FocusNode();
-  FocusNode _remark1Node = FocusNode();
-  FocusNode _remark2Node = FocusNode();
+  FocusNode _deviceNode = new FocusNode();
+  FocusNode _usernameNode = new FocusNode();
+  FocusNode _companyNode = new FocusNode();
+  FocusNode _remark1Node = new FocusNode();
+  FocusNode _remark2Node = new FocusNode();
 
+  List<String> _days = ['Not Selected', '3', '5', '7', '14', '21', '30'];
   bool lockEn = true;
-
-
+  bool isDispatchNoteDefault = false;
+  String dropdownValue = 'Not Selected';
 
   Future<Null> _focusNode(BuildContext context, FocusNode node) async {
     FocusScope.of(context).requestFocus(node);
@@ -48,6 +49,13 @@ class SettingScreenState extends State<SettingScreen> {
     _companyController.text = await FileManager.readProfile('company_name');
     _remark1Controller.text = await FileManager.readProfile('remark1');
     _remark2Controller.text = await FileManager.readProfile('remark2');
+    final value = await FileManager.readProfile('expiry_day');
+    setState(() {
+      if(value != null) {
+        dropdownValue = value;
+      }
+    });
+
   }
 
   @override
@@ -84,6 +92,59 @@ class SettingScreenState extends State<SettingScreen> {
 
   @override 
   Widget build(BuildContext context) {
+
+    Widget _dayMenu(BuildContext context, String header) {
+      return Row(
+        children: <Widget>[
+          Expanded(
+            flex: 4,
+            child: Text(
+              '$header',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+                color: Color(0xFF004B83),
+                fontWeight: FontWeight.bold
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 6,
+            child: Padding(
+              padding: const EdgeInsets.all(3.0),
+              child: Container(
+                child: DropdownButton<String>(
+                  value: dropdownValue,
+                  icon: Icon(EvaIcons.arrowDownOutline),
+                  iconSize: 24,
+                  elevation: 16,
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.deepPurple,
+                  ),
+                  underline: Container(
+                    height: 2,
+                    color: Colors.deepPurpleAccent,
+                  ),
+                  onChanged: (String newValue) {
+                    setState(() {
+                      dropdownValue = newValue;
+                    });
+                    // Add some functions to handle change.
+                  },
+                  items: _days.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
 
     Widget _mainInput(String header, TextEditingController _mainController, FocusNode _mainNode) {
       return Row(
@@ -139,16 +200,11 @@ class SettingScreenState extends State<SettingScreen> {
                           },
                         ),
                       ),
+                      keyboardType: header == 'Expiry Days' ? 
+                          TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
                       autofocus: false,
                       autocorrect: false,
                       controller: _mainController,
-                      validator: (String value) {
-                        if(value.isEmpty) {
-                          return 'Enter Scan Number';
-                        } else if(int.parse(value) >= 9){
-                          return 'Too much. Suggestion: 1-8';
-                        }
-                      },
                       focusNode: _mainNode,
                       onTap: () {
                         _focusNode(context, _mainNode);
@@ -175,12 +231,13 @@ class SettingScreenState extends State<SettingScreen> {
             String company = _companyController.text;
             String remark1 = _remark1Controller.text;
             String remark2 = _remark2Controller.text;
-            if(dname != '' && uname != '' && company != '' && remark1 != '' && remark2 != '') {
+            if(dname != '' && uname != '' && company != '' && remark1 != '' && remark2 != '' && dropdownValue != '') {
               FileManager.saveProfile('device_name', dname);
               FileManager.saveProfile('user_name',uname);
               FileManager.saveProfile('company_name',company);
               FileManager.saveProfile('remark1',remark1);
               FileManager.saveProfile('remark2',remark2);
+              FileManager.saveProfile('expiry_day', dropdownValue);
               print('Saving now!');
               _scaffoldKey.currentState.showSnackBar(SnackBar(
                 content: new Text("User data is saved successfully!", textAlign: TextAlign.center,),
@@ -229,7 +286,8 @@ class SettingScreenState extends State<SettingScreen> {
           onTap: () {
             FocusScope.of(context).requestFocus(new FocusNode());
           },
-          child: Container(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(8),
             child: Column(
               children: <Widget>[
                 
@@ -238,6 +296,7 @@ class SettingScreenState extends State<SettingScreen> {
                 _mainInput('Company',_companyController, _companyNode),
                 _mainInput('Remark 1',_remark1Controller, _remark1Node),
                 _mainInput('Remark 2',_remark2Controller, _remark2Node),
+                _dayMenu(context, 'Expiry Day:'),
                 SizedBox(height: 15,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

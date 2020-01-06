@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import '../helper/file_manager.dart';
 import 'package:share_extend/share_extend.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:retail_scanner/screens/stock_saved_screen.dart';
+import '../screens/stock_saved_screen.dart';
 
 
 class SavedFileItem extends StatelessWidget {
@@ -32,7 +33,7 @@ class SavedFileItem extends StatelessWidget {
             IconButton(
               icon: Icon(EvaIcons.trash2Outline),
               onPressed: () {
-                _deleteFile(filename, index);
+                FileManager.deleteFile(filename, index, 'stock_files');
                 Navigator.of(context).pushReplacementNamed(StockSavedScreen.routeName);
               },
               color: Theme.of(context).errorColor,
@@ -51,21 +52,5 @@ class SavedFileItem extends StatelessWidget {
       print('File not existed');
     }
     ShareExtend.share(testFile.path, "file");
-  }
-
-
-  _deleteFile(String filename, int index) async {
-    Directory dir = await getApplicationDocumentsDirectory();
-    File currentFile = File("${dir.path}/$filename");
-
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'stock_files';
-    List<String> files = prefs.getStringList(key);
-    if(prefs != null) {
-      files.removeAt(index);
-      prefs.setStringList(key, files);
-      currentFile.deleteSync(recursive: true);
-    }
-    print('Files List: $files');
   }
 }

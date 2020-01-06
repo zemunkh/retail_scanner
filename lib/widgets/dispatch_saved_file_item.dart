@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:retail_scanner/helper/file_manager.dart';
 import 'package:share_extend/share_extend.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,7 +33,7 @@ class DispatchSavedFileItem extends StatelessWidget {
             IconButton(
               icon: Icon(EvaIcons.trash2Outline),
               onPressed: () {
-                _deleteFile(filename, index);
+                FileManager.deleteFile(filename, index, 'dispatch_files');
                 Navigator.of(context).pushReplacementNamed(DispatchSavedScreen.routeName);
               },
               color: Theme.of(context).errorColor,
@@ -53,19 +54,4 @@ class DispatchSavedFileItem extends StatelessWidget {
     ShareExtend.share(testFile.path, "file");
   }
 
-
-  _deleteFile(String filename, int index) async {
-    Directory dir = await getApplicationDocumentsDirectory();
-    File currentFile = File("${dir.path}/$filename");
-
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'dispatch_files';
-    List<String> files = prefs.getStringList(key);
-    if(prefs != null) {
-      files.removeAt(index);
-      prefs.setStringList(key, files);
-      currentFile.deleteSync(recursive: true);
-    }
-    print('Files List: $files');
-  }
 }

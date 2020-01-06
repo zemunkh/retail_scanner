@@ -88,7 +88,7 @@ class MainDrawer extends StatelessWidget {
               }
             ),          
             buildListTile(
-              'Dispatch Draft', 
+              'Dispatch Drafts', 
               EvaIcons.clock,
               () {
                 Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName);

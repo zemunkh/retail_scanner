@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:retail_scanner/helper/file_manager.dart';
 import 'package:retail_scanner/screens/home_screen.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
@@ -37,10 +38,26 @@ class DispatchNoteState extends State<DispatchNote> {
 
   PrintNote printNote;
 
+  Future<Null> _checkInputs() async {
+    bool isEmpty = false;
+    for (int i = 0; i < _masterControllers.length; i++) {
+      if ((counterList[i] > 0 &&
+          _dispatchNoController.text != null &&
+          _numberOfScanController.text != null) ||
+          keyEnableList[i] == false ) {
+        isEmpty = isEmpty || false;
+      } else {
+        isEmpty = isEmpty || true;
+      }
+    }
+    setState(() {
+      _isButtonDisabled = isEmpty;
+    });
+    return null;
+  }
+
   Future<Null> _compareData(String prodVal, int index) async {
     final masterCode = _masterControllers[index].text;
-    // final productCode = _productControllers[index].text;
-    bool isEmpty = false;
     print('Comparison: $masterCode : $prodVal');
 
     setState(() {
@@ -51,18 +68,7 @@ class DispatchNoteState extends State<DispatchNote> {
         matchList[index] = false;
       }
     });
-    for (int i = 0; i < _masterControllers.length; i++) {
-      if (counterList[i] > 0 &&
-          _dispatchNoController.text != null &&
-          _numberOfScanController.text != null) {
-        isEmpty = isEmpty || false;
-      } else {
-        isEmpty = isEmpty || true;
-      }
-    }
-    setState(() {
-      _isButtonDisabled = isEmpty;
-    });
+    _checkInputs();
   }
 
   String buffer = '';
@@ -189,12 +195,6 @@ class DispatchNoteState extends State<DispatchNote> {
             if ((length - 1) > index) {
               FocusScope.of(context).requestFocus(_masterFocusNodes[index + 1]);
             } else {
-              // bool isEmpty = true;
-              // for(int i = length; i < length; i++) {
-              //   if(_masterControllers[index].text == ''){
-              //     isEmpty = isEmpty && false;
-              //   }
-              // }
               setState(() {
                 _isFormEnabled = false;
               });
@@ -233,7 +233,7 @@ class DispatchNoteState extends State<DispatchNote> {
       remark2 = 'Unknown';
     }
 
-    List<String> draftList = [];
+    List<String> valueList = [];
     int len = _masterControllers.length;
 
     List<String> _masterList = [];
@@ -244,15 +244,15 @@ class DispatchNoteState extends State<DispatchNote> {
         _numberOfScanController.text != null) {
       for (int i = 0; i < len; i++) {
         String buff =
-            '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_masterControllers[i].text}, ${counterList[i].toString()}, $currentTime, $deviceName, $userName\r\n';
-        draftList.add(buff);
+            '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime, $deviceName, $userName\r\n';
+        valueList.add(buff);
         _masterList.add(_masterControllers[i].text);
         _productList.add(_productControllers[i].text);
         _counterList.add(counterList[i].toString());
       }
     }
-    print('List Data: $draftList');
-    FileManager.saveDispatchData(filenameDate, draftList);
+    print('List Data: $valueList');
+    FileManager.saveDispatchData(filenameDate, valueList);
     // prepare the passing value
 
     // start print operation
@@ -319,9 +319,6 @@ class DispatchNoteState extends State<DispatchNote> {
     FileManager.saveDraft('draft_counter_$index', _counterList);
     FileManager.saveDraft('draft_other_$index', _otherList);
 
-    Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
-    _setNavbarItem(false);
-
     // add DispatchNote model and Retrieve it on Draft page screen by id {createdAt}.
     // follow the structure of screen
   }
@@ -330,7 +327,7 @@ class DispatchNoteState extends State<DispatchNote> {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Do you want to disable #${index + 1} input?"),
+        title: Text("Are you sure to cancel #${index + 1}?"),
         actions: <Widget>[
           FlatButton(
             child: Text('Yes'),
@@ -338,6 +335,8 @@ class DispatchNoteState extends State<DispatchNote> {
               print('Yes clicked');
               setState(() {
                 keyEnableList[index] = false;
+                _productControllers[index].text = 'Cancelled';
+                _checkInputs();
               });
               Navigator.pop(context);
             },
@@ -350,15 +349,14 @@ class DispatchNoteState extends State<DispatchNote> {
             },
           ),
         ],
-      )
-    );
+      ));
   }
 
   Future<Null> _enableInput(int index) async {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Do you want to enable #${index + 1} input?"),
+        title: Text("Are you sure to enable #${index + 1}?"),
         actions: <Widget>[
           FlatButton(
             child: Text('Yes'),
@@ -366,6 +364,8 @@ class DispatchNoteState extends State<DispatchNote> {
               print('Yes clicked');
               setState(() {
                 keyEnableList[index] = true;
+                _productControllers[index].text = '';
+                _checkInputs();
               });
               Navigator.pop(context);
             },
@@ -378,8 +378,7 @@ class DispatchNoteState extends State<DispatchNote> {
             },
           ),
         ],
-      )
-    );
+      ));
   }
 
   Future<Null> _initValues() async {
@@ -468,13 +467,6 @@ class DispatchNoteState extends State<DispatchNote> {
                   ),
                   autofocus: false,
                   controller: _mainController,
-                  validator: (String value) {
-                    if (value.isEmpty) {
-                      return 'Enter Scan Number';
-                    } else if (int.parse(value) >= 50) {
-                      return 'Too much. Suggestion: 1-50';
-                    }
-                  },
                   focusNode: _mainNode,
                   onTap: () {
                     _focusNode(context, _mainNode);
@@ -499,7 +491,7 @@ class DispatchNoteState extends State<DispatchNote> {
               color: Color(0xFF004B83),
               fontWeight: FontWeight.bold,
             ),
-            enabled: typeController == 'master' ? _isFormEnabled : true,
+            enabled: typeController == 'master' ? _isFormEnabled : keyEnableList[index],
             decoration: InputDecoration.collapsed(
               filled: true,
               fillColor: Colors.white,
@@ -621,14 +613,26 @@ class DispatchNoteState extends State<DispatchNote> {
             onPressed: () {
               print('You pressed Draft Button!');
               _saveTheDraft(createdDate).then((_) {
-                Scaffold.of(context).showSnackBar(SnackBar(
-                    content: new Text(
-                      "Draft Saved!",
-                      textAlign: TextAlign.center,
-                    ),
-                    duration: const Duration(milliseconds: 500)));
+                Alert(
+                  context: context,
+                  type: AlertType.success,
+                  title: "Dispatch note is drafted successfully",
+                  desc: "You can check it on Drafts Menu.",
+                  buttons: [
+                    DialogButton(
+                      child: Text(
+                        "OK",
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+                        _setNavbarItem(false);
+                      },
+                      width: 120,
+                    )
+                  ],
+                ).show();
               });
-
               // _setDraftValues(i, draftList);
             },
             child: Text(
@@ -657,7 +661,6 @@ class DispatchNoteState extends State<DispatchNote> {
                 ? null
                 : () {
                     print('You pressed Save and Print Button!');
-
                     _saveAndPrint(createdDate).then((_) {
                       Scaffold.of(context).showSnackBar(SnackBar(
                           content: new Text(

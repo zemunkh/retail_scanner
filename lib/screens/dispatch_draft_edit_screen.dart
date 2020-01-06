@@ -32,6 +32,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
 
   bool lockEn = true;
   bool _isButtonDisabled = true;
+  List<bool> _isMasterEnabled = [];
 
   // final _mainFormKey = GlobalKey<FormState>();
   // final _scannerFormKey = GlobalKey<FormFieldState>(); 
@@ -41,9 +42,27 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
   String createdDate = '';
   DateTime createdDateTime;
   // Widget _form;
+  List<bool> keyEnableList = [];
   List<bool> matchList = [];
   List<int> counterList = [];
 
+  Future<Null> _checkInputs() async {
+    bool isEmpty = false;
+    for (int i = 0; i < _masterControllers.length; i++) {
+      if ((counterList[i] > 0 &&
+          _dispatchNoController.text != null &&
+          _numberOfScanController.text != null) ||
+          keyEnableList[i] == false ) {
+        isEmpty = isEmpty || false;
+      } else {
+        isEmpty = isEmpty || true;
+      }
+    }
+    setState(() {
+      _isButtonDisabled = isEmpty;
+    });
+    return null;
+  }
 
   Future<Null> _compareData(String prodVal, int index) async {
     final masterCode = _masterControllers[index].text;
@@ -59,16 +78,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
         matchList[index] = false;
       }
     });
-    for(int i = 0; i < _masterControllers.length; i++) {
-      if(counterList[i] > 0 && _dispatchNoController.text != null && _numberOfScanController.text != null) {
-        isEmpty = isEmpty || false;
-      } else {
-        isEmpty = isEmpty || true;
-      }
-    }
-    setState(() {
-      _isButtonDisabled = isEmpty;
-    });
+    _checkInputs();
   }
 
   String buffer = '';
@@ -86,7 +96,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
         setState(() {
           _dispatchNoController.text = trueVal;
         });
-        FocusScope.of(context).requestFocus(_numberNode);
+        FocusScope.of(context).requestFocus(new FocusNode());
       });
     }
   }
@@ -124,6 +134,16 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                   print('adding:');
                   _masterControllers.add(new TextEditingController());
                   _productControllers.add(new TextEditingController());
+
+                  if(_masterList[i] == '') {
+                    _isMasterEnabled[i] = true;
+                  } else {
+                    _isMasterEnabled[i] = false;
+                  }
+
+                  if(_productList[i] == 'Cancelled') {
+                    keyEnableList[i] = false;
+                  }
 
                   _masterControllers[i].text = _masterList[i];
                   _productControllers[i].text = _productList[i];
@@ -178,51 +198,51 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
       buffer = _productControllers[index].text;
     }
     
-      if(buffer.endsWith(r'$')){
-        buffer = buffer.substring(0, buffer.length - 1);
-        trueVal = buffer;
-        if(_typeController == 'master') {
-          print('I am master!');
-          _masterFocusNodes[index].unfocus();
-        } else if(_typeController == 'product') {
-          print('I am product!');
-          Future.delayed(const Duration(milliseconds: 1000), (){
-            _productControllers[index].text = trueVal;
-          }).then((value){
-            _compareData(trueVal, index);
-            Future.delayed(const Duration(milliseconds: 500), (){
-              _productControllers[index].clear();
-            });
+    if(buffer.endsWith(r'$')){
+      buffer = buffer.substring(0, buffer.length - 1);
+      trueVal = buffer;
+      if(_typeController == 'master' && trueVal != '') {
+        print('I am master!');
+        _isMasterEnabled[index] = false;
+      } else if(_typeController == 'product') {
+        print('I am product!');
+        Future.delayed(const Duration(milliseconds: 1000), (){
+          _productControllers[index].text = trueVal;
+        }).then((value){
+          _compareData(trueVal, index);
+          Future.delayed(const Duration(milliseconds: 500), (){
+            _productControllers[index].clear();
           });
-        } else {
-          print('Nothing to do');
-        }
-        
-        Future.delayed(const Duration(milliseconds: 200), (){
-          setState(() {
-            _controller.text = trueVal;
-          });
-          if(length < 50) {
-            if(_typeController == 'master') {
-              FocusScope.of(context).requestFocus(_productFocusNodes[index]);
-            } else if(_typeController == 'product') {
-              if((length - 1) > index){
-                FocusScope.of(context).requestFocus(_masterFocusNodes[index + 1]);
-              } else {
-                FocusScope.of(context).requestFocus(new FocusNode());
-              }
-              
-            }
-          }
         });
+      } else {
+        print('Nothing to do');
       }
+      
+      Future.delayed(const Duration(milliseconds: 200), (){
+        setState(() {
+          _controller.text = trueVal;
+        });
+        if(length < 50) {
+          if(_typeController == 'master') {
+            FocusScope.of(context).requestFocus(_productFocusNodes[index]);
+          } else if(_typeController == 'product') {
+            if((length - 1) > index){
+              FocusScope.of(context).requestFocus(_masterFocusNodes[index + 1]);
+            } else {
+              FocusScope.of(context).requestFocus(new FocusNode());
+            }
+            
+          }
+        }
+      });
+    }
   }
 
   Future<Null> _saveAndPrint(DateTime createdDateTime) async {
 
     String currentTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
     String createdAt = DateFormat("yyyyMMdd").format(createdDateTime);
-    List<String> draftList = [];
+    List<String> valueList = [];
     int len = _masterControllers.length;
     
     int draftIndex = await FileManager.getSelectedIndex();
@@ -253,15 +273,15 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     
     if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
       for(int i = 0; i < len; i++) {
-        String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_masterControllers[i].text}, ${counterList[i].toString()}, $currentTime, $deviceName, $userName\r\n';    
-        draftList.add(buff);
+        String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime, $deviceName, $userName\r\n';    
+        valueList.add(buff);
         _masterList.add(_masterControllers[i].text);
         _productList.add(_productControllers[i].text);
         _counterList.add(counterList[i].toString());
       }
     }
-    print('List Data: $draftList');
-    FileManager.saveDispatchData(createdAt, draftList);
+    print('List Data: $valueList');
+    FileManager.saveDispatchData(createdAt, valueList);
     // prepare the passing value
 
     FileManager.removeDraft('draft_master_$draftIndex');
@@ -285,7 +305,9 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
 
     List<String> _masterList = [];
     List<String> _productList = [];
+    List<String> _enabledList = [];
     List<String> _counterList = [];  // Matched Counter Value
+    
     List<String> _otherList = [];
 
     if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
@@ -293,6 +315,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
         _masterList.add(_masterControllers[i].text);
         _productList.add(_productControllers[i].text);
         _counterList.add(counterList[i].toString());
+        _enabledList.add(keyEnableList[i].toString());
         if(counterList[i] > 0) {
           totalMatched++;
         }
@@ -316,6 +339,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
 
     FileManager.saveDraft('draft_master_$index', _masterList);
     FileManager.saveDraft('draft_product_$index', _productList);
+    FileManager.saveDraft('draft_enabled_$index', _enabledList);
     FileManager.saveDraft('draft_counter_$index', _counterList);
     FileManager.saveDraft('draft_other_$index', _otherList);
 
@@ -327,6 +351,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     print('Selected number: $draftIndex');
     _otherList = await FileManager.readDraft('draft_other_$draftIndex');
     print('Other list: $_otherList');
+    
     setState(() {
       createdDateTime = DateTime.parse(_otherList[0]);
       createdDate = DateFormat("yyyy/MM/dd HH:mm:ss").format(createdDateTime);
@@ -354,8 +379,68 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     );
   }
 
+  Future<Null> _disableInput(int index) {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Are you sure to cancel #${index + 1}?"),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Yes'),
+            onPressed: () {
+              print('Yes clicked');
+              setState(() {
+                keyEnableList[index] = false;
+                _productControllers[index].text = 'Cancelled';
+                _checkInputs();
+              });
+              Navigator.pop(context);
+            },
+          ),
+          FlatButton(
+            child: Text('No'),
+            onPressed: () {
+              print('No clicked');
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ));
+  }
+
+  Future<Null> _enableInput(int index) async {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Are you sure to enable #${index + 1}?"),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Yes'),
+            onPressed: () {
+              print('Yes clicked');
+              setState(() {
+                keyEnableList[index] = true;
+                _productControllers[index].text = '';
+                _checkInputs();
+              });
+              Navigator.pop(context);
+            },
+          ),
+          FlatButton(
+            child: Text('No'),
+            onPressed: () {
+              print('No clicked');
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ));
+  }
+
   Future<Null> _initValues() async {
-    for(int i = 0; i < 50; i++) {
+    for (int i = 0; i < 50; i++) {
+      _isMasterEnabled.add(true);
+      keyEnableList.add(true);
       matchList.add(false);
       counterList.add(0);
     }
@@ -469,7 +554,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
               color: Color(0xFF004B83),
               fontWeight: FontWeight.bold,
             ),
-            enabled: typeController == 'master' ? false : true,
+            enabled: typeController == 'master' ? _isMasterEnabled[index] : keyEnableList[index],
             decoration: InputDecoration.collapsed(
               filled: true,
               fillColor: Colors.white,
@@ -501,7 +586,29 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     Widget statusBar(int index) {
       return Row(children: <Widget>[
         Expanded(
-            flex: 5,
+          flex: 2,
+          child: keyEnableList[index]
+              ? IconButton(
+                  icon: Icon(
+                    EvaIcons.checkmarkOutline,
+                    color: Colors.green,
+                  ),
+                  onPressed: () {
+                    _disableInput(index);
+                  },
+                )
+              : IconButton(
+                  icon: Icon(
+                    EvaIcons.closeCircleOutline,
+                    color: Colors.red,
+                  ),
+                  onPressed: () {
+                    _enableInput(index);
+                  },
+                ),
+        ),
+        Expanded(
+            flex: 4,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 2),
               child: matchList[index] ? new Icon(
@@ -516,7 +623,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
             ),
           ),
           Expanded(
-            flex: 5,
+            flex: 4,
             child: Container(
               margin: const EdgeInsets.all(2),
               padding: const EdgeInsets.all(2),
@@ -682,18 +789,18 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                           child: Row(
                             children: <Widget>[
                               Expanded(
-                                flex: 7,
+                                flex: 5,
                                 child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                    Text('Item: $index'),
+                                    Text('Item: ${index + 1}'),
                                     _scannerInput('master', _masterControllers[index], _masterFocusNodes[index], index),
                                     _scannerInput('product', _productControllers[index], _productFocusNodes[index], index),
                                   ],
                                 ),
                               ),
                               Expanded(
-                                flex: 3,
+                                flex: 5,
                                 child: statusBar(index),
                               ),
                             ],

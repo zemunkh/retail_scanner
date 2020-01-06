@@ -1,16 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../widgets/main_drawer.dart';
 import '../widgets/stock_saved_file_item.dart';
-
-  _getFilesList() async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'stock_files';
-    List<String> files = prefs.getStringList(key);
-    print('Stock Files List: $files');
-    return files;
-  }
+import '../helper/file_manager.dart';
 
 class StockSavedScreen extends StatefulWidget {
   static const routeName = '/stock_saved';
@@ -51,7 +42,7 @@ class _StockSavedScreenState extends State<StockSavedScreen> {
         drawer: MainDrawer(),
         body: Container(
           child: new FutureBuilder(
-            future: _getFilesList(),
+            future: FileManager.getStockFilesList(),
             builder: (context, snapshot){
               if(snapshot.connectionState == ConnectionState.done) {
                 var myData = snapshot.data;
