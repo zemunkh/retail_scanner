@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -114,22 +113,6 @@ class FileManager {
     return profile;
   }
 
-  static Future<Null> saveDraftList(String key, String draftName) async {
-    final prefs = await SharedPreferences.getInstance();
-    List<String> drafts = prefs.getStringList(key);
-    if(drafts == null || drafts.isEmpty) {
-      drafts = [draftName];
-      prefs.setStringList(key, drafts);
-    } else {
-      if(drafts[drafts.length - 1] != draftName) {
-        drafts.add(draftName);
-        prefs.setStringList(key, drafts);
-      }
-    }
-    print('Draft List: $drafts');
-    return null;
-  }
-
   static Future<Null> updateDraftList(int index, String key, String draftName) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> drafts = prefs.getStringList(key);
@@ -166,9 +149,65 @@ class FileManager {
     return index;
   }
 
-  static Future<List> getDraftBank() async {
+  static Future<Null> addDraftIndexNameBank(String draftIndexName) async {
     final prefs = await SharedPreferences.getInstance();
-    final key = 'draft_bank';
+    String key = 'draft_index_name_bank';
+    List<String> drafts = prefs.getStringList(key);
+    if(drafts == null || drafts.isEmpty) {
+      drafts = [draftIndexName];
+      prefs.setStringList(key, drafts);
+    } else {
+      if(drafts[drafts.length - 1] != draftIndexName) {
+        drafts.add(draftIndexName);
+        prefs.setStringList(key, drafts);
+      }
+    }
+    print('Draft Bank List: $drafts');
+    return null;
+  }
+
+  static Future<List> getDraftIndexNameBank() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'draft_index_name_bank';
+    List<String> drafts = prefs.getStringList(key);
+    if(drafts == null) {
+      drafts = [];
+    }
+    print('Draft Index Name Bank: $drafts');
+    return drafts;
+  }
+
+  static Future<Null> removeFromIndexBank(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'draft_index_name_bank';
+    List<String> drafts = prefs.getStringList(key);
+    if(prefs != null) {
+      drafts.removeAt(index);
+      prefs.setStringList(key, drafts);
+    }
+    print('Draft Bank: $drafts');
+  }
+
+  static Future<Null> addToDraftNameList(String draftName) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'draft_name_bank';
+    List<String> drafts = prefs.getStringList(key);
+    if(drafts == null || drafts.isEmpty) {
+      drafts = [draftName];
+      prefs.setStringList(key, drafts);
+    } else {
+      if(drafts[drafts.length - 1] != draftName) {
+        drafts.add(draftName);
+        prefs.setStringList(key, drafts);
+      }
+    }
+    print('Draft List: $drafts');
+    return null;
+  }
+
+  static Future<List> getDraftNameBank() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'draft_name_bank';
     List<String> drafts = prefs.getStringList(key);
     if(drafts == null) {
       drafts = [];
@@ -176,15 +215,16 @@ class FileManager {
     print('Draft Bank: $drafts');
     return drafts;
   }
+
   static Future<Null> removeFromBank(int index) async {
     final prefs = await SharedPreferences.getInstance();
-    final key = 'draft_bank';
+    final key = 'draft_name_bank';
     List<String> drafts = prefs.getStringList(key);
     if(prefs != null) {
       drafts.removeAt(index);
       prefs.setStringList(key, drafts);
     }
-    print('Draft List: $drafts');
+    print('Draft Bank: $drafts');
   }
 
   static Future<List> getStockFilesList() async {

@@ -4,7 +4,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:retail_scanner/helper/file_manager.dart';
 import 'package:share_extend/share_extend.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:retail_scanner/screens/dispatch_saved_screen.dart';
 
 

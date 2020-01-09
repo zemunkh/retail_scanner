@@ -301,26 +301,18 @@ class DispatchNoteState extends State<DispatchNote> {
     _otherList.add(_numberOfScanController.text);
     _otherList.add(draftedTime);
 
-    // save the List to Shared Prefs
-    // master_list, product_list, counter_list
+    // To create Unique name for the draft list view
+    String draftName = '${_dispatchNoController.text}/$dtime/${_numberOfScanController.text}/$totalMatched';
+    FileManager.addToDraftNameList(draftName);
 
-    List<String> draftBank = await FileManager.getDraftList('draft_bank');
-    String index = '${draftBank.length}';
-    String draftName =
-        '${_dispatchNoController.text}/$dtime/${_numberOfScanController.text}/$totalMatched';
+    String draftIndexName = '${_dispatchNoController.text}_$dtime';
+    FileManager.addDraftIndexNameBank(draftIndexName);
 
-    // Saving new draft list to Draft Bank for the Draft list page.
-    FileManager.saveDraftList('draft_bank', draftName);
-    // length will decide what number of the draft list.
-    print('Draft names: draft_master_$index, draft_product_$index');
+    FileManager.saveDraft('draft_master_$draftIndexName', _masterList);
+    FileManager.saveDraft('draft_product_$draftIndexName', _productList);
+    FileManager.saveDraft('draft_counter_$draftIndexName', _counterList);
+    FileManager.saveDraft('draft_other_$draftIndexName', _otherList);
 
-    FileManager.saveDraft('draft_master_$index', _masterList);
-    FileManager.saveDraft('draft_product_$index', _productList);
-    FileManager.saveDraft('draft_counter_$index', _counterList);
-    FileManager.saveDraft('draft_other_$index', _otherList);
-
-    // add DispatchNote model and Retrieve it on Draft page screen by id {createdAt}.
-    // follow the structure of screen
   }
 
   Future<Null> _disableInput(int index) {

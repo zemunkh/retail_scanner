@@ -67,6 +67,9 @@ class MyApp extends StatelessWidget {
       },
       onGenerateRoute: (settings) {
         print(settings.arguments);
+        return MaterialPageRoute(
+          builder: (ctx) => HomeScreen(),
+        );
       },
       onUnknownRoute: (settings) {
         return MaterialPageRoute(

@@ -72,7 +72,6 @@ class _PrinterScreenState extends State<PrinterScreen> {
       devices = await bluetooth.getBondedDevices();
     } on PlatformException {
       devices = null;
-      // TODO - Error
     }
 
     bluetooth.onStateChanged().listen((state) {

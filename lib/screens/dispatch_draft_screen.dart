@@ -42,7 +42,7 @@ class DispatchDraftScreenState extends State<DispatchDraftScreen> {
         drawer: MainDrawer(),
         body: Container(
           child: new FutureBuilder(
-            future: FileManager.getDraftBank(),
+            future: FileManager.getDraftNameBank(),
             builder: (context, snapshot){
               if(snapshot.connectionState == ConnectionState.done) {
                 var myData = snapshot.data;

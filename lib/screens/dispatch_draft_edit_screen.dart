@@ -24,7 +24,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
 
   final _dispatchNoController = TextEditingController();
   final _numberOfScanController = TextEditingController();
-  
+
   final _dispatchNode = FocusNode();
   final _numberNode = FocusNode();
 
@@ -35,10 +35,11 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
   List<bool> _isMasterEnabled = [];
 
   // final _mainFormKey = GlobalKey<FormState>();
-  // final _scannerFormKey = GlobalKey<FormFieldState>(); 
+  // final _scannerFormKey = GlobalKey<FormFieldState>();
 
   PrintNote printNote;
 
+  String draftNameIndex = '';
   String createdDate = '';
   DateTime createdDateTime;
   // Widget _form;
@@ -66,8 +67,6 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
 
   Future<Null> _compareData(String prodVal, int index) async {
     final masterCode = _masterControllers[index].text;
-    // final productCode = _productControllers[index].text;
-    bool isEmpty = false;
     print('Comparison: $masterCode : $prodVal');
 
     setState(() {
@@ -103,7 +102,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
 
   List<String> _masterList = [];
   List<String> _productList = [];
-  List<String> _counterList = []; 
+  List<String> _counterList = [];
 
   Future<Null> _numberScanListener() async {
 
@@ -112,19 +111,18 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
       buffer = buffer.substring(0, buffer.length - 1);
       trueVal = buffer;
 
-      int draftIndex = await FileManager.getSelectedIndex();
-      _masterList =  await FileManager.readDraft('draft_master_$draftIndex');
-      _productList = await FileManager.readDraft('draft_product_$draftIndex');
-      _counterList = await FileManager.readDraft('draft_counter_$draftIndex');
+      _masterList =  await FileManager.readDraft('draft_master_$draftNameIndex');
+      _productList = await FileManager.readDraft('draft_product_$draftNameIndex');
+      _counterList = await FileManager.readDraft('draft_counter_$draftNameIndex');
 
       await Future.delayed(const Duration(milliseconds: 1000), (){
         _numberOfScanController.text = trueVal;
       }).then((value){
-        
+
         // set the number of inputs will be built in the screen
         if(trueVal != '') {
           if(int.parse(trueVal) < 51) {
-            
+
             print('Controller Length: ${_masterControllers.length}');
 
             if(_masterControllers.length < int.parse(trueVal) ) {
@@ -148,11 +146,11 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                   _masterControllers[i].text = _masterList[i];
                   _productControllers[i].text = _productList[i];
                   counterList[i] = int.parse(_counterList[i]);
-                  if(counterList[i] > 0 && _dispatchNoController.text != null) {
+                  if((counterList[i] > 0 || keyEnableList[i] == false) && _dispatchNoController.text != null) {
                     matchList[i] = true;
 
                     // at least counter > 0, that will add up 1/3
-                    _isButtonDisabled = _isButtonDisabled && false;
+                    _isButtonDisabled = _isButtonDisabled || false;
                   } else {
                     _isButtonDisabled = _isButtonDisabled || true;
                   }
@@ -167,8 +165,8 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
             }
           } else {
             print('Too many :(');
-          } 
-        } 
+          }
+        }
         _numberNode.unfocus();
         FocusScope.of(context).requestFocus(new FocusNode());
       });
@@ -197,7 +195,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     } else if(_typeController == 'product') {
       buffer = _productControllers[index].text;
     }
-    
+
     if(buffer.endsWith(r'$')){
       buffer = buffer.substring(0, buffer.length - 1);
       trueVal = buffer;
@@ -217,7 +215,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
       } else {
         print('Nothing to do');
       }
-      
+
       Future.delayed(const Duration(milliseconds: 200), (){
         setState(() {
           _controller.text = trueVal;
@@ -231,7 +229,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
             } else {
               FocusScope.of(context).requestFocus(new FocusNode());
             }
-            
+
           }
         }
       });
@@ -244,7 +242,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     String createdAt = DateFormat("yyyyMMdd").format(createdDateTime);
     List<String> valueList = [];
     int len = _masterControllers.length;
-    
+
     int draftIndex = await FileManager.getSelectedIndex();
 
     String deviceName = await FileManager.readProfile('device_name');
@@ -270,10 +268,10 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     List<String> _masterList = [];
     List<String> _productList = [];
     List<String> _counterList = [];  // Matched Counter Value
-    
+
     if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
       for(int i = 0; i < len; i++) {
-        String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime, $deviceName, $userName\r\n';    
+        String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime, $deviceName, $userName\r\n';
         valueList.add(buff);
         _masterList.add(_masterControllers[i].text);
         _productList.add(_productControllers[i].text);
@@ -283,12 +281,13 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     print('List Data: $valueList');
     FileManager.saveDispatchData(createdAt, valueList);
     // prepare the passing value
-
-    FileManager.removeDraft('draft_master_$draftIndex');
-    FileManager.removeDraft('draft_product_$draftIndex');
-    FileManager.removeDraft('draft_counter_$draftIndex');
-    FileManager.removeDraft('draft_other_$draftIndex');
+    String draftIndexName = '${_dispatchNoController.text}_$createdAt';
+    FileManager.removeDraft('draft_master_$draftIndexName');
+    FileManager.removeDraft('draft_product_$draftIndexName');
+    FileManager.removeDraft('draft_counter_$draftIndexName');
+    FileManager.removeDraft('draft_other_$draftIndexName');
     FileManager.removeFromBank(draftIndex);
+    FileManager.removeFromIndexBank(draftIndex);
     // start print operation
     printNote.sample(deviceName, userName, companyName, remark1, remark2, createdAt, _dispatchNoController.text, _numberOfScanController.text, _masterList, _productList, _counterList, currentTime);
     return null;
@@ -307,7 +306,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     List<String> _productList = [];
     List<String> _enabledList = [];
     List<String> _counterList = [];  // Matched Counter Value
-    
+
     List<String> _otherList = [];
 
     if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
@@ -322,42 +321,42 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
       }
     }
     // _otherList.add(dtime);
-    _otherList.add(createdAt);
+    _otherList.add(createdDateTime.toString());
     _otherList.add(_dispatchNoController.text);
     _otherList.add(_numberOfScanController.text);
     _otherList.add(draftedTime);
 
-    // save the List to Shared Prefs
-    // master_list, product_list, counter_list
+    // To create Unique name for the draft list view
+    String draftFrontName = '${_dispatchNoController.text}/$createdAt/${_numberOfScanController.text}/$totalMatched';
+    String draftIndexName = '${_dispatchNoController.text}_$createdAt';
+    // FileManager.removeFromIndexBank(index);
+    FileManager.updateDraftList(index, 'draft_name_bank', draftFrontName);
 
-    String draftName = '${_dispatchNoController.text}/$createdAt/${_numberOfScanController.text}/$totalMatched';
-
-    // Updating drafts and re-writing draft name on the list of draft_bank
-    FileManager.updateDraftList(index, 'draft_bank', draftName);
-    // length will decide what number of the draft list.
-    print('Updated Draft names: draft_master_$index, draft_product_$index');
-
-    FileManager.saveDraft('draft_master_$index', _masterList);
-    FileManager.saveDraft('draft_product_$index', _productList);
-    FileManager.saveDraft('draft_enabled_$index', _enabledList);
-    FileManager.saveDraft('draft_counter_$index', _counterList);
-    FileManager.saveDraft('draft_other_$index', _otherList);
+    FileManager.saveDraft('draft_master_$draftIndexName', _masterList);
+    FileManager.saveDraft('draft_product_$draftIndexName', _productList);
+    FileManager.saveDraft('draft_enabled_$draftIndexName', _enabledList);
+    FileManager.saveDraft('draft_counter_$draftIndexName', _counterList);
+    FileManager.saveDraft('draft_other_$draftIndexName', _otherList);
 
   }
 
   void initDraftScreen() async {
  // Matched Counter Value
+    List<String> draftIndexBank = await FileManager.getDraftIndexNameBank();
     int draftIndex = await FileManager.getSelectedIndex();
-    print('Selected number: $draftIndex');
-    _otherList = await FileManager.readDraft('draft_other_$draftIndex');
+    draftNameIndex = draftIndexBank[draftIndex];
+    print('Selected Draft Index: $draftIndex');
+    _otherList = await FileManager.readDraft('draft_other_$draftNameIndex');
+    _counterList = await FileManager.readDraft('draft_counter_$draftNameIndex');
     print('Other list: $_otherList');
-    
+
     setState(() {
       createdDateTime = DateTime.parse(_otherList[0]);
       createdDate = DateFormat("yyyy/MM/dd HH:mm:ss").format(createdDateTime);
-      _dispatchNoController.text = _otherList[1]; 
+      _dispatchNoController.text = _otherList[1];
       _numberOfScanController.text = _otherList[2] + r'$';
     });
+
   }
 
   Future<bool> _backButtonPressed() {
@@ -464,7 +463,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     _initValues();
   }
 
-  @override 
+  @override
   Widget build(BuildContext context) {
 
     Widget _mainInput(String header, TextEditingController _mainController, FocusNode _mainNode) {
@@ -477,7 +476,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
               '$header:',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 16, 
+                fontSize: 16,
                 color: Color(0xFF004B83),
                 fontWeight: FontWeight.bold,
               ),
@@ -492,7 +491,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                 child: Center(
                   child: TextFormField(
                     style: TextStyle(
-                      fontSize: 16, 
+                      fontSize: 16,
                       color: Color(0xFF004B83),
                       fontWeight: FontWeight.bold,
                     ),
@@ -502,7 +501,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                       fillColor: Colors.white,
                       hintText: header,
                       hintStyle: TextStyle(
-                        color: Color(0xFF004B83), 
+                        color: Color(0xFF004B83),
                         fontWeight: FontWeight.w200,
                       ),
                       border: OutlineInputBorder(
@@ -512,8 +511,8 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                         color: Colors.yellowAccent,
                       ),
                       suffixIcon: IconButton(
-                        icon: Icon(EvaIcons.close, 
-                          color: Colors.blueAccent, 
+                        icon: Icon(EvaIcons.close,
+                          color: Colors.blueAccent,
                           size: 24,
                         ),
                         onPressed: () {
@@ -523,13 +522,6 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                     ),
                     autofocus: true,
                     controller: _mainController,
-                    validator: (String value) {
-                      if(value.isEmpty) {
-                        return 'Enter Scan Number';
-                      } else if(int.parse(value) >= 50){
-                        return 'Too much. Suggestion: 1-50';
-                      }
-                    },
                     focusNode: _mainNode,
                     onTap: () {
                       _focusNode(context, _mainNode);
@@ -550,7 +542,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
           height: 25,
           child: TextFormField(
             style: TextStyle(
-              fontSize: 14, 
+              fontSize: 14,
               color: Color(0xFF004B83),
               fontWeight: FontWeight.bold,
             ),
@@ -561,7 +553,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
               hintText: typeController,
               hintStyle: TextStyle(
                 color: Color(0xFF004B83),
-                fontSize: 14, 
+                fontSize: 14,
                 fontWeight: FontWeight.w300,
               ),
               border: OutlineInputBorder(
@@ -632,7 +624,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                   borderRadius: BorderRadius.all(
                       Radius.circular(3),
                   ),
-                  side: BorderSide(width: 1, color: Colors.black), 
+                  side: BorderSide(width: 1, color: Colors.black),
                 ),
               ),
               child: Center(
@@ -705,7 +697,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
           elevation: 2,
         )
       );
-    }  
+    }
 
     Widget _saveDraftButton(BuildContext context) {
       return Padding(
@@ -726,7 +718,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                       "OK",
                       style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName),
                     width: 120,
                   )
                 ],
@@ -751,8 +743,8 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
           elevation: 2,
         )
       );
-    }  
-    
+    }
+
     return WillPopScope(
       onWillPop: _backButtonPressed,
       child: Scaffold(
@@ -807,7 +799,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                           ),
                         );
                       },
-                      
+
                     ),
                 ),
                 Row(

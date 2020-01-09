@@ -23,7 +23,13 @@ class DispatchDraftItem extends StatelessWidget {
           children: <Widget>[
             IconButton(
               icon: Icon(EvaIcons.trash2Outline),
-              onPressed: () {
+              onPressed: () async {
+                List<String> draftIndexBank = await FileManager.getDraftIndexNameBank();
+                FileManager.removeDraft('draft_master_${draftIndexBank[index]}');
+                FileManager.removeDraft('draft_product_${draftIndexBank[index]}');
+                FileManager.removeDraft('draft_counter_${draftIndexBank[index]}');
+                FileManager.removeDraft('draft_other_${draftIndexBank[index]}');
+                FileManager.removeFromIndexBank(index);
                 FileManager.removeFromBank(index);
                 print('Draft name: $draftName');
                 Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName);

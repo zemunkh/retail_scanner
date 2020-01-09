@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
-import 'package:retail_scanner/helper/file_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../widgets/main_drawer.dart';
