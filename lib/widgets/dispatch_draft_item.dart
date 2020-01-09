@@ -11,6 +11,41 @@ class DispatchDraftItem extends StatelessWidget {
 
   DispatchDraftItem(this.draftName, this.index);
 
+  Future<Null> _deleteItem(BuildContext context, int index) {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Are you sure to delete #${index + 1}?",          
+        style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Yes', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF004B83),),),
+            onPressed: () async {
+              List<String> draftIndexBank = await FileManager.getDraftIndexNameBank();
+              FileManager.removeDraft('draft_master_${draftIndexBank[index]}');
+              FileManager.removeDraft('draft_product_${draftIndexBank[index]}');
+              FileManager.removeDraft('draft_counter_${draftIndexBank[index]}');
+              FileManager.removeDraft('draft_other_${draftIndexBank[index]}');
+              FileManager.removeFromIndexBank(index);
+              FileManager.removeFromBank(index);
+              print('Draft name: $draftName');
+              Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName);
+            },
+          ),
+          FlatButton(
+            child: Text('No', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF004B83),),),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -24,15 +59,7 @@ class DispatchDraftItem extends StatelessWidget {
             IconButton(
               icon: Icon(EvaIcons.trash2Outline),
               onPressed: () async {
-                List<String> draftIndexBank = await FileManager.getDraftIndexNameBank();
-                FileManager.removeDraft('draft_master_${draftIndexBank[index]}');
-                FileManager.removeDraft('draft_product_${draftIndexBank[index]}');
-                FileManager.removeDraft('draft_counter_${draftIndexBank[index]}');
-                FileManager.removeDraft('draft_other_${draftIndexBank[index]}');
-                FileManager.removeFromIndexBank(index);
-                FileManager.removeFromBank(index);
-                print('Draft name: $draftName');
-                Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName);
+                _deleteItem(context, index);
               },
               color: Theme.of(context).errorColor,
             ),

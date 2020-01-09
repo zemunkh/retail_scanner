@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../widgets/main_drawer.dart';
 import '../widgets/stock_saved_file_item.dart';
 import '../helper/file_manager.dart';
@@ -19,7 +20,7 @@ class _StockSavedScreenState extends State<StockSavedScreen> {
         actions: <Widget>[
           FlatButton(
             child: Text('Yes'),
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => SystemNavigator.pop(),
           ),
           FlatButton(
             child: Text('No'),

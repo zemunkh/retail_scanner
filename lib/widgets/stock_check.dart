@@ -125,11 +125,6 @@ class StockInState extends State<StockIn> {
     super.initState();
     _masterController.addListener(masterListener);
     _productController.addListener(productListener);
-    // for(int i = 0; i < 1; i++) {
-    //   FileManager.removeFromBank(i);
-    //   FileManager.removeFromIndexBank(i);
-    // }
-
   }
   
   @override

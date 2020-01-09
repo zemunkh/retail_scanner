@@ -1,5 +1,6 @@
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:retail_scanner/helper/file_manager.dart';
@@ -105,7 +106,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
   List<String> _counterList = [];
 
   Future<Null> _numberScanListener() async {
-
+    bool isEmpty = false;
     buffer = _numberOfScanController.text;
     if(buffer.endsWith(r'$')) {
       buffer = buffer.substring(0, buffer.length - 1);
@@ -139,23 +140,25 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                     _isMasterEnabled[i] = false;
                   }
 
-                  if(_productList[i] == 'Cancelled') {
+                  if(_productList[i].contains('Cancelled')) {
                     keyEnableList[i] = false;
                   }
 
                   _masterControllers[i].text = _masterList[i];
                   _productControllers[i].text = _productList[i];
                   counterList[i] = int.parse(_counterList[i]);
-                  if((counterList[i] > 0 || keyEnableList[i] == false) && _dispatchNoController.text != null) {
+                  if((counterList[i] > 0 || _productList[i].contains('Cancelled')) && _dispatchNoController.text != null) {
                     matchList[i] = true;
 
                     // at least counter > 0, that will add up 1/3
-                    _isButtonDisabled = _isButtonDisabled || false;
+                    isEmpty = isEmpty || false;
                   } else {
-                    _isButtonDisabled = _isButtonDisabled || true;
+                    isEmpty = isEmpty || true;
                   }
                   _masterFocusNodes.add(new FocusNode());
                   _productFocusNodes.add(new FocusNode());
+                  _isButtonDisabled = isEmpty;
+                  print('Button status $i: $_isButtonDisabled');
                 }
 
               });
@@ -240,6 +243,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
 
     String currentTime = DateFormat("yyyy/MM/dd HH:mm:ss").format(DateTime.now());
     String createdAt = DateFormat("yyyyMMdd").format(createdDateTime);
+    String filenameDate = DateFormat("yyyy/MM/dd HH:mm").format(createdDateTime);
     List<String> valueList = [];
     int len = _masterControllers.length;
 
@@ -271,7 +275,7 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
 
     if(_dispatchNoController.text != null || _numberOfScanController.text != null) {
       for(int i = 0; i < len; i++) {
-        String buff = '$createdAt, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime, $deviceName, $userName\r\n';
+        String buff = '$filenameDate, ${_dispatchNoController.text}, ${_numberOfScanController.text}, ${_masterControllers[i].text}, ${_productControllers[i].text}, ${counterList[i].toString()}, $currentTime, $deviceName, $userName\r\n';
         valueList.add(buff);
         _masterList.add(_masterControllers[i].text);
         _productList.add(_productControllers[i].text);
@@ -359,25 +363,6 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
 
   }
 
-  Future<bool> _backButtonPressed() {
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Exit the Stock App?"),
-        actions: <Widget>[
-          FlatButton(
-            child: Text('Yes'),
-            onPressed: () => Navigator.pop(context, true),
-          ),
-          FlatButton(
-            child: Text('No'),
-            onPressed: () => Navigator.pop(context, false),
-          ),
-        ],
-      )
-    );
-  }
-
   Future<Null> _disableInput(int index) {
     return showDialog(
       context: context,
@@ -451,6 +436,10 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
     super.dispose();
     _dispatchNoController.dispose();
     _numberOfScanController.dispose();
+    for(int i = 0; i < _masterControllers.length; i++) {
+      _masterControllers[i].dispose();
+      _productControllers[i].dispose();
+    }
   }
 
   @override
@@ -520,7 +509,6 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                         },
                       ),
                     ),
-                    autofocus: true,
                     controller: _mainController,
                     focusNode: _mainNode,
                     onTap: () {
@@ -560,7 +548,6 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
                 borderRadius: BorderRadius.circular(5.0),
               ),
             ),
-            autofocus: true,
             controller: _controller,
             focusNode: currentNode,
             onTap: () {
@@ -705,26 +692,33 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
         child: MaterialButton(
           onPressed: () {
             print('You pressed Draft Button!');
-            _saveTheDraft(createdDateTime).then((_){
-              // Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName);
-              Alert(
-                context: context,
-                type: AlertType.success,
-                title: "Draft is saved successfully",
-                desc: "You saved the draft again.",
-                buttons: [
-                  DialogButton(
-                    child: Text(
-                      "OK",
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                    onPressed: () => Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName),
-                    width: 120,
-                  )
-                ],
-              ).show();
-            });
-
+            if (_dispatchNoController.text != '' && _numberOfScanController.text != '') {
+              _saveTheDraft(createdDateTime).then((_) {
+                Alert(
+                  context: context,
+                  type: AlertType.success,
+                  title: "Draft is saved again successfully",
+                  desc: "You saved the draft again.",
+                  buttons: [
+                    DialogButton(
+                      child: Text(
+                        "OK",
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      ),
+                      onPressed: () => Navigator.of(context).pushReplacementNamed(DispatchDraftScreen.routeName),
+                      width: 120,
+                    )
+                  ],
+                ).show();
+              });
+            } else {
+              Scaffold.of(context).showSnackBar(SnackBar(
+                content: new Text(
+                  "Input fields are empty. Fill the fields!",
+                  textAlign: TextAlign.center,
+                ),
+                duration: const Duration(milliseconds: 2000)));
+            }
           },
           child: Text(
             'Save as Draft',
@@ -741,6 +735,25 @@ class DispatchDraftEditScreenState extends State<DispatchDraftEditScreen> {
           height: 30,
           minWidth: 120,
           elevation: 2,
+        )
+      );
+    }
+
+    Future<bool> _backButtonPressed() {
+      return showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Exit the Stock App?"),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Yes'),
+              onPressed: () => SystemNavigator.pop(),
+            ),
+            FlatButton(
+              child: Text('No'),
+              onPressed: () => Navigator.pop(context, false),
+            ),
+          ],
         )
       );
     }

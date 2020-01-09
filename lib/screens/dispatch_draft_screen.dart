@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../helper/file_manager.dart';
 import '../widgets/dispatch_draft_item.dart';
 import '../widgets/main_drawer.dart';
@@ -19,7 +20,7 @@ class DispatchDraftScreenState extends State<DispatchDraftScreen> {
         actions: <Widget>[
           FlatButton(
             child: Text('Yes'),
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => SystemNavigator.pop(),
           ),
           FlatButton(
             child: Text('No'),

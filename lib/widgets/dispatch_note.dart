@@ -319,10 +319,15 @@ class DispatchNoteState extends State<DispatchNote> {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Are you sure to cancel #${index + 1}?"),
+        title: Text("Are you sure to cancel #${index + 1}?",
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+          ),         
+        ),
         actions: <Widget>[
           FlatButton(
-            child: Text('Yes'),
+            child: Text('Yes', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF004B83),),),
             onPressed: () {
               print('Yes clicked');
               setState(() {
@@ -334,7 +339,7 @@ class DispatchNoteState extends State<DispatchNote> {
             },
           ),
           FlatButton(
-            child: Text('No'),
+            child: Text('No', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF004B83),),),
             onPressed: () {
               print('No clicked');
               Navigator.pop(context);
@@ -604,27 +609,36 @@ class DispatchNoteState extends State<DispatchNote> {
           child: MaterialButton(
             onPressed: () {
               print('You pressed Draft Button!');
-              _saveTheDraft(createdDate).then((_) {
-                Alert(
-                  context: context,
-                  type: AlertType.success,
-                  title: "Dispatch note is drafted successfully",
-                  desc: "You can check it on Drafts Menu.",
-                  buttons: [
-                    DialogButton(
-                      child: Text(
-                        "OK",
-                        style: TextStyle(color: Colors.white, fontSize: 20),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
-                        _setNavbarItem(false);
-                      },
-                      width: 120,
-                    )
-                  ],
-                ).show();
-              });
+              if (_dispatchNoController.text != '' && _numberOfScanController.text != '') {
+                _saveTheDraft(createdDate).then((_) {
+                  Alert(
+                    context: context,
+                    type: AlertType.success,
+                    title: "Dispatch note is drafted successfully",
+                    desc: "You can check it on Drafts Menu.",
+                    buttons: [
+                      DialogButton(
+                        child: Text(
+                          "OK",
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+                          _setNavbarItem(false);
+                        },
+                        width: 120,
+                      )
+                    ],
+                  ).show();
+                });
+              } else {
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: new Text(
+                    "Input fields are empty. Fill the fields!",
+                    textAlign: TextAlign.center,
+                  ),
+                  duration: const Duration(milliseconds: 2000)));
+              }
               // _setDraftValues(i, draftList);
             },
             child: Text(

@@ -1,5 +1,6 @@
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:retail_scanner/helper/file_manager.dart';
 import '../widgets/main_drawer.dart';
 
@@ -79,7 +80,7 @@ class SettingScreenState extends State<SettingScreen> {
         actions: <Widget>[
           FlatButton(
             child: Text('Yes'),
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => SystemNavigator.pop(),
           ),
           FlatButton(
             child: Text('No'),

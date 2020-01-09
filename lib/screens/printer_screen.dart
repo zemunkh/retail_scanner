@@ -54,7 +54,7 @@ class _PrinterScreenState extends State<PrinterScreen> {
         actions: <Widget>[
           FlatButton(
             child: Text('Yes'),
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => SystemNavigator.pop(),
           ),
           FlatButton(
             child: Text('No'),
